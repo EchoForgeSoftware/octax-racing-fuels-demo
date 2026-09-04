@@ -1,22 +1,11 @@
 export function Logo({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 48 48"
-      className={className}
-      role="img"
-      aria-label="Octax Racing Fuels logo"
-      fill="none"
-    >
+    <svg viewBox="0 0 48 48" className={className} role="img" aria-label="Octax Racing Fuels logo" fill="none">
+      <rect x="1.5" y="1.5" width="45" height="45" rx="3" fill="var(--color-lime)" stroke="var(--color-ink)" strokeWidth="2.5" />
       <path
-        d="M24 3.5 41.7 13.75v20.5L24 44.5 6.3 34.25v-20.5z"
-        stroke="var(--color-brand)"
-        strokeWidth="2.5"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M17 16 L26 24 L17 32 M31 16 L22 24 L31 32"
-        stroke="var(--color-brand)"
-        strokeWidth="3"
+        d="M16 15 L25 24 L16 33 M32 15 L23 24 L32 33"
+        stroke="var(--color-ink)"
+        strokeWidth="3.5"
         strokeLinecap="round"
         strokeLinejoin="round"
       />

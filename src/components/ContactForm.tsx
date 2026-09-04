@@ -5,7 +5,8 @@ import { useState, type FormEvent } from "react";
 type Errors = Partial<Record<"name" | "email" | "message", string>>;
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-border bg-surface px-3 py-2.5 text-sm outline-none focus:border-brand";
+  "mt-1.5 w-full border-2 border-ink bg-panel px-3 py-2.5 text-sm outline-none focus:bg-lime/20";
+const labelClass = "kicker text-ink-soft";
 
 export function ContactForm() {
   const [errors, setErrors] = useState<Errors>({});
@@ -39,19 +40,19 @@ export function ContactForm() {
     return (
       <div
         role="status"
-        className="rounded-xl border border-acid/40 bg-acid/5 p-6"
+        className="border-2 border-ink bg-lime p-6"
       >
-        <h2 className="font-display text-lg font-semibold text-acid">
-          Thanks, your message is ready to send
+        <h2 className="font-display text-xl uppercase text-ink">
+          Message ready to send
         </h2>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-sm text-ink-soft">
           This is a demo, so nothing was actually sent. On the live site this would
           reach the Octax sales team and we would reply with a fuel recommendation.
         </p>
         <button
           type="button"
           onClick={() => setSent(false)}
-          className="mt-4 text-sm font-medium text-brand hover:underline"
+          className="kicker mt-4 inline-block border-b-2 border-ink pb-1 hover:text-flare"
         >
           Send another message
         </button>
@@ -62,27 +63,27 @@ export function ContactForm() {
   return (
     <form onSubmit={onSubmit} noValidate className="space-y-5">
       <div>
-        <label htmlFor="name" className="text-sm font-medium">
+        <label htmlFor="name" className={labelClass}>
           Name
         </label>
         <input id="name" name="name" type="text" autoComplete="name" className={inputClass} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} />
         {errors.name && (
-          <p id="name-err" className="mt-1 text-xs text-brand-strong">{errors.name}</p>
+          <p id="name-err" className="mt-1 font-mono text-xs text-flare">{errors.name}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="email" className="text-sm font-medium">
+        <label htmlFor="email" className={labelClass}>
           Email
         </label>
         <input id="email" name="email" type="email" autoComplete="email" className={inputClass} aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-err" : undefined} />
         {errors.email && (
-          <p id="email-err" className="mt-1 text-xs text-brand-strong">{errors.email}</p>
+          <p id="email-err" className="mt-1 font-mono text-xs text-flare">{errors.email}</p>
         )}
       </div>
 
       <div>
-        <label htmlFor="topic" className="text-sm font-medium">
+        <label htmlFor="topic" className={labelClass}>
           Topic
         </label>
         <select id="topic" name="topic" className={inputClass} defaultValue="fuel-advice">
@@ -94,18 +95,18 @@ export function ContactForm() {
       </div>
 
       <div>
-        <label htmlFor="message" className="text-sm font-medium">
+        <label htmlFor="message" className={labelClass}>
           Message
         </label>
         <textarea id="message" name="message" rows={5} className={inputClass} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-err" : undefined} />
         {errors.message && (
-          <p id="message-err" className="mt-1 text-xs text-brand-strong">{errors.message}</p>
+          <p id="message-err" className="mt-1 font-mono text-xs text-flare">{errors.message}</p>
         )}
       </div>
 
       <button
         type="submit"
-        className="w-full rounded-lg bg-brand px-5 py-3 font-semibold text-black transition-colors hover:bg-brand-strong sm:w-auto"
+        className="w-full border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink sm:w-auto"
       >
         Send message
       </button>

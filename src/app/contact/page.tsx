@@ -24,47 +24,39 @@ export default function ContactPage() {
       <JsonLd data={breadcrumbSchema(trail)} />
       <Breadcrumbs trail={trail} />
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <header className="max-w-2xl">
-          <h1 className="font-display text-4xl font-bold">Contact us</h1>
-          <p className="mt-3 text-muted">
-            Tell us about your engine, class and the fuel you are running now, and we
-            will recommend the right blend. For orders and delivery, include your
-            location.
+          <p className="kicker text-flare">Get in touch</p>
+          <h1 className="mt-3 font-display text-[clamp(2.4rem,8vw,5rem)]">Contact us</h1>
+          <p className="mt-4 text-ink-soft">
+            Tell us about your engine, class and the fuel you are running now, and we will
+            recommend the right blend. For orders and delivery, include your location.
           </p>
         </header>
 
-        <div className="mt-10 grid gap-10 lg:grid-cols-[1.4fr_1fr]">
-          <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+        <div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_1fr]">
+          <div className="border-2 border-ink bg-panel p-6 sm:p-8">
             <ContactForm />
           </div>
 
           <aside className="space-y-6">
-            <div className="rounded-xl border border-border bg-surface p-6">
-              <h2 className="font-display text-lg font-semibold">Reach us directly</h2>
-              <dl className="mt-4 space-y-3 text-sm">
+            <div className="border-2 border-ink bg-ink p-6 text-paper">
+              <h2 className="kicker text-lime">Reach us directly</h2>
+              <dl className="mt-4 space-y-4 text-sm">
                 <div>
-                  <dt className="text-muted">Email</dt>
-                  <dd>
-                    <a href={`mailto:${SITE.email}`} className="text-brand hover:underline">
-                      {SITE.email}
-                    </a>
-                  </dd>
+                  <dt className="font-mono text-xs uppercase tracking-wider text-paper/50">Email</dt>
+                  <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-lime hover:underline">{SITE.email}</a></dd>
                 </div>
                 <div>
-                  <dt className="text-muted">Phone</dt>
-                  <dd>
-                    <a href={`tel:${SITE.phoneHref}`} className="text-brand hover:underline">
-                      {SITE.phoneDisplay}
-                    </a>
-                  </dd>
+                  <dt className="font-mono text-xs uppercase tracking-wider text-paper/50">Phone</dt>
+                  <dd className="mt-1"><a href={`tel:${SITE.phoneHref}`} className="text-lime hover:underline">{SITE.phoneDisplay}</a></dd>
                 </div>
               </dl>
             </div>
 
-            <div className="rounded-xl border border-border bg-surface p-6 text-sm text-muted">
-              Contact details and location are placeholders in this demo. Real details
-              are added when the site goes to production.
+            <div className="border-2 border-ink p-6 text-sm text-muted">
+              Contact details and location are placeholders in this demo. Real details are
+              added when the site goes to production.
             </div>
           </aside>
         </div>

@@ -13,14 +13,14 @@ export function CartView() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-surface p-10 text-center">
+      <div className="border-2 border-ink bg-panel p-10 text-center">
         <p className="font-display text-xl font-semibold">Your cart is empty</p>
         <p className="mx-auto mt-2 max-w-sm text-muted">
           Browse the catalogue and add fuels or additives to get started.
         </p>
         <Link
           href="/shop/"
-          className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-black transition-colors hover:bg-brand-strong"
+          className="mt-6 inline-block bg-flare px-6 py-3 font-semibold text-paper transition-colors hover:bg-ink"
         >
           Shop products
         </Link>
@@ -30,11 +30,11 @@ export function CartView() {
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1.6fr_1fr]">
-      <ul className="divide-y divide-border rounded-2xl border border-border bg-surface">
+      <ul className="divide-y-2 divide-ink border-2 border-ink bg-panel">
         {items.map((i) => (
           <li key={i.sku} className="flex flex-wrap items-center gap-4 p-4">
             <div className="min-w-0 flex-1">
-              <Link href={`/shop/${i.slug}/`} className="font-medium hover:text-brand">
+              <Link href={`/shop/${i.slug}/`} className="font-medium hover:text-flare">
                 {i.name}
               </Link>
               <p className="text-sm text-muted">
@@ -42,11 +42,11 @@ export function CartView() {
               </p>
             </div>
 
-            <div className="flex items-center rounded-lg border border-border">
+            <div className="flex items-center border-2 border-ink">
               <button
                 type="button"
                 aria-label={`Decrease ${i.name} quantity`}
-                className="px-3 py-2 text-muted hover:text-fg"
+                className="px-3 py-2 text-muted hover:text-ink"
                 onClick={() => setQty(i.sku, i.qty - 1)}
               >
                 &minus;
@@ -55,7 +55,7 @@ export function CartView() {
               <button
                 type="button"
                 aria-label={`Increase ${i.name} quantity`}
-                className="px-3 py-2 text-muted hover:text-fg"
+                className="px-3 py-2 text-muted hover:text-ink"
                 onClick={() => setQty(i.sku, i.qty + 1)}
               >
                 +
@@ -69,7 +69,7 @@ export function CartView() {
             <button
               type="button"
               onClick={() => remove(i.sku)}
-              className="text-sm text-muted hover:text-brand-strong"
+              className="text-sm text-muted hover:text-flare"
             >
               Remove
             </button>
@@ -77,7 +77,7 @@ export function CartView() {
         ))}
       </ul>
 
-      <aside className="h-fit rounded-2xl border border-border bg-surface p-6">
+      <aside className="h-fit border-2 border-ink bg-panel p-6">
         <h2 className="font-display text-lg font-semibold">Order summary</h2>
         <dl className="mt-4 space-y-2 text-sm">
           <div className="flex justify-between">
@@ -89,21 +89,21 @@ export function CartView() {
             <dd className="text-muted">Calculated at checkout</dd>
           </div>
         </dl>
-        <div className="mt-4 flex justify-between border-t border-border pt-4">
+        <div className="mt-4 flex justify-between border-t-2 border-ink pt-4">
           <span className="font-semibold">Total</span>
-          <span className="font-display text-xl font-bold text-brand">
+          <span className="font-display text-xl font-bold text-flare">
             {formatPrice(subtotal)}
           </span>
         </div>
         <Link
           href="/checkout/"
-          className="mt-6 block rounded-lg bg-brand px-5 py-3 text-center font-semibold text-black transition-colors hover:bg-brand-strong"
+          className="mt-6 block bg-flare px-5 py-3 text-center font-semibold text-paper transition-colors hover:bg-ink"
         >
           Proceed to checkout
         </Link>
         <Link
           href="/shop/"
-          className="mt-3 block text-center text-sm text-muted hover:text-fg"
+          className="mt-3 block text-center text-sm text-muted hover:text-ink"
         >
           Continue shopping
         </Link>

@@ -81,59 +81,68 @@ export default function InformationPage() {
       <JsonLd data={[breadcrumbSchema(trail), faqSchema()]} />
       <Breadcrumbs trail={trail} />
 
-      <div className="mx-auto max-w-4xl px-4 py-8">
+      <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <header>
-          <h1 className="font-display text-4xl font-bold">Fuel information and selection guide</h1>
-          <p className="mt-4 text-lg text-muted">
-            A quick guide to choosing the right fuel for your engine and class, plus
-            safe handling, storage and delivery. If you are still unsure,{" "}
-            <Link href="/contact/" className="text-brand hover:underline">
-              contact us
-            </Link>{" "}
-            with your build details.
+          <p className="kicker text-flare">Field manual</p>
+          <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4.5rem)] leading-[0.9]">Fuel information &amp; selection guide</h1>
+          <p className="mt-5 max-w-2xl text-lg text-ink-soft">
+            A quick guide to choosing the right fuel for your engine and class, plus safe
+            handling, storage and delivery. If you are still unsure,{" "}
+            <Link href="/contact/" className="text-flare underline">contact us</Link> with your
+            build details.
           </p>
         </header>
 
-        <section className="mt-12 space-y-8">
-          {guide.map((g) => (
-            <div key={g.h} className="rounded-xl border border-border bg-surface p-6">
-              <h2 className="font-display text-2xl font-bold">{g.h}</h2>
-              <p className="mt-3 text-muted">{g.p}</p>
-              <Link href={g.href} className="mt-4 inline-block text-sm font-medium text-brand hover:underline">
-                {g.cta} &rarr;
-              </Link>
+        <section className="mt-14 border-t-2 border-ink">
+          {guide.map((g, i) => (
+            <div key={g.h} className="grid gap-3 border-b-2 border-ink py-8 md:grid-cols-[auto_1fr]">
+              <span className="text-outline font-display text-4xl md:w-24">0{i + 1}</span>
+              <div>
+                <h2 className="font-display text-2xl">{g.h}</h2>
+                <p className="mt-3 max-w-2xl text-ink-soft">{g.p}</p>
+                <Link href={g.href} className="kicker mt-4 inline-block border-b-2 border-ink pb-1 hover:text-flare">
+                  {g.cta} &rarr;
+                </Link>
+              </div>
             </div>
           ))}
         </section>
 
-        <section className="mt-14">
-          <h2 className="font-display text-2xl font-bold">Safe handling and storage</h2>
-          <ul className="mt-4 space-y-3 text-muted">
-            <li>Store fuels in approved, sealed containers away from heat, sparks and direct sunlight.</li>
-            <li>Methanol is toxic and absorbs through skin; wear appropriate gloves and eye protection.</li>
-            <li>Alcohol fuels attract water over time; keep containers sealed and use fresh stock.</li>
-            <li>Transport dangerous goods according to your local regulations and quantity limits.</li>
-            <li>Keep a suitable fire extinguisher on hand when handling or decanting fuel.</li>
+        <section className="mt-14 border-2 border-ink bg-ink p-8 text-paper">
+          <p className="kicker text-lime">Safe handling and storage</p>
+          <ul className="mt-5 space-y-3">
+            {[
+              "Store fuels in approved, sealed containers away from heat, sparks and direct sunlight.",
+              "Methanol is toxic and absorbs through skin; wear appropriate gloves and eye protection.",
+              "Alcohol fuels attract water over time; keep containers sealed and use fresh stock.",
+              "Transport dangerous goods according to your local regulations and quantity limits.",
+              "Keep a suitable fire extinguisher on hand when handling or decanting fuel.",
+            ].map((t) => (
+              <li key={t} className="flex gap-3 text-paper/80">
+                <span className="mt-2 h-2 w-2 shrink-0 bg-lime" />
+                {t}
+              </li>
+            ))}
           </ul>
         </section>
 
         <section className="mt-14">
-          <h2 className="font-display text-2xl font-bold">Ordering and delivery</h2>
-          <p className="mt-4 text-muted">
-            Add products to your cart and check out online. Orders are dispatched within
-            a 24 to 48 hour window to your workshop or a nominated track address, subject
-            to dangerous-goods transport rules for your area. This is a demo store, so no
+          <h2 className="font-display text-2xl">Ordering and delivery</h2>
+          <p className="mt-4 text-ink-soft">
+            Add products to your cart and check out online. Orders are dispatched within a
+            24 to 48 hour window to your workshop or a nominated track address, subject to
+            dangerous-goods transport rules for your area. This is a demo store, so no
             payment is taken and no order is actually placed.
           </p>
         </section>
 
         <section className="mt-14">
-          <h2 className="font-display text-2xl font-bold">Frequently asked questions</h2>
-          <dl className="mt-6 space-y-6">
+          <h2 className="font-display text-[clamp(1.6rem,5vw,3rem)]">FAQ</h2>
+          <dl className="mt-6 border-t-2 border-ink">
             {faqs.map((f) => (
-              <div key={f.q} className="rounded-xl border border-border bg-surface p-6">
-                <dt className="font-display text-lg font-semibold">{f.q}</dt>
-                <dd className="mt-2 text-muted">{f.a}</dd>
+              <div key={f.q} className="border-b-2 border-ink py-6">
+                <dt className="font-display text-lg uppercase">{f.q}</dt>
+                <dd className="mt-2 max-w-3xl text-ink-soft">{f.a}</dd>
               </div>
             ))}
           </dl>

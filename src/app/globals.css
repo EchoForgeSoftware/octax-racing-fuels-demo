@@ -1,72 +1,112 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg: #0a0a0b;
-  --color-surface: #141418;
-  --color-surface-2: #1c1c22;
-  --color-border: #2a2a31;
-  --color-fg: #f6f6f5;
-  --color-muted: #a6a6b0;
-  --color-brand: #ff6a1a;
-  --color-brand-strong: #ff8438;
-  --color-acid: #b6ff3c;
+  /* Livery palette in OKLCH. Bone base, warm ink, electric lime hazard, vermilion spark. */
+  --color-paper: oklch(0.955 0.012 95);
+  --color-paper-2: oklch(0.925 0.014 95);
+  --color-panel: oklch(0.99 0.006 95);
+  --color-ink: oklch(0.17 0.014 66);
+  --color-ink-soft: oklch(0.32 0.014 66);
+  --color-muted: oklch(0.5 0.012 66);
+  --color-line: oklch(0.84 0.012 95);
 
-  --font-display: var(--font-display), "Space Grotesk", system-ui, sans-serif;
-  --font-sans: var(--font-sans), "Inter", system-ui, sans-serif;
+  --color-lime: oklch(0.88 0.205 128);
+  --color-lime-deep: oklch(0.8 0.2 128);
+  --color-flare: oklch(0.64 0.221 33);
+  --color-cobalt: oklch(0.52 0.19 258);
 
-  --radius: 0.75rem;
+  --font-display: var(--font-display), "Archivo Black", system-ui, sans-serif;
+  --font-sans: var(--font-sans), "Archivo", system-ui, sans-serif;
+  --font-mono: var(--font-mono), "Space Mono", ui-monospace, monospace;
+
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 * {
-  border-color: var(--color-border);
+  border-color: var(--color-line);
+  min-width: 0;
 }
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  background-color: var(--color-bg);
-  color: var(--color-fg);
+  background-color: var(--color-paper);
+  color: var(--color-ink);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
 
-h1,
-h2,
-h3,
-h4 {
+h1, h2, h3, h4 {
   font-family: var(--font-display);
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  line-height: 0.95;
+  text-transform: uppercase;
 }
 
-/* Visible keyboard focus for accessibility */
 :focus-visible {
-  outline: 2px solid var(--color-brand);
+  outline: 3px solid var(--color-flare);
   outline-offset: 2px;
-  border-radius: 4px;
 }
 
 ::selection {
-  background: var(--color-brand);
-  color: #0a0a0b;
+  background: var(--color-lime);
+  color: var(--color-ink);
 }
+
+/* Kicker / eyebrow label */
+.kicker {
+  font-family: var(--font-mono);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+/* Outlined display text for oversized numerals */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 2px var(--color-ink);
+}
+
+/* Diagonal hazard stripes */
+.hazard {
+  background-image: repeating-linear-gradient(
+    -45deg,
+    var(--color-ink) 0 14px,
+    transparent 14px 28px
+  );
+}
+
+/* Infinite marquee track */
+@keyframes marquee-x {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+.marquee-track {
+  display: inline-flex;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee-x var(--marquee-duration, 28s) linear infinite;
+}
+.marquee-reverse .marquee-track { animation-direction: reverse; }
 
 @media (prefers-reduced-motion: reduce) {
-  html {
-    scroll-behavior: auto;
-  }
+  html { scroll-behavior: auto; }
+  .marquee-track { animation: none; }
 }
 
-/* Subtle grid texture used behind hero sections */
-.bg-grid {
-  background-image:
-    linear-gradient(to right, rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 44px 44px;
+/* Angular clip for section bands */
+.clip-slash-top {
+  clip-path: polygon(0 3.5vw, 100% 0, 100% 100%, 0 100%);
+}
+.clip-slash-both {
+  clip-path: polygon(0 3.5vw, 100% 0, 100% calc(100% - 3.5vw), 0 100%);
 }

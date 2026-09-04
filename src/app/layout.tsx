@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Space_Grotesk, Inter } from "next/font/google";
+import { Archivo, Archivo_Black, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
@@ -9,15 +9,23 @@ import { JsonLd } from "@/components/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { SITE, SITE_URL, INDEXABLE } from "@/lib/site";
 
-const display = Space_Grotesk({
+const display = Archivo_Black({
   subsets: ["latin"],
+  weight: "400",
   variable: "--font-display",
   display: "swap",
 });
 
-const sans = Inter({
+const sans = Archivo({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+const mono = Space_Mono({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  variable: "--font-mono",
   display: "swap",
 });
 
@@ -47,7 +55,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${display.variable} ${sans.variable}`}>
+    <html
+      lang="en"
+      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+    >
       <body className="flex min-h-screen flex-col">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <Providers>

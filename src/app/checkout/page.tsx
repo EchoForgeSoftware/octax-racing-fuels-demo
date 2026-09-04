@@ -19,8 +19,8 @@ export default function CheckoutPage() {
   return (
     <>
       <Breadcrumbs trail={trail} />
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <h1 className="mb-8 font-display text-4xl font-bold">Checkout</h1>
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <h1 className="mb-8 font-display text-[clamp(2.4rem,8vw,5rem)]">Checkout</h1>
         <CheckoutView />
       </div>
     </>

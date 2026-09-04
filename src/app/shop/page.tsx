@@ -24,16 +24,17 @@ export default function ShopPage() {
       <JsonLd data={breadcrumbSchema(trail)} />
       <Breadcrumbs trail={trail} />
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
-        <header className="mb-8">
-          <h1 className="font-display text-4xl font-bold">Shop racing fuels</h1>
-          <p className="mt-3 max-w-2xl text-muted">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
+        <header className="mb-10">
+          <p className="kicker text-flare">Catalogue</p>
+          <h1 className="mt-3 font-display text-[clamp(2.4rem,8vw,5rem)]">Shop racing fuels</h1>
+          <p className="mt-4 max-w-2xl text-ink-soft">
             Competition fuels, methanol, ethanol and additives. All products, prices
             and stock shown here are sample data for this demo.
           </p>
         </header>
 
-        <Suspense fallback={<p className="text-muted">Loading products&hellip;</p>}>
+        <Suspense fallback={<p className="font-mono text-sm text-muted">Loading products&hellip;</p>}>
           <ShopGrid />
         </Suspense>
       </div>

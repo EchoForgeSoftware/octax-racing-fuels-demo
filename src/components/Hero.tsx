@@ -1,101 +1,84 @@
 "use client";
 
 import Link from "next/link";
-import { motion, type Variants } from "framer-motion";
-
-const stagger: Variants = {
-  hidden: {},
-  show: { transition: { staggerChildren: 0.12, delayChildren: 0.1 } },
-};
-
-const item: Variants = {
-  hidden: { opacity: 0, y: 28 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-  },
-};
+import { useGsap } from "@/lib/gsap";
+import { Magnetic } from "./anim/Magnetic";
+import { Counter } from "./anim/Counter";
 
 export function Hero() {
+  const scope = useGsap(({ gsap, scope }) => {
+    const lines = scope.querySelectorAll<HTMLElement>("[data-line]");
+    const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
+    tl.from(scope.querySelector("[data-kicker]"), { xPercent: -20, autoAlpha: 0, duration: 0.7 })
+      .from(lines, { yPercent: 115, skewY: 4, duration: 1, stagger: 0.12 }, "-=0.4")
+      .from(scope.querySelector("[data-sub]"), { y: 24, autoAlpha: 0, duration: 0.7 }, "-=0.5")
+      .from(scope.querySelectorAll("[data-cta]"), { y: 20, autoAlpha: 0, duration: 0.6, stagger: 0.1 }, "-=0.4")
+      .from(scope.querySelector("[data-slab]"), { scale: 0.7, rotate: -6, autoAlpha: 0, duration: 0.9, ease: "back.out(1.6)" }, "-=0.9");
+  });
+
   return (
-    <section className="relative overflow-hidden border-b border-border bg-bg">
-      <div className="bg-grid absolute inset-0 opacity-60" aria-hidden="true" />
+    <section ref={scope} className="relative overflow-hidden border-b-2 border-ink bg-paper">
       <div
-        className="absolute -top-40 left-1/2 h-[520px] w-[520px] -translate-x-1/2 rounded-full blur-3xl"
-        style={{
-          background:
-            "radial-gradient(closest-side, rgba(255,106,26,0.28), transparent)",
-        }}
+        className="pointer-events-none absolute inset-y-0 right-0 hidden w-1/2 opacity-[0.06] lg:block"
+        style={{ backgroundImage: "repeating-linear-gradient(-45deg, var(--color-ink) 0 2px, transparent 2px 22px)" }}
         aria-hidden="true"
       />
 
-      <motion.div
-        className="relative mx-auto max-w-6xl px-4 py-24 text-center sm:py-32"
-        variants={stagger}
-        initial="hidden"
-        animate="show"
-      >
-        <motion.p
-          variants={item}
-          className="mx-auto mb-5 inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-1.5 text-xs font-medium text-muted"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-acid" />
-          Consistent, batch-tested fuels for the grid
-        </motion.p>
+      <div className="mx-auto grid max-w-7xl gap-8 px-4 py-16 sm:px-6 lg:grid-cols-[1.5fr_1fr] lg:items-center lg:py-24">
+        <div>
+          <p data-kicker className="kicker inline-flex items-center gap-2 text-muted">
+            <span className="h-2 w-2 bg-lime" />
+            Batch-tested fuel for the grid
+          </p>
 
-        <motion.h1
-          variants={item}
-          className="mx-auto max-w-4xl font-display text-4xl font-extrabold leading-[1.05] sm:text-6xl"
-        >
-          High-octane fuel,
-          <br />
-          <span className="text-brand">engineered for the grid</span>
-        </motion.h1>
+          <h1 className="mt-5 font-display text-[clamp(2.7rem,10vw,7.5rem)] leading-[0.86]">
+            <span className="block overflow-hidden"><span data-line className="block">High-octane</span></span>
+            <span className="block overflow-hidden"><span data-line className="block">fuel for the</span></span>
+            <span className="block overflow-hidden">
+              <span data-line className="block">
+                <span className="bg-lime px-3 text-ink">grid</span>
+              </span>
+            </span>
+          </h1>
 
-        <motion.p
-          variants={item}
-          className="mx-auto mt-6 max-w-2xl text-lg text-muted"
-        >
-          Race fuels, methanol, ethanol and additives built for consistent power,
-          detonation resistance and repeatable tunes. Order online, delivered to your
-          door or the paddock.
-        </motion.p>
+          <p data-sub className="mt-7 max-w-xl text-lg text-ink-soft">
+            Race fuels, methanol, ethanol and additives built for consistent power,
+            detonation resistance and repeatable tunes. Order online, dispatched to your
+            workshop or the paddock.
+          </p>
 
-        <motion.div
-          variants={item}
-          className="mt-9 flex flex-wrap items-center justify-center gap-3"
-        >
-          <Link
-            href="/shop/"
-            className="rounded-lg bg-brand px-6 py-3 font-semibold text-black transition-colors hover:bg-brand-strong"
-          >
-            Shop fuels
-          </Link>
-          <Link
-            href="/information/"
-            className="rounded-lg border border-border px-6 py-3 font-semibold text-fg transition-colors hover:border-brand"
-          >
-            How to choose a fuel
-          </Link>
-        </motion.div>
-
-        <motion.dl
-          variants={item}
-          className="mx-auto mt-16 grid max-w-2xl grid-cols-3 gap-6 border-t border-border pt-8"
-        >
-          {[
-            { k: "102-118", v: "Octane range" },
-            { k: "99.9%", v: "Methanol purity" },
-            { k: "24-48h", v: "Dispatch window" },
-          ].map((s) => (
-            <div key={s.v}>
-              <dt className="font-display text-2xl font-bold text-brand">{s.k}</dt>
-              <dd className="mt-1 text-xs text-muted">{s.v}</dd>
+          <div className="mt-9 flex flex-wrap items-center gap-4">
+            <div data-cta>
+              <Magnetic>
+                <Link href="/shop/" className="inline-block border-2 border-ink bg-flare px-7 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink">
+                  Shop fuels
+                </Link>
+              </Magnetic>
             </div>
-          ))}
-        </motion.dl>
-      </motion.div>
+            <Link data-cta href="/information/" className="kicker border-b-2 border-ink pb-1 text-ink transition-colors hover:text-flare">
+              How to choose &rarr;
+            </Link>
+          </div>
+        </div>
+
+        <div data-slab className="relative">
+          <div className="border-2 border-ink bg-ink p-6 text-paper shadow-[10px_10px_0_0_var(--color-lime)]">
+            <p className="kicker text-lime">Octane range</p>
+            <p className="font-display text-[clamp(3.5rem,14vw,7rem)] leading-none text-paper">102<span className="text-lime">-</span>118</p>
+            <div className="mt-6 grid grid-cols-2 gap-px border-2 border-paper/20 bg-paper/20">
+              {[
+                { k: "Methanol", v: 99, suffix: ".9%" },
+                { k: "Dispatch", v: 48, suffix: "h" },
+              ].map((s) => (
+                <div key={s.k} className="bg-ink p-4">
+                  <Counter to={s.v} suffix={s.suffix} className="font-display text-3xl text-paper" />
+                  <p className="kicker mt-1 text-paper/50">{s.k}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
   );
 }

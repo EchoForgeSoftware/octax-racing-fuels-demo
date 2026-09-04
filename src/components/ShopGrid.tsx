@@ -13,8 +13,7 @@ export function ShopGrid() {
   const known = filters.some((f) => f.slug === initial) ? initial : "all";
   const [active, setActive] = useState(known);
 
-  const list =
-    active === "all" ? products : products.filter((p) => p.category === active);
+  const list = active === "all" ? products : products.filter((p) => p.category === active);
 
   return (
     <div>
@@ -26,10 +25,8 @@ export function ShopGrid() {
             role="tab"
             aria-selected={active === f.slug}
             onClick={() => setActive(f.slug)}
-            className={`rounded-lg border px-4 py-2 text-sm font-medium transition-colors ${
-              active === f.slug
-                ? "border-brand bg-brand/10 text-brand"
-                : "border-border text-muted hover:text-fg"
+            className={`kicker border-2 border-ink px-4 py-2.5 transition-colors ${
+              active === f.slug ? "bg-ink text-lime" : "text-ink hover:bg-lime"
             }`}
           >
             {f.name}
@@ -37,7 +34,7 @@ export function ShopGrid() {
         ))}
       </div>
 
-      <p className="mt-4 text-sm text-muted">
+      <p className="mt-5 font-mono text-xs uppercase tracking-wider text-muted">
         {list.length} product{list.length === 1 ? "" : "s"}
       </p>
 

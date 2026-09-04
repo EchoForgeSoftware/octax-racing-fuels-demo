@@ -62,23 +62,23 @@ export default async function ProductPage({
       <JsonLd data={[breadcrumbSchema(trail), productSchema(product)]} />
       <Breadcrumbs trail={trail} />
 
-      <div className="mx-auto max-w-6xl px-4 py-8">
+      <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
         <div className="grid gap-10 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
+          <div className="overflow-hidden border-2 border-ink shadow-[10px_10px_0_0_var(--color-ink)]">
             <ProductArt product={product} className="h-full w-full" />
           </div>
 
           <div>
             <Link
               href={`/shop/?category=${product.category}`}
-              className="text-sm font-medium text-brand hover:underline"
+              className="kicker text-flare hover:underline"
             >
               {category?.name}
             </Link>
-            <h1 className="mt-2 font-display text-3xl font-bold sm:text-4xl">
+            <h1 className="mt-3 font-display text-[clamp(2rem,6vw,3.5rem)] leading-[0.9]">
               {product.name}
             </h1>
-            <p className="mt-4 text-muted">{product.description}</p>
+            <p className="mt-5 text-ink-soft">{product.description}</p>
 
             <div className="mt-6">
               <AddToCart product={product} />
@@ -87,46 +87,43 @@ export default async function ProductPage({
         </div>
 
         {/* Specs + applications */}
-        <div className="mt-14 grid gap-8 lg:grid-cols-2">
+        <div className="mt-16 grid gap-10 lg:grid-cols-2">
           <section>
-            <h2 className="font-display text-xl font-bold">Specifications</h2>
-            <dl className="mt-4 divide-y divide-border rounded-xl border border-border">
-              {product.specs.map((s) => (
-                <div key={s.label} className="flex justify-between px-4 py-3 text-sm">
-                  <dt className="text-muted">{s.label}</dt>
-                  <dd className="font-medium">{s.value}</dd>
+            <h2 className="font-display text-2xl">Specifications</h2>
+            <dl className="mt-4 border-2 border-ink">
+              {product.specs.map((s, i) => (
+                <div key={s.label} className={`flex justify-between px-4 py-3 text-sm ${i > 0 ? "border-t border-line" : ""}`}>
+                  <dt className="font-mono uppercase tracking-wider text-muted">{s.label}</dt>
+                  <dd className="font-bold">{s.value}</dd>
                 </div>
               ))}
             </dl>
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold">Typical applications</h2>
+            <h2 className="font-display text-2xl">Typical applications</h2>
             <ul className="mt-4 flex flex-wrap gap-2">
               {product.applications.map((a) => (
-                <li
-                  key={a}
-                  className="rounded-full border border-border bg-surface px-3 py-1.5 text-sm text-muted"
-                >
+                <li key={a} className="border-2 border-ink px-3 py-1.5 font-mono text-xs uppercase tracking-wider text-ink-soft">
                   {a}
                 </li>
               ))}
             </ul>
-            <div className="mt-6 rounded-xl border border-border bg-surface p-4 text-sm text-muted">
-              Handling matters: race fuels, methanol and ethanol are flammable and some
-              are toxic. Store and transport them safely and follow local regulations.
-              See the{" "}
-              <Link href="/information/" className="text-brand hover:underline">
-                information page
-              </Link>{" "}
-              for guidance.
+            <div className="mt-6 border-l-0 bg-ink p-5 text-sm text-paper/80">
+              <span className="kicker text-lime">Handle with care</span>
+              <p className="mt-2">
+                Race fuels, methanol and ethanol are flammable and some are toxic. Store
+                and transport them safely and follow local regulations. See the{" "}
+                <Link href="/information/" className="text-lime hover:underline">information page</Link>{" "}
+                for guidance.
+              </p>
             </div>
           </section>
         </div>
 
         {related.length > 0 && (
-          <section className="mt-16">
-            <h2 className="font-display text-xl font-bold">More in {category?.name}</h2>
+          <section className="mt-20">
+            <h2 className="font-display text-[clamp(1.6rem,5vw,3rem)]">More in {category?.name}</h2>
             <div className="mt-6 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
               {related.map((p) => (
                 <ProductCard key={p.slug} product={p} />

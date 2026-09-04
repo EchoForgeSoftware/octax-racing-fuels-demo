@@ -1,70 +1,61 @@
 import type { Product } from "@/lib/products";
 
+const PAPER = "#f2efe6";
+const INK = "#191817";
+const LIME = "#c6f24e";
+const FLARE = "#e8451f";
+const COBALT = "#3b5bdb";
+
 const categoryColor: Record<string, string> = {
-  "race-fuels": "#ff6a1a",
-  methanol: "#35d6e0",
-  ethanol: "#b6ff3c",
-  additives: "#a78bfa",
+  "race-fuels": FLARE,
+  methanol: COBALT,
+  ethanol: LIME,
+  additives: INK,
 };
 
-// The badge value shown on the can: octane, ethanol % or purity from the first spec.
 function badge(product: Product): string {
-  const s = product.specs[0];
-  if (!s) return "";
-  return s.value.replace(/\s*\(.*\)\s*/, "").replace(/[^0-9A-Za-z.%]+/g, " ").trim();
+  const raw = product.specs[0]?.value ?? "";
+  const num = raw.match(/\d+(\.\d+)?\s?%?/);
+  const value = num ? num[0].replace(/\s/g, "") : raw.split(/[\s,(]/)[0];
+  return value.slice(0, 7).toUpperCase();
 }
 
-export function ProductArt({
-  product,
-  className,
-}: {
-  product: Product;
-  className?: string;
-}) {
-  const color = categoryColor[product.category] ?? "#ff6a1a";
+function badgeFontSize(label: string): number {
+  const n = label.length;
+  if (n <= 3) return 150;
+  if (n <= 4) return 118;
+  if (n <= 5) return 92;
+  return 66;
+}
+
+export function ProductArt({ product, className }: { product: Product; className?: string }) {
+  const color = categoryColor[product.category] ?? FLARE;
+  const onColor = color === LIME ? INK : PAPER;
   const label = badge(product);
 
   return (
-    <svg
-      viewBox="0 0 400 400"
-      className={className}
-      role="img"
-      aria-label={`${product.name} product illustration`}
-    >
-      <defs>
-        <linearGradient id={`bg-${product.slug}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#17171d" />
-          <stop offset="1" stopColor="#0c0c10" />
-        </linearGradient>
-      </defs>
-      <rect width="400" height="400" rx="16" fill={`url(#bg-${product.slug})`} />
-      <g opacity="0.12" stroke={color} strokeWidth="1">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <line key={i} x1={i * 50} y1="0" x2={i * 50} y2="400" />
-        ))}
+    <svg viewBox="0 0 400 400" className={className} role="img" aria-label={`${product.name} livery panel`}>
+      <rect width="400" height="400" fill={PAPER} />
+      {/* diagonal color block */}
+      <path d="M0 0 H400 V250 L0 330 Z" fill={color} />
+      {/* hazard band */}
+      <g clipPath="url(#band)">
+        <rect x="0" y="330" width="400" height="34" fill={INK} />
       </g>
+      <clipPath id="band"><rect x="0" y="330" width="400" height="34" /></clipPath>
+      {Array.from({ length: 22 }).map((_, i) => (
+        <rect key={i} x={i * 24 - 20} y="330" width="8" height="34" transform="skewX(-24)" fill={LIME} />
+      ))}
 
-      {/* jerrycan body */}
-      <g transform="translate(120 88)">
-        <rect x="0" y="24" width="160" height="200" rx="18" fill="#202028" stroke="#33333d" strokeWidth="2" />
-        {/* cap */}
-        <rect x="54" y="0" width="52" height="34" rx="8" fill={color} />
-        <rect x="66" y="-14" width="28" height="18" rx="5" fill={color} opacity="0.7" />
-        {/* handle */}
-        <path d="M20 24 q60 -34 120 0" fill="none" stroke="#33333d" strokeWidth="10" strokeLinecap="round" />
-        {/* label panel */}
-        <rect x="18" y="70" width="124" height="118" rx="10" fill="#0d0d11" stroke={color} strokeWidth="1.5" />
-        <rect x="18" y="70" width="124" height="26" rx="10" fill={color} />
-        <text x="80" y="88" textAnchor="middle" fontSize="12" fontWeight="700" fill="#0a0a0b" fontFamily="system-ui">
-          OCTAX
-        </text>
-        <text x="80" y="146" textAnchor="middle" fontSize="34" fontWeight="800" fill={color} fontFamily="system-ui">
-          {label}
-        </text>
-        <text x="80" y="172" textAnchor="middle" fontSize="10" fill="#a6a6b0" fontFamily="system-ui">
-          {product.specs[0]?.label ?? ""}
-        </text>
-      </g>
+      <text x="28" y="70" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="700" letterSpacing="3" fill={onColor}>
+        OCTAX
+      </text>
+      <text x="24" y="215" fontFamily="Arial Black, Arial, sans-serif" fontSize={badgeFontSize(label)} fontWeight="900" fill={onColor}>
+        {label}
+      </text>
+      <text x="28" y="300" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="700" letterSpacing="2" fill={INK}>
+        {(product.specs[0]?.label ?? "").toUpperCase()}
+      </text>
     </svg>
   );
 }

@@ -7,7 +7,7 @@ import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-border bg-surface-2 px-3 py-2.5 text-sm outline-none focus:border-brand";
+  "mt-1 w-full border-2 border-ink bg-paper-2 px-3 py-2.5 text-sm outline-none focus:border-flare";
 
 type Errors = Record<string, string>;
 
@@ -21,12 +21,12 @@ export function CheckoutView() {
 
   if (items.length === 0) {
     return (
-      <div className="rounded-2xl border border-border bg-surface p-10 text-center">
+      <div className="border-2 border-ink bg-panel p-10 text-center">
         <p className="font-display text-xl font-semibold">Nothing to check out</p>
         <p className="mt-2 text-muted">Your cart is empty.</p>
         <Link
           href="/shop/"
-          className="mt-6 inline-block rounded-lg bg-brand px-6 py-3 font-semibold text-black transition-colors hover:bg-brand-strong"
+          className="mt-6 inline-block bg-flare px-6 py-3 font-semibold text-paper transition-colors hover:bg-ink"
         >
           Shop products
         </Link>
@@ -59,7 +59,7 @@ export function CheckoutView() {
   return (
     <form onSubmit={onSubmit} noValidate className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
       <div className="space-y-8">
-        <fieldset className="rounded-2xl border border-border bg-surface p-6">
+        <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-lg font-semibold">
             Delivery details
           </legend>
@@ -76,9 +76,9 @@ export function CheckoutView() {
           </div>
         </fieldset>
 
-        <fieldset className="rounded-2xl border border-border bg-surface p-6">
+        <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-lg font-semibold">Payment</legend>
-          <div className="rounded-lg border border-dashed border-border bg-surface-2 p-5 text-sm text-muted">
+          <div className="border border-dashed border-ink bg-paper-2 p-5 text-sm text-muted">
             This is a demo checkout. No card fields are shown and no payment is taken.
             On the live site, a secure payment provider is integrated here at
             production handoff.
@@ -86,14 +86,14 @@ export function CheckoutView() {
         </fieldset>
       </div>
 
-      <aside className="h-fit rounded-2xl border border-border bg-surface p-6">
+      <aside className="h-fit border-2 border-ink bg-panel p-6">
         <h2 className="font-display text-lg font-semibold">Order summary</h2>
         <ul className="mt-4 space-y-3 text-sm">
           {items.map((i) => (
             <li key={i.sku} className="flex justify-between gap-3">
               <span className="min-w-0 text-muted">
                 {i.qty} &times; {i.name}{" "}
-                <span className="text-border">({i.size})</span>
+                <span className="text-muted">({i.size})</span>
               </span>
               <span className="whitespace-nowrap font-medium">
                 {formatPrice(i.price * i.qty)}
@@ -101,7 +101,7 @@ export function CheckoutView() {
             </li>
           ))}
         </ul>
-        <dl className="mt-4 space-y-2 border-t border-border pt-4 text-sm">
+        <dl className="mt-4 space-y-2 border-t-2 border-ink pt-4 text-sm">
           <div className="flex justify-between">
             <dt className="text-muted">Subtotal</dt>
             <dd className="font-medium">{formatPrice(subtotal)}</dd>
@@ -111,20 +111,20 @@ export function CheckoutView() {
             <dd className="font-medium">{formatPrice(delivery)}</dd>
           </div>
         </dl>
-        <div className="mt-4 flex justify-between border-t border-border pt-4">
+        <div className="mt-4 flex justify-between border-t-2 border-ink pt-4">
           <span className="font-semibold">Total</span>
-          <span className="font-display text-xl font-bold text-brand">
+          <span className="font-display text-xl font-bold text-flare">
             {formatPrice(subtotal + delivery)}
           </span>
         </div>
         <button
           type="submit"
           disabled={placing}
-          className="mt-6 w-full rounded-lg bg-brand px-5 py-3 font-semibold text-black transition-colors hover:bg-brand-strong disabled:opacity-50"
+          className="mt-6 w-full bg-flare px-5 py-3 font-semibold text-paper transition-colors hover:bg-ink disabled:opacity-50"
         >
           {placing ? "Placing order…" : "Place order (demo)"}
         </button>
-        <Link href="/cart/" className="mt-3 block text-center text-sm text-muted hover:text-fg">
+        <Link href="/cart/" className="mt-3 block text-center text-sm text-muted hover:text-ink">
           Back to cart
         </Link>
       </aside>
@@ -160,7 +160,7 @@ function Field({
         className={inputClass}
       />
       {error && (
-        <p id={`${name}-err`} className="mt-1 text-xs text-brand-strong">
+        <p id={`${name}-err`} className="mt-1 text-xs text-flare">
           {error}
         </p>
       )}
