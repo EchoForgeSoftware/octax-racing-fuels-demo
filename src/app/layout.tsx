@@ -5,6 +5,7 @@ import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
 import { DemoBanner } from "@/components/DemoBanner";
+import { BackToTop } from "@/components/BackToTop";
 import { JsonLd } from "@/components/JsonLd";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
 import { SITE, SITE_URL, INDEXABLE } from "@/lib/site";
@@ -66,6 +67,7 @@ export default function RootLayout({
           <Nav />
           <main className="flex-1">{children}</main>
           <Footer />
+          <BackToTop />
         </Providers>
       </body>
     </html>

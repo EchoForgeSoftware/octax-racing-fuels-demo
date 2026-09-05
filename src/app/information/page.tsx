@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Reveal } from "@/components/anim/Reveal";
 import { JsonLd } from "@/components/JsonLd";
 import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbSchema } from "@/lib/schema";
@@ -95,7 +96,7 @@ export default function InformationPage() {
 
         <section className="mt-14 border-t-2 border-ink">
           {guide.map((g, i) => (
-            <div key={g.h} className="grid gap-3 border-b-2 border-ink py-8 md:grid-cols-[auto_1fr]">
+            <Reveal key={g.h} self className="grid gap-3 border-b-2 border-ink py-8 md:grid-cols-[auto_1fr]">
               <span className="text-outline font-display text-4xl md:w-24">0{i + 1}</span>
               <div>
                 <h2 className="font-display text-2xl">{g.h}</h2>
@@ -104,7 +105,7 @@ export default function InformationPage() {
                   {g.cta} &rarr;
                 </Link>
               </div>
-            </div>
+            </Reveal>
           ))}
         </section>
 

@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { Reveal } from "@/components/anim/Reveal";
 import { ProductArt } from "@/components/ProductArt";
 import { ProductCard } from "@/components/ProductCard";
 import { AddToCart } from "@/components/AddToCart";
@@ -87,7 +88,7 @@ export default async function ProductPage({
         </div>
 
         {/* Specs + applications */}
-        <div className="mt-16 grid gap-10 lg:grid-cols-2">
+        <Reveal className="mt-16 grid gap-10 lg:grid-cols-2">
           <section>
             <h2 className="font-display text-2xl">Specifications</h2>
             <dl className="mt-4 border-2 border-ink">
@@ -119,7 +120,7 @@ export default async function ProductPage({
               </p>
             </div>
           </section>
-        </div>
+        </Reveal>
 
         {related.length > 0 && (
           <section className="mt-20">
