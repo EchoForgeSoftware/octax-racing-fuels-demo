@@ -1,0 +1,4 @@
+User-Agent: *
+Disallow: /
+
+Sitemap: https://echoforgesoftware.github.io/octax-racing-fuels-demo/sitemap.xml

@@ -1,0 +1,21 @@
+# Octax Racing Fuels
+
+> Octax Racing Fuels supplies high-octane race fuels, methanol, ethanol and performance additives for motorsport, karting and marine, with online ordering and delivery.
+
+This is a demonstration e-commerce site. Products, prices and stock are sample data
+and no real orders are placed.
+
+## Main pages
+- [Home](https://echoforgesoftware.github.io/octax-racing-fuels-demo/): Overview of Octax Racing Fuels and featured products.
+- [Shop](https://echoforgesoftware.github.io/octax-racing-fuels-demo/shop/): Full catalogue of race fuels, methanol, ethanol and additives.
+- [Information](https://echoforgesoftware.github.io/octax-racing-fuels-demo/information/): Fuel selection guide, safe handling and delivery.
+- [Contact](https://echoforgesoftware.github.io/octax-racing-fuels-demo/contact/): Enquiries about fuel advice, orders and delivery.
+
+## Product categories
+- [Race fuels](https://echoforgesoftware.github.io/octax-racing-fuels-demo/shop/?category=race-fuels): 102 to 118 octane leaded and unleaded competition fuels.
+- [Methanol](https://echoforgesoftware.github.io/octax-racing-fuels-demo/shop/?category=methanol): High-purity methanol for methanol-burning engines.
+- [Ethanol](https://echoforgesoftware.github.io/octax-racing-fuels-demo/shop/?category=ethanol): Anhydrous ethanol and consistent E85 blends.
+- [Additives](https://echoforgesoftware.github.io/octax-racing-fuels-demo/shop/?category=additives): Octane boosters, lubricants and fuel-system treatments.
+
+## Notes
+- Built and maintained by Echo Software (https://echosoftware.co.za).
