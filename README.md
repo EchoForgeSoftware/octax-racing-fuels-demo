@@ -47,6 +47,15 @@ When the production domain is known:
    `LocalBusiness` if there is a physical location.
 6. Submit the sitemap in Google Search Console.
 
+## Deployment
+
+The demo is served from GitHub Pages on the `gh-pages` branch: `npm run build`
+produces the static `out/`, which is published to that branch. A ready-to-use
+GitHub Actions workflow that automates this on every push to `main` is kept in
+[docs/github-pages-workflow.yml.example](docs/github-pages-workflow.yml.example);
+move it to `.github/workflows/deploy.yml` and set the Pages source to "GitHub
+Actions" once a token with the `workflow` scope is available.
+
 ## Attribution
 
 Made and maintained by [Echo Software](https://echosoftware.co.za).
