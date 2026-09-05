@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "./CartContext";
 import { Logo } from "./Logo";
 
@@ -20,6 +20,18 @@ export function Nav() {
   const pathname = usePathname();
   const { count, ready } = useCart();
   const [open, setOpen] = useState(false);
+  const [pop, setPop] = useState(false);
+  const prevCount = useRef(count);
+
+  useEffect(() => {
+    if (count > prevCount.current) {
+      setPop(true);
+      const t = setTimeout(() => setPop(false), 450);
+      prevCount.current = count;
+      return () => clearTimeout(t);
+    }
+    prevCount.current = count;
+  }, [count]);
 
   return (
     <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
@@ -54,7 +66,7 @@ export function Nav() {
             className="group relative flex items-center gap-2 border-2 border-ink bg-ink px-4 py-2 text-paper transition-colors hover:bg-lime hover:text-ink"
           >
             <span className="kicker">Cart</span>
-            <span className="grid h-5 min-w-5 place-items-center bg-lime px-1 font-mono text-xs font-bold text-ink group-hover:bg-ink group-hover:text-lime">
+            <span className={`grid h-5 min-w-5 place-items-center bg-lime px-1 font-mono text-xs font-bold text-ink group-hover:bg-ink group-hover:text-lime ${pop ? "animate-bump" : ""}`}>
               {ready ? count : 0}
             </span>
           </Link>

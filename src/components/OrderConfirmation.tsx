@@ -14,7 +14,7 @@ export function OrderConfirmation() {
 
   return (
     <div className="mx-auto max-w-xl border-2 border-ink bg-panel p-8 text-center sm:p-10">
-      <div className="mx-auto grid h-14 w-14 place-items-center bg-lime">
+      <div className="animate-pop mx-auto grid h-14 w-14 place-items-center bg-lime shadow-[5px_5px_0_0_var(--color-ink)]">
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="var(--color-ink)" strokeWidth="2.5" aria-hidden="true">
           <path d="M20 6 9 17l-5-5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

@@ -103,6 +103,28 @@ h1, h2, h3, h4 {
   .marquee-track { animation: none; }
 }
 
+/* User-initiated feedback motion (add to cart, order placed). Kept brief and
+   non-looping, so it plays as direct response to an action. */
+@keyframes bump {
+  0% { transform: scale(1); }
+  30% { transform: scale(1.55); }
+  60% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+.animate-bump { animation: bump 0.45s var(--ease-out-quint); }
+
+@keyframes pop-in {
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.animate-pop { animation: pop-in 0.55s var(--ease-out-quint) both; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.animate-spin-slow { animation: spin 0.9s linear infinite; }
+
+@keyframes fill { from { width: 0; } to { width: 100%; } }
+
 /* Angular clip for section bands */
 .clip-slash-top {
   clip-path: polygon(0 3.5vw, 100% 0, 100% 100%, 0 100%);

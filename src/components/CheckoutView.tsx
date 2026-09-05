@@ -2,9 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
+import { ProcessingOverlay } from "./ProcessingOverlay";
 
 const inputClass =
   "mt-1 w-full border-2 border-ink bg-paper-2 px-3 py-2.5 text-sm outline-none focus:border-flare";
@@ -15,7 +16,10 @@ export function CheckoutView() {
   const { items, subtotal, clear, ready } = useCart();
   const router = useRouter();
   const [errors, setErrors] = useState<Errors>({});
-  const [placing, setPlacing] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const formRef = useRef<HTMLFormElement | null>(null);
+
+  const PROCESS_MS = 1800;
 
   if (!ready) return <p className="text-muted">Loading&hellip;</p>;
 
@@ -34,9 +38,10 @@ export function CheckoutView() {
     );
   }
 
-  function onSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const data = new FormData(e.currentTarget);
+  function validate(): boolean {
+    const form = formRef.current;
+    if (!form) return false;
+    const data = new FormData(form);
     const required = ["fullname", "email", "phone", "address", "city", "postcode"];
     const next: Errors = {};
     for (const key of required) {
@@ -46,18 +51,34 @@ export function CheckoutView() {
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
       next.email = "Enter a valid email";
     setErrors(next);
-    if (Object.keys(next).length > 0) return;
+    return Object.keys(next).length === 0;
+  }
 
-    setPlacing(true);
+  function onSubmit(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!validate()) return;
+    setProcessing(true);
     // Simulated order: no payment, no network call. Clear cart and confirm.
-    clear();
-    router.push("/checkout/success/");
+    window.setTimeout(() => {
+      clear();
+      router.push("/checkout/success/");
+    }, PROCESS_MS);
+  }
+
+  function onDecline() {
+    if (!validate()) return;
+    setProcessing(true);
+    // Cart is kept so the customer can retry from the error page.
+    window.setTimeout(() => {
+      router.push("/checkout/error/");
+    }, PROCESS_MS);
   }
 
   const delivery = 0;
 
   return (
-    <form onSubmit={onSubmit} noValidate className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+    <form ref={formRef} onSubmit={onSubmit} noValidate className="grid gap-8 lg:grid-cols-[1.5fr_1fr]">
+      {processing && <ProcessingOverlay durationMs={PROCESS_MS} />}
       <div className="space-y-8">
         <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-lg font-semibold">
@@ -119,12 +140,20 @@ export function CheckoutView() {
         </div>
         <button
           type="submit"
-          disabled={placing}
-          className="mt-6 w-full bg-flare px-5 py-3 font-semibold text-paper transition-colors hover:bg-ink disabled:opacity-50"
+          disabled={processing}
+          className="mt-6 w-full border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:opacity-50"
         >
-          {placing ? "Placing order…" : "Place order (demo)"}
+          Place order (demo)
         </button>
-        <Link href="/cart/" className="mt-3 block text-center text-sm text-muted hover:text-ink">
+        <button
+          type="button"
+          onClick={onDecline}
+          disabled={processing}
+          className="mt-3 block w-full text-center font-mono text-xs uppercase tracking-wider text-muted underline hover:text-flare disabled:opacity-50"
+        >
+          Preview a declined payment
+        </button>
+        <Link href="/cart/" className="mt-4 block text-center font-mono text-xs uppercase tracking-wider text-muted hover:text-ink">
           Back to cart
         </Link>
       </aside>

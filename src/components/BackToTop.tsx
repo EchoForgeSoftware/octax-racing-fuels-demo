@@ -13,8 +13,17 @@ export function BackToTop() {
   }, []);
 
   function toTop() {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    window.scrollTo({ top: 0, behavior: reduce ? "auto" : "smooth" });
+    const start = window.scrollY;
+    if (start <= 0) return;
+    const duration = 600;
+    const t0 = performance.now();
+    const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / duration);
+      window.scrollTo(0, start * (1 - easeOutQuart(p)));
+      if (p < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
   }
 
   return (

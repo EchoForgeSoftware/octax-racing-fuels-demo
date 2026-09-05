@@ -18,6 +18,8 @@ export type CartItem = {
   qty: number;
 };
 
+export type AddedSignal = { name: string; qty: number; at: number };
+
 type CartState = {
   items: CartItem[];
   add: (item: Omit<CartItem, "qty">, qty?: number) => void;
@@ -27,6 +29,7 @@ type CartState = {
   count: number;
   subtotal: number;
   ready: boolean;
+  lastAdded: AddedSignal | null;
 };
 
 const STORAGE_KEY = "octax-cart-v1";
@@ -35,6 +38,7 @@ const CartCtx = createContext<CartState | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
+  const [lastAdded, setLastAdded] = useState<AddedSignal | null>(null);
 
   useEffect(() => {
     try {
@@ -63,7 +67,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
       count,
       subtotal,
       ready,
-      add: (item, qty = 1) =>
+      lastAdded,
+      add: (item, qty = 1) => {
         setItems((prev) => {
           const found = prev.find((i) => i.sku === item.sku);
           if (found) {
@@ -72,7 +77,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
             );
           }
           return [...prev, { ...item, qty }];
-        }),
+        });
+        setLastAdded({ name: item.name, qty, at: Date.now() });
+      },
       remove: (sku) => setItems((prev) => prev.filter((i) => i.sku !== sku)),
       setQty: (sku, qty) =>
         setItems((prev) =>
@@ -82,7 +89,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items, ready]);
+  }, [items, ready, lastAdded]);
 
   return <CartCtx.Provider value={api}>{children}</CartCtx.Provider>;
 }
