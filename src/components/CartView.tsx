@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 import { getProduct } from "@/lib/products";
-import { ProductArt } from "./ProductArt";
+import { ProductShot } from "./pack/ProductShot";
 import { Icon } from "./Icon";
 
 export function CartView() {
@@ -44,7 +44,14 @@ export function CartView() {
           return (
             <li key={i.sku} className="grid grid-cols-[4.5rem_1fr] gap-x-4 gap-y-3 p-4 sm:grid-cols-[5.5rem_1fr_auto] sm:items-center">
               <Link href={`/shop/${i.slug}/`} tabIndex={-1} aria-hidden="true" className="row-span-2 block self-start border-2 border-ink sm:row-span-1">
-                {product && <ProductArt product={product} className="block aspect-square w-full" />}
+                {product && (
+                  <ProductShot
+                    product={product}
+                    variant={product.variants.find((v) => v.sku === i.sku)}
+                    frame="square"
+                    className="block aspect-square w-full"
+                  />
+                )}
               </Link>
 
               <div className="min-w-0">

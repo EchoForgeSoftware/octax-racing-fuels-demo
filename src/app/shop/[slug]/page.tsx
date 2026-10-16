@@ -3,9 +3,8 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { Reveal } from "@/components/anim/Reveal";
-import { ProductArt } from "@/components/ProductArt";
 import { ProductCard } from "@/components/ProductCard";
-import { AddToCart } from "@/components/AddToCart";
+import { ProductBuy } from "@/components/ProductBuy";
 import { JsonLd } from "@/components/JsonLd";
 import {
   products,
@@ -64,28 +63,18 @@ export default async function ProductPage({
       <Breadcrumbs trail={trail} />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">
-        <div className="grid gap-10 lg:grid-cols-2">
-          <div className="overflow-hidden border-2 border-ink shadow-[10px_10px_0_0_var(--color-ink)]">
-            <ProductArt product={product} className="h-full w-full" />
-          </div>
-
-          <div>
-            <Link
-              href={`/shop/?category=${product.category}`}
-              className="kicker text-flare hover:underline"
-            >
-              {category?.name}
-            </Link>
-            <h1 className="mt-3 font-display text-[clamp(2rem,6vw,3.5rem)] leading-[0.9]">
-              {product.name}
-            </h1>
-            <p className="mt-5 text-ink-soft">{product.description}</p>
-
-            <div className="mt-6">
-              <AddToCart product={product} />
-            </div>
-          </div>
-        </div>
+        <ProductBuy product={product}>
+          <Link
+            href={`/shop/?category=${product.category}`}
+            className="kicker text-flare hover:underline"
+          >
+            {category?.name}
+          </Link>
+          <h1 className="mt-3 font-display text-[clamp(2rem,6vw,3.5rem)] leading-[0.9]">
+            {product.name}
+          </h1>
+          <p className="mt-5 text-ink-soft">{product.description}</p>
+        </ProductBuy>
 
         {/* Specs + applications */}
         <Reveal className="mt-16 grid gap-10 lg:grid-cols-2">

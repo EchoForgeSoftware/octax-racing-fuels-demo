@@ -1,20 +1,37 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/products";
 import { Icon } from "./Icon";
 
-export function AddToCart({ product }: { product: Product }) {
+export function AddToCart({
+  product,
+  variantIndex: controlledIndex,
+  onVariantChange,
+}: {
+  product: Product;
+  /** Pass both to share the selected size with something else on the page (the product shot). */
+  variantIndex?: number;
+  onVariantChange?: (index: number) => void;
+}) {
   const { add } = useCart();
-  const [variantIndex, setVariantIndex] = useState(0);
+  const [ownIndex, setOwnIndex] = useState(0);
+  const variantIndex = controlledIndex ?? ownIndex;
+  const setVariantIndex = (i: number) => {
+    setOwnIndex(i);
+    onVariantChange?.(i);
+  };
   const [qty, setQty] = useState(1);
   const [added, setAdded] = useState(false);
 
   const variant = product.variants[variantIndex];
   const outOfStock = variant.stock <= 0;
   const maxQty = Math.max(1, variant.stock);
+
+  // Keep the quantity within what the selected size has in stock, however it was picked.
+  useEffect(() => setQty((q) => Math.min(q, maxQty)), [maxQty]);
 
   function handleAdd() {
     if (outOfStock) return;
@@ -47,11 +64,7 @@ export function AddToCart({ product }: { product: Product }) {
               key={v.sku}
               type="button"
               aria-pressed={i === variantIndex}
-              onClick={() => {
-                setVariantIndex(i);
-                // Keep the quantity within what the newly picked size has in stock.
-                setQty((q) => Math.min(q, Math.max(1, v.stock)));
-              }}
+              onClick={() => setVariantIndex(i)}
               className={`min-h-11 border-2 border-ink px-4 py-2 font-mono text-sm font-bold uppercase transition-colors ${
                 i === variantIndex ? "bg-ink text-lime" : "hover:bg-lime"
               }`}

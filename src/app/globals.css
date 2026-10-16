@@ -141,6 +141,16 @@ a { text-underline-offset: 0.2em; }
 }
 .animate-pop { animation: pop-in 0.55s var(--ease-out-quint) both; }
 
+/* Product shot swaps when a different pack size is picked. */
+@keyframes pack-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+.animate-pack-in { animation: pack-in 0.4s var(--ease-out-quint) both; }
+@media (prefers-reduced-motion: reduce) {
+  .animate-pack-in { animation: none; }
+}
+
 @keyframes spin { to { transform: rotate(360deg); } }
 .animate-spin-slow { animation: spin 0.9s linear infinite; }
 
