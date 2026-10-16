@@ -90,8 +90,6 @@ export function CheckoutView() {
     }, PROCESS_MS);
   }
 
-  const delivery = 0;
-
   return (
     <form ref={formRef} onSubmit={onSubmit} noValidate className="grid gap-8 lg:grid-cols-[1.5fr_1fr] lg:items-start">
       {processing && <ProcessingOverlay durationMs={PROCESS_MS} />}
@@ -146,15 +144,18 @@ export function CheckoutView() {
             <dt className="font-mono text-xs uppercase tracking-wider text-muted">Subtotal</dt>
             <dd className="font-bold">{formatPrice(subtotal)}</dd>
           </div>
-          <div className="flex justify-between">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Delivery (demo)</dt>
-            <dd className="font-bold">{formatPrice(delivery)}</dd>
+          <div className="flex justify-between gap-4">
+            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Courier</dt>
+            <dd className="text-right text-muted">Quoted separately</dd>
           </div>
         </dl>
         <div className="mt-5 flex items-end justify-between border-t-2 border-ink pt-4">
-          <span className="kicker">Total</span>
+          <span className="kicker">
+            Total
+            <span className="mt-1 block font-normal normal-case tracking-normal text-muted">Incl. VAT, excl. courier</span>
+          </span>
           <span className="num font-display text-3xl text-flare">
-            {formatPrice(subtotal + delivery)}
+            {formatPrice(subtotal)}
           </span>
         </div>
         <button

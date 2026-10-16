@@ -2,16 +2,17 @@
 // and the colours the product shot uses.
 import type { Product } from "./products";
 
-/** 200L ships in a steel drum, 20L and up in the HDPE jerry can, smaller in the 5L jug. */
-export type PackKind = "can" | "drum" | "jug";
+/** 210L ships in a steel drum, 20L in the jerry can, 5L in the jug, 500ml in a bottle. */
+export type PackKind = "can" | "drum" | "jug" | "bottle";
 
 export function packKind(size: string): PackKind {
   if (/drum/i.test(size)) return "drum";
   const litres = /ml/i.test(size) ? parseFloat(size) / 1000 : parseFloat(size);
-  return litres >= 20 ? "can" : "jug";
+  if (litres >= 20) return "can";
+  return litres >= 2 ? "jug" : "bottle";
 }
 
-/** "25L" -> "25L", "200L drum" -> "200L", "500ml" -> "500ml" (as embossed on the packs). */
+/** "20L" -> "20L", "210L drum" -> "210L", "500ml" -> "500ml" (as embossed on the packs). */
 export function volumeLabel(size: string): string {
   const m = size.match(/(\d+(?:\.\d+)?)\s*(ml|l)/i);
   if (!m) return size.toUpperCase();
@@ -39,6 +40,7 @@ export const categoryColor: Record<string, string> = {
   ethanol: "var(--color-lime)",
   methanol: "var(--color-flare)",
   additives: "var(--color-ink)",
+  diesel: "var(--color-cobalt)",
 };
 
 /** Text colour that reads on a category colour. */
@@ -47,7 +49,7 @@ export function onCategory(category: string): string {
 }
 
 export function packName(kind: PackKind): string {
-  return { can: "Jerry can", drum: "Steel drum", jug: "Jug" }[kind];
+  return { can: "Jerry can", drum: "Steel drum", jug: "Jug", bottle: "Bottle" }[kind];
 }
 
 export type { Product };

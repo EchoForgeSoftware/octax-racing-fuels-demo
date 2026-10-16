@@ -1,6 +1,7 @@
 // OCTA Performance catalogue. Product names, UN numbers, hazard classes, mix
-// ratios and label wording come from the supplied product labels. Pack sizes,
-// prices and stock are still sample data for the demo.
+// ratios and label wording come from the supplied product labels. Prices and
+// pack sizes come from the supplied price list (ZAR, VAT included, courier
+// excluded). Stock levels are still sample data for the demo.
 
 export type Category = {
   slug: string;
@@ -11,7 +12,7 @@ export type Category = {
 export type Variant = {
   size: string;
   sku: string;
-  price: number; // in ZAR
+  price: number; // in ZAR, VAT included, courier excluded
   stock: number;
 };
 
@@ -19,13 +20,16 @@ export type Pictogram = "flame" | "goggles" | "gloves" | "respirator" | "no-flam
 
 /** Everything printed on the product label, as supplied. */
 export type ProductLabel = {
+  /** "wide" is the 2:3 can label (OCTA-X, OCTA-M); "tall" the 9:16 jug and bottle label. */
+  layout: "wide" | "tall";
   /** Lime mark after the OCTA wordmark: a letter (X, M) or a word (BOOST). */
   mark: string;
   /** Product name printed large, with an optional lime highlight (e.g. "95%"). */
   title: string;
   highlight?: string;
-  un: string;
-  hazardClass: string;
+  /** Left off where the product's dangerous-goods data has not been supplied yet. */
+  un?: string;
+  hazardClass?: string;
   /** Whether the UN line sits above the product name (OCTA-X) or below it (OCTA-M). */
   unPlacement: "above" | "below";
   /** Show the alcohol chain doodle next to the mark. */
@@ -34,6 +38,8 @@ export type ProductLabel = {
   disclaimer: string;
   /** Mixing instructions (OCTA-BOOST). */
   mix?: { lead: string; rows: { ratio: string; text: string }[] };
+  /** Short descriptor lines for tall labels without a mix table. */
+  lines?: string[];
 };
 
 export type Product = {
@@ -63,7 +69,12 @@ export const categories: Category[] = [
   {
     slug: "additives",
     name: "Octane booster",
-    blurb: "OCTA-BOOST: octane booster mixed with 95 octane pump fuel, from 1:7 up to 1:4.",
+    blurb: "OCTA-BOOST in 5L for mixing with 95 octane pump fuel, and OCTA-SHOT fuel octane booster in 500ml.",
+  },
+  {
+    slug: "diesel",
+    name: "Diesel improver",
+    blurb: "OCTA-TORQUE: diesel improver in a 500ml bottle.",
   },
 ];
 
@@ -86,10 +97,11 @@ export const products: Product[] = [
     applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
     featured: true,
     variants: [
-      { size: "25L", sku: "OCTA-X-25", price: 990, stock: 34 },
-      { size: "200L drum", sku: "OCTA-X-200", price: 7400, stock: 7 },
+      { size: "20L", sku: "OCTA-X-20", price: 555.68, stock: 34 },
+      { size: "210L drum", sku: "OCTA-X-210", price: 5230.89, stock: 7 },
     ],
     label: {
+      layout: "wide",
       mark: "X",
       title: "ETHANOL",
       highlight: "95%",
@@ -118,10 +130,11 @@ export const products: Product[] = [
     applications: ["Methanol-burning engines", "Performance use"],
     featured: true,
     variants: [
-      { size: "25L", sku: "OCTA-M-25", price: 640, stock: 60 },
-      { size: "200L drum", sku: "OCTA-M-200", price: 4800, stock: 15 },
+      { size: "20L", sku: "OCTA-M-20", price: 477.94, stock: 60 },
+      { size: "210L drum", sku: "OCTA-M-210", price: 4414.62, stock: 15 },
     ],
     label: {
+      layout: "wide",
       mark: "M",
       title: "METHANOL",
       un: "UN 1230",
@@ -149,8 +162,9 @@ export const products: Product[] = [
     applications: ["95 octane pump fuel", "Performance use"],
     featured: true,
     // Ships in the 5L HDPE jug.
-    variants: [{ size: "5L", sku: "OCTA-BOOST-5", price: 1390, stock: 40 }],
+    variants: [{ size: "5L", sku: "OCTA-BOOST-5", price: 229.94, stock: 40 }],
     label: {
+      layout: "tall",
       mark: "BOOST",
       title: "OCTANE",
       highlight: "BOOSTER",
@@ -169,6 +183,59 @@ export const products: Product[] = [
           { ratio: "1:4", text: "EXTREME" },
         ],
       },
+    },
+  },
+  {
+    slug: "octa-shot",
+    name: "OCTA-SHOT Fuel Octane Booster",
+    category: "additives",
+    short: "Fuel octane booster in a 500ml bottle.",
+    description:
+      "OCTA-SHOT is OCTA's fuel octane booster in a 500ml bottle, the compact partner to the 5L OCTA-BOOST. Follow the dosing instructions supplied with the product, and re-check your tune whenever you change your fuel.",
+    specs: [
+      { label: "Size", value: "500ml bottle" },
+      { label: "Use", value: "Fuel octane booster" },
+    ],
+    applications: ["Petrol engines", "Performance use"],
+    featured: true,
+    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 97.97, stock: 120 }],
+    label: {
+      layout: "tall",
+      mark: "SHOT",
+      title: "OCTANE",
+      highlight: "BOOSTER",
+      unPlacement: "below",
+      chain: false,
+      pictograms: ["goggles", "gloves"],
+      lines: ["500ML BOTTLE", "FOR PETROL ENGINES"],
+      disclaimer:
+        "USE AT OWN RISK. OCTA-SHOT IS FOR PERFORMANCE USE ONLY. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM ITS USE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+    },
+  },
+  {
+    slug: "octa-torque",
+    name: "OCTA-TORQUE Diesel Improver",
+    category: "diesel",
+    short: "Diesel improver in a 500ml bottle.",
+    description:
+      "OCTA-TORQUE is OCTA's diesel improver in a 500ml bottle, for diesel engines. Follow the dosing instructions supplied with the product.",
+    specs: [
+      { label: "Size", value: "500ml bottle" },
+      { label: "Use", value: "Diesel improver" },
+    ],
+    applications: ["Diesel engines"],
+    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 77.68, stock: 90 }],
+    label: {
+      layout: "tall",
+      mark: "TORQUE",
+      title: "DIESEL",
+      highlight: "IMPROVER",
+      unPlacement: "below",
+      chain: false,
+      pictograms: ["goggles", "gloves"],
+      lines: ["500ML BOTTLE", "FOR DIESEL ENGINES"],
+      disclaimer:
+        "USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM THE USE OF OCTA-TORQUE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
     },
   },
 ];

@@ -12,6 +12,8 @@ const columns = [
       { label: "OCTA-X Ethanol 95%", href: "/shop/octa-x-ethanol/" },
       { label: "OCTA-M Methanol", href: "/shop/octa-m-methanol/" },
       { label: "OCTA-BOOST", href: "/shop/octa-boost/" },
+      { label: "OCTA-SHOT", href: "/shop/octa-shot/" },
+      { label: "OCTA-TORQUE", href: "/shop/octa-torque/" },
     ],
   },
   {

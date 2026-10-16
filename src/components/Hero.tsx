@@ -162,7 +162,7 @@ export function Hero() {
             <div data-depth="30" className="grid grid-cols-2 gap-px border-t-2 border-ink bg-paper/20">
               {[
                 { k: "Ethanol", to: 95, suffix: "%", label: "95%" },
-                { k: "Litre can", to: 25, suffix: "L", label: "25L" },
+                { k: "Litre can", to: 20, suffix: "L", label: "20L" },
               ].map((s) => (
                 <div key={s.k} className="bg-ink p-4">
                   <span data-count={s.to} data-suffix={s.suffix} className="font-display text-3xl text-paper">

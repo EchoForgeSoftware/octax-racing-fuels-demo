@@ -3,11 +3,11 @@
 import { useId } from "react";
 import type { Product, Variant } from "@/lib/products";
 import { categoryColor, onCategory, packKind, volumeLabel } from "@/lib/pack";
-import { Drum, JerryCan, Jug, PACK_SIZE } from "./Containers";
+import { Bottle, Drum, JerryCan, Jug, PACK_SIZE } from "./Containers";
 
 const INK = "var(--color-ink)";
 const LIME = "var(--color-lime)";
-const packWord = { can: "jerry can", drum: "steel drum", jug: "jug" } as const;
+const packWord = { can: "jerry can", drum: "steel drum", jug: "jug", bottle: "bottle" } as const;
 
 type Props = {
   product: Product;
@@ -39,7 +39,7 @@ export function ProductShot({ product, variant, frame = "card", className, decor
   // Fit the container into the stage, standing on the floor line.
   const size = PACK_SIZE[kind];
   const maxH = floorY - (frame === "card" ? 22 : 36);
-  const maxW = kind === "jug" ? 200 : 230;
+  const maxW = kind === "jug" || kind === "bottle" ? 200 : 230;
   const s = Math.min(maxH / size.h, maxW / size.w);
   const pw = size.w * s;
   const px = W * 0.58 - pw / 2;
@@ -81,6 +81,7 @@ export function ProductShot({ product, variant, frame = "card", className, decor
         {kind === "can" && <JerryCan product={product} volume={volume} uid={uid} />}
         {kind === "drum" && <Drum product={product} volume={volume} uid={uid} />}
         {kind === "jug" && <Jug product={product} volume={volume} uid={uid} />}
+        {kind === "bottle" && <Bottle product={product} volume={volume} uid={uid} />}
       </g>
 
       {/* Hazard band floor */}

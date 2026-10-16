@@ -37,7 +37,7 @@ const faqs = [
   },
   {
     q: "How is it delivered?",
-    a: "Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA products are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
+    a: "Prices on the site include VAT and exclude courier, which is quoted separately. Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA fuels are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
   },
 ];
 
@@ -72,6 +72,18 @@ const guide = [
     href: "/shop/octa-boost/",
     cta: "Shop OCTA-BOOST",
   },
+  {
+    h: "OCTA-SHOT Fuel Octane Booster",
+    p: "OCTA's fuel octane booster in a 500ml bottle, the compact partner to the 5L OCTA-BOOST. Follow the dosing instructions supplied with the product.",
+    href: "/shop/octa-shot/",
+    cta: "Shop OCTA-SHOT",
+  },
+  {
+    h: "OCTA-TORQUE Diesel Improver",
+    p: "OCTA's diesel improver in a 500ml bottle, for diesel engines. Follow the dosing instructions supplied with the product.",
+    href: "/shop/octa-torque/",
+    cta: "Shop OCTA-TORQUE",
+  },
 ];
 
 export default function InformationPage() {
@@ -85,7 +97,7 @@ export default function InformationPage() {
           <p className="kicker text-flare">Field manual</p>
           <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4.5rem)] leading-[0.9]">Product guide &amp; safe handling</h1>
           <p className="mt-5 max-w-2xl text-lg text-ink-soft">
-            A quick guide to the three OCTA products, plus safe handling, storage and
+            A quick guide to the OCTA range, plus safe handling, storage and
             delivery. If you are still unsure,{" "}
             <Link href="/contact/" className="text-flare underline">contact us</Link> with your
             build details.
@@ -129,7 +141,8 @@ export default function InformationPage() {
         <section className="mt-14">
           <h2 className="font-display text-2xl">Ordering and delivery</h2>
           <p className="mt-4 text-ink-soft">
-            Add products to your cart and check out online. Orders are dispatched within a
+            Add products to your cart and check out online. Prices include VAT and exclude
+            courier, which is quoted separately. Orders are dispatched within a
             24 to 48 hour window to your workshop or a nominated track address, subject to
             dangerous-goods transport rules for your area. This is a demo store, so no
             payment is taken and no order is actually placed.

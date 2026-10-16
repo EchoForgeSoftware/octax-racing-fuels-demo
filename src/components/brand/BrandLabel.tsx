@@ -5,7 +5,8 @@ import { PictogramRow } from "./Pictograms";
 
 // Vector rebuild of the supplied OCTA product labels. OCTA-X and OCTA-M share
 // the 2:3 layout (they differ in where the UN line sits and in the pictogram
-// count); OCTA-BOOST uses the taller 9:16 layout with its mix ratios.
+// count); OCTA-BOOST, OCTA-SHOT and OCTA-TORQUE use the taller 9:16 layout,
+// with the mix table when there is one and descriptor lines otherwise.
 
 const INK = "var(--color-ink)";
 export const LABEL_PAPER = "oklch(0.975 0.016 98)";
@@ -19,7 +20,7 @@ const cond = (weight: number, italic = false) => ({
 });
 
 export function labelSize(product: Product): { w: number; h: number } {
-  return product.label.mix ? { w: 360, h: 660 } : { w: 400, h: 600 };
+  return product.label.layout === "tall" ? { w: 360, h: 660 } : { w: 400, h: 600 };
 }
 
 /** Hazard-stripe frame, bracket lines and black X corners shared by every label. */
@@ -182,7 +183,7 @@ function AlcoholLabel({ product }: { product: Product }) {
   );
 }
 
-/** 9:16 label for OCTA-BOOST, with the mixing table. */
+/** 9:16 label for the jug and bottle products. */
 function BoostLabel({ product }: { product: Product }) {
   const l = product.label;
   const W = 360;
@@ -218,13 +219,33 @@ function BoostLabel({ product }: { product: Product }) {
         </g>
       )}
 
+      {!l.mix && l.lines && (
+        <g>
+          {l.lines.map((line, i) => (
+            <text
+              key={line}
+              x={W / 2}
+              y={262 + i * 34}
+              textAnchor="middle"
+              style={cond(i === 0 ? 800 : 600, i === 0)}
+              fontSize={i === 0 ? 30 : 22}
+              fill={i === 0 ? INK : MUTED_LIME}
+            >
+              {line}
+            </text>
+          ))}
+        </g>
+      )}
+
       <text x={W / 2} y={384} textAnchor="middle" style={cond(800, true)} fontSize="40" fill={INK}>
         {l.title}
         {l.highlight && <tspan fill={MUTED_LIME}>{l.highlight}</tspan>}
       </text>
-      <text x={W / 2} y={410} textAnchor="middle" style={cond(600)} fontSize="18" fill={INK}>
-        {l.un} {l.hazardClass}
-      </text>
+      {l.un && (
+        <text x={W / 2} y={410} textAnchor="middle" style={cond(600)} fontSize="18" fill={INK}>
+          {l.un} {l.hazardClass}
+        </text>
+      )}
 
       <PictogramRow items={l.pictograms} x={30} y={448} width={300} size={54} />
       <Disclaimer text={l.disclaimer} x={W / 2} y={528} maxChars={56} size={10.4} center />
@@ -234,7 +255,7 @@ function BoostLabel({ product }: { product: Product }) {
 }
 
 export function BrandLabel({ product }: { product: Product }) {
-  return product.label.mix ? <BoostLabel product={product} /> : <AlcoholLabel product={product} />;
+  return product.label.layout === "tall" ? <BoostLabel product={product} /> : <AlcoholLabel product={product} />;
 }
 
 /** Standalone label as an HTML-embeddable SVG (product page). */

@@ -27,7 +27,8 @@ export function ProductCard({ product }: { product: Product }) {
         <div className="mt-4 flex items-end justify-between border-t-2 border-ink pt-3">
           <div>
             <span className="kicker text-muted">From</span>
-            <div className="font-display text-2xl">{formatPrice(price)}</div>
+            <div className="num font-display text-2xl">{formatPrice(price)}</div>
+            <span className="font-mono text-[0.6rem] uppercase tracking-wider text-muted">Incl. VAT</span>
           </div>
           <span className="flex items-center gap-1.5 font-mono text-[0.68rem] font-bold uppercase tracking-wider">
             <span className={`h-2 w-2 ${stock > 0 ? "bg-lime" : "bg-flare"}`} />

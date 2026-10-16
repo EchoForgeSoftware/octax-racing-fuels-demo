@@ -49,6 +49,7 @@ export function AddToCart({
         <div>
           <span className="kicker text-muted">Price</span>
           <div className="num font-display text-4xl">{formatPrice(variant.price)}</div>
+          <span className="mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">Incl. VAT · excl. courier</span>
         </div>
         <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider">
           <span className={`h-2 w-2 ${variant.stock > 0 ? "bg-lime" : "bg-flare"}`} />

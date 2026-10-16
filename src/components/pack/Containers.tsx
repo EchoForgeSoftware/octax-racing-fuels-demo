@@ -18,6 +18,7 @@ export const PACK_SIZE = {
   can: { w: 210, h: 320 },
   drum: { w: 226, h: 304 },
   jug: { w: 176, h: 310 },
+  bottle: { w: 120, h: 250 },
 } as const;
 
 type PackProps = { product: Product; volume: string; uid: string };
@@ -76,7 +77,7 @@ function ThreadedCap({ x, y, w, h }: { x: number; y: number; w: number; h: numbe
 const CAN_BODY =
   "M0 82 Q0 40 42 40 H168 Q210 40 210 82 V300 Q210 320 190 320 H138 Q105 311 72 320 H20 Q0 320 0 300 Z";
 
-/** 25 L white HDPE jerry can with red cap, after the supplied can photos. */
+/** 20 L white HDPE jerry can with red cap, after the supplied can photos. */
 export function JerryCan({ product, volume, uid }: PackProps) {
   const clip = `${uid}-can`;
   return (
@@ -124,7 +125,7 @@ export function JerryCan({ product, volume, uid }: PackProps) {
   );
 }
 
-/** 200 L steel drum: black body, hoops and chimes in the category colour. */
+/** 210 L steel drum: black body, hoops and chimes in the category colour. */
 export function Drum({ product }: PackProps) {
   const color = categoryColor[product.category];
   return (
@@ -190,6 +191,39 @@ export function Jug({ product, volume, uid }: PackProps) {
 
       <PlacedLabel product={product} cx={88} y={128} maxW={124} maxH={168} />
       <Embossed x={128} y={112} size={14}>{volume}</Embossed>
+    </g>
+  );
+}
+
+// 500 ml bottle: shoulders curving into a short neck.
+const BOTTLE_BODY =
+  "M44 44 H76 C76 60 120 60 120 90 V236 Q120 250 106 250 H14 Q0 250 0 236 V90 C0 60 44 60 44 44 Z";
+
+/** 500 ml white HDPE bottle with red cap, matching the can and jug. */
+export function Bottle({ product, volume, uid }: PackProps) {
+  const clip = `${uid}-bottle`;
+  return (
+    <g>
+      <defs>
+        <clipPath id={clip}>
+          <path d={BOTTLE_BODY} />
+        </clipPath>
+      </defs>
+
+      <rect x="46" y="26" width="28" height="20" fill={HDPE_SHADE} stroke={INK} strokeWidth={STROKE} />
+      <ThreadedCap x={38} y={2} w={44} h={28} />
+
+      <path d={BOTTLE_BODY} fill={HDPE} />
+      <g clipPath={`url(#${clip})`}>
+        <rect x="0" y="96" width="120" height="160" fill={MILK} opacity="0.45" />
+        <rect x="0" y="44" width="10" height="210" fill={INK} opacity="0.06" />
+        <rect x="104" y="60" width="16" height="194" fill={INK} opacity="0.09" />
+        <rect x="8" y="92" width="5" height="140" fill="#fff" opacity="0.9" />
+      </g>
+      <path d={BOTTLE_BODY} fill="none" stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
+
+      <PlacedLabel product={product} cx={60} y={94} maxW={96} maxH={140} />
+      <Embossed x={44} y={84} size={11}>{volume}</Embossed>
     </g>
   );
 }

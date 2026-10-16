@@ -102,9 +102,10 @@ export default async function ProductPage({
             <div className="mt-6 bg-ink p-5 text-sm text-paper/80">
               <span className="kicker text-lime">Handle with care</span>
               <p className="mt-2">
-                {product.name} is a {label.hazardClass.toLowerCase()} flammable liquid ({label.un}).
-                Wear eye protection, gloves and a respirator, keep it away from open flame, and
-                store and transport it according to local regulations. See the{" "}
+                {label.un
+                  ? `${product.name} is a ${label.hazardClass?.toLowerCase()} flammable liquid (${label.un}). Wear eye protection, gloves and a respirator, keep it away from open flame, and store and transport it according to local regulations.`
+                  : `Handle ${product.name} with eye protection and gloves, keep it out of reach of children, and store it sealed, away from heat.`}{" "}
+                See the{" "}
                 <Link href="/information/" className="text-lime hover:underline">information page</Link>{" "}
                 for guidance.
               </p>
@@ -149,16 +150,18 @@ export default async function ProductPage({
               ))}
             </ul>
 
-            <dl className="mt-8 grid grid-cols-2 gap-px border-2 border-ink bg-ink">
-              <div className="bg-paper p-4">
-                <dt className="kicker text-muted">UN number</dt>
-                <dd className="mt-1 font-display text-2xl">{label.un}</dd>
-              </div>
-              <div className="bg-paper p-4">
-                <dt className="kicker text-muted">Hazard class</dt>
-                <dd className="mt-1 font-display text-2xl">{label.hazardClass}</dd>
-              </div>
-            </dl>
+            {label.un && (
+              <dl className="mt-8 grid grid-cols-2 gap-px border-2 border-ink bg-ink">
+                <div className="bg-paper p-4">
+                  <dt className="kicker text-muted">UN number</dt>
+                  <dd className="mt-1 font-display text-2xl">{label.un}</dd>
+                </div>
+                <div className="bg-paper p-4">
+                  <dt className="kicker text-muted">Hazard class</dt>
+                  <dd className="mt-1 font-display text-2xl">{label.hazardClass}</dd>
+                </div>
+              </dl>
+            )}
           </div>
         </section>
 

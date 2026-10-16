@@ -25,7 +25,11 @@ and no real orders are placed.
 ## Products
 - [OCTA-X Ethanol 95%](${u("/shop/octa-x-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
 - [OCTA-M Methanol](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
-- [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 1:7 to 1:4. UN 1170, Class 3.
+- [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 1:7 to 1:4, 5L. UN 1170, Class 3.
+- [OCTA-SHOT](${u("/shop/octa-shot/")}): Fuel octane booster, 500ml.
+- [OCTA-TORQUE](${u("/shop/octa-torque/")}): Diesel improver, 500ml.
+
+Prices are in ZAR, include VAT and exclude courier.
 
 OCTA Performance is a brand of ${SITE.legalName}.
 
