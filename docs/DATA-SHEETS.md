@@ -2,7 +2,7 @@
 
 ## Landscape label and image pack
 
-`output/OCTA-brand-pack.zip` contains all three available technical sheets,
+`output/OCTA-brand-pack.zip` contains all five technical sheets,
 their combined PDF, five landscape label PNG/SVG masters and a combined label
 PDF, eight 4000px catalogue packaging illustrations and logo assets. Label PNGs
 are 6000x3750px. The 210L ethanol and methanol drum variants are included.
@@ -17,7 +17,7 @@ approval requirements. These are artwork masters, not certified final labels.
 
 ## Technical sheets
 
-The three PDFs in `public/data-sheets/` are newly authored documents, not
+The five PDFs in `public/data-sheets/` are newly authored documents, not
 overlays on supplier PDFs. The originals' page images, logos, product codes,
 metadata and attachments are not copied into the deliverables. The OCTA logo,
 product art and ZRG-X logo come from this website. They are technical data
@@ -32,6 +32,8 @@ The user confirmed on 16 October 2026:
 | AOB 235.pdf | OCTA-BOOST | 1 page |
 | C6 OCTANE BOOSTER.pdf | OCTA-SHOT (one shot) | 1 page |
 | DIESEL PERFORMANCE IMPROVER.pdf | OCTA-TORQUE, the site's diesel improver | 2 pages |
+| ETHANOL.pdf (17 Oct 2026) | OCTA-X Ethanol 96% | 1 page |
+| METHANOL.pdf (17 Oct 2026) | OCTA-M Methanol | 1 page |
 
 The first two mappings were explicitly confirmed. The diesel mapping follows
 the existing product catalogue. The user also confirmed that the supplied
@@ -50,10 +52,17 @@ Company registration 2026/667453/07 was read from the supplied FNB account
 confirmation. That confidential letter is not published or embedded in the
 technical sheets. The public outputs contain no banking information.
 
-ETHANOL.pdf and METHANOL.pdf were referenced but not supplied at the named
-Downloads location. No technical sheet or safety classification was invented
-for those products. Supply the matching documents to create OCTA-X and OCTA-M
-editions. Approved current SDS documents are a separate requirement before
+ETHANOL.pdf and METHANOL.pdf (supplier specification sheets) were supplied on
+17 October 2026 and became the OCTA-X and OCTA-M editions. Every property,
+unit, limit and footnote was kept. Editorial changes: the typo "Ethylol
+alcoholof" became "Ethyl alcohol of"; the methanol sheet's supplier-internal
+method codes (SASOL 1074, 2000, 3041, 5043, 3144, 2023) were reduced to the
+ASTM / GC methods they reference; the supplier's quality-assurance statement
+and disclaimer were kept in plain wording. Hazard lines repeat the UN numbers
+already on the product labels (UN 1170, UN 1230). These sheets have no benefits
+list because the sources have none. Note that the methanol specification is
+99.9 mass % while the website and label call the product "Methanol 100%".
+Approved current SDS documents are a separate requirement before
 handling/supplying the chemicals; a TDS is not a substitute.
 
 ## Editing and rebuilding

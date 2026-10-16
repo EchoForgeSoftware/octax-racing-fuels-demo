@@ -6,6 +6,7 @@ export const technicalSheets = sheets.map((sheet) => ({
   category: sheet.category,
   description: sheet.description,
   dosage: sheet.dosage,
+  summary: sheet.summary,
   edition: sheet.edition,
   pages: sheet.pages,
   pdf: `/data-sheets/${sheet.slug}-technical-data-sheet.pdf`,

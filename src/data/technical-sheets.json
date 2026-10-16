@@ -1,18 +1,187 @@
 [
   {
+    "slug": "octa-x-ethanol",
+    "pages": 1,
+    "name": "OCTA-X",
+    "category": "Ethanol 96%",
+    "strapline": "Ethyl alcohol, 96% mass purity",
+    "description": "Ethyl alcohol of 96% mass purity, containing isopropanol as denaturant.",
+    "benefits": [],
+    "tableTitle": "Specification",
+    "columns": [
+      "Property",
+      "Unit",
+      "Limit",
+      "Test method"
+    ],
+    "rows": [
+      [
+        "Appearance",
+        "-",
+        "Clear and bright",
+        "ASTM E2680"
+      ],
+      [
+        "Colour",
+        "Pt-Co",
+        "5 max",
+        "ASTM D1209 / ASTM D5386"
+      ],
+      [
+        "Water",
+        "Mass %",
+        "0.4 max",
+        "ASTM E1364"
+      ],
+      [
+        "Ethanol",
+        "Mass %",
+        "96.0 min",
+        "GC"
+      ],
+      [
+        "Isopropanol",
+        "Mass %",
+        "5 max",
+        "GC"
+      ],
+      [
+        "n-Propanol",
+        "Mass %",
+        "0.10 max",
+        "GC"
+      ],
+      [
+        "Acidity as acetic acid",
+        "Mass %",
+        "0.01 max",
+        "ASTM D1613"
+      ],
+      [
+        "Carbonyls as methyl ethyl ketone",
+        "Mass %",
+        "0.40 max",
+        "GC"
+      ]
+    ],
+    "notes": [
+      "GC = gas chromatography. Limits are reproduced from the supplied technical data sheet; no additional test certification is implied.",
+      "Highly flammable liquid: UN 1170, Class 3, as shown on the product label. Consult the current SDS before handling, storage or transport."
+    ],
+    "dosage": "Use as supplied for performance use.",
+    "summary": "Product profile and full specification with test methods.",
+    "edition": "2026-10-17"
+  },
+  {
+    "slug": "octa-m-methanol",
+    "pages": 1,
+    "name": "OCTA-M",
+    "category": "Methanol",
+    "strapline": "Methanol, 99.90 mass % purity",
+    "description": "Methanol of 99.90 mass % purity.",
+    "benefits": [],
+    "tableTitle": "Specification",
+    "columns": [
+      "Property",
+      "Unit",
+      "Limit",
+      "Test method"
+    ],
+    "rows": [
+      [
+        "Appearance",
+        "-",
+        "Clear and bright",
+        "ASTM E2680"
+      ],
+      [
+        "Colour",
+        "Pt-Co",
+        "5 max",
+        "ASTM D1209 / ASTM D5386"
+      ],
+      [
+        "Water",
+        "Mass %",
+        "0.10 max",
+        "ASTM E1364"
+      ],
+      [
+        "Methanol",
+        "Mass %",
+        "99.9",
+        "GC"
+      ],
+      [
+        "Acid as formic acid*",
+        "mg/kg",
+        "30 max",
+        "ASTM D1613"
+      ],
+      [
+        "Miscibility with water**",
+        "-",
+        "No opalescence",
+        "ASTM D1722"
+      ]
+    ],
+    "notes": [
+      "*Nitrogen bubbled through the sample for 2 min before titration. **10 mL to 90 mL at 20°C. GC = gas chromatography. Specification revision: 5 July 2020.",
+      "Sales specification values are continuously checked, documented and stored within the scope of quality assurance. Further properties are informational only and are not checked regularly; if the sales specification is complied with, further properties and typical data can generally be assumed to conform.",
+      "The product contains no plant or animal products. It is the customer's responsibility to determine that their use of the product is safe, lawful and technically suitable for the intended application.",
+      "Toxic and highly flammable liquid: UN 1230, Class 3, as shown on the product label. Consult the current SDS before handling, storage or transport."
+    ],
+    "dosage": "Use as supplied for performance use.",
+    "summary": "Product profile and full specification with test methods.",
+    "edition": "2026-10-17"
+  },
+  {
     "slug": "octa-boost",
     "pages": 1,
     "name": "OCTA-BOOST",
     "category": "Octane booster",
     "strapline": "For 95 octane petrol",
     "description": "Solvent based octane improver.",
-    "benefits": ["Increase octane value", "No detrimental effect on fuel system", "Increase performance substantially"],
+    "benefits": [
+      "Increase octane value",
+      "No detrimental effect on fuel system",
+      "Increase performance substantially"
+    ],
     "tableTitle": "Recommended dosage / octane increase",
-    "columns": ["OCTA-BOOST", "95 octane petrol", "Reported increase*"],
-    "rows": [["5 L", "30 L", "8"], ["5 L", "25 L", "9"], ["5 L", "20 L", "11"], ["5 L", "15 L", "25"]],
-    "notes": ["*Octane-increase values are reproduced as supplied. The technical source does not state the test method or units for the increase.", "The petrol volume is the base fuel volume before the additive is added. Use only with 95 octane petrol as specified in the supplied table."],
+    "columns": [
+      "OCTA-BOOST",
+      "95 octane petrol",
+      "Reported increase*"
+    ],
+    "rows": [
+      [
+        "5 L",
+        "30 L",
+        "8"
+      ],
+      [
+        "5 L",
+        "25 L",
+        "9"
+      ],
+      [
+        "5 L",
+        "20 L",
+        "11"
+      ],
+      [
+        "5 L",
+        "15 L",
+        "25"
+      ]
+    ],
+    "notes": [
+      "*Octane-increase values are reproduced as supplied. The technical source does not state the test method or units for the increase.",
+      "The petrol volume is the base fuel volume before the additive is added. Use only with 95 octane petrol as specified in the supplied table."
+    ],
     "dosage": "5 L per 15-30 L of 95 octane petrol; see the table.",
-    "edition": "2026-10-16"
+    "edition": "2026-10-16",
+    "summary": "Product profile, benefits and a clear dosage table."
   },
   {
     "slug": "octa-shot",
@@ -21,13 +190,51 @@
     "category": "Fuel octane booster",
     "strapline": "500 mL / unleaded petrol",
     "description": "Solvent based octane improver and emission reducer for unleaded gasoline.",
-    "benefits": ["Increase octane value", "Reduce emissions due to cleaner burning of fuel", "Provides wear protection for older vehicles and maintains modern vehicle emission systems at optimum performance"],
+    "benefits": [
+      "Increase octane value",
+      "Reduce emissions due to cleaner burning of fuel",
+      "Provides wear protection for older vehicles and maintains modern vehicle emission systems at optimum performance"
+    ],
     "tableTitle": "Recommended dosage / octane increase",
-    "columns": ["OCTA-SHOT", "Petrol volume", "93 fuel*", "95 fuel*"],
-    "rows": [["500 mL", "250 L", "2", "1"], ["500 mL", "200 L", "4", "2"], ["500 mL", "100 L", "5", "2.5"], ["500 mL", "50 L", "6.5", "3"]],
-    "notes": ["*The 93 and 95 columns show the reported octane increase for the respective base fuels. The technical source does not state the test method or units for the increase.", "The petrol volume is the base fuel volume before the additive is added."],
+    "columns": [
+      "OCTA-SHOT",
+      "Petrol volume",
+      "93 fuel*",
+      "95 fuel*"
+    ],
+    "rows": [
+      [
+        "500 mL",
+        "250 L",
+        "2",
+        "1"
+      ],
+      [
+        "500 mL",
+        "200 L",
+        "4",
+        "2"
+      ],
+      [
+        "500 mL",
+        "100 L",
+        "5",
+        "2.5"
+      ],
+      [
+        "500 mL",
+        "50 L",
+        "6.5",
+        "3"
+      ]
+    ],
+    "notes": [
+      "*The 93 and 95 columns show the reported octane increase for the respective base fuels. The technical source does not state the test method or units for the increase.",
+      "The petrol volume is the base fuel volume before the additive is added."
+    ],
     "dosage": "500 mL per 50-250 L of petrol; see the table.",
-    "edition": "2026-10-16"
+    "edition": "2026-10-16",
+    "summary": "Product profile, benefits and a clear dosage table."
   },
   {
     "slug": "octa-torque",
@@ -49,24 +256,97 @@
       "Faster fuel fill up and reduced forecourt spillage"
     ],
     "tableTitle": "Technical properties",
-    "columns": ["Property", "Unit", "Test method", "Value"],
-    "rows": [
-      ["Density at 20°C", "kg/L", "ASTM D 1298", "0.84"],
-      ["Viscosity at 40°C", "cSt", "ASTM D 445", "14"],
-      ["Viscosity at 100°C", "cSt", "ASTM D 445", "2.9"],
-      ["Viscosity index", "-", "ASTM D 2270", "97"],
-      ["Pour point", "°C", "ASTM D 97", "-15"],
-      ["Flash point (COC)", "°C", "ASTM D 92", "150"],
-      ["Flash point (PMCC)", "°C", "ASTM D 93", "168"],
-      ["Fire point", "°C", "ASTM D 92", "170"],
-      ["Colour", "-", "ASTM D 1500", "L4.0"],
-      ["Sulphated ash", "% mass", "ASTM D 874", "0.61"],
-      ["T.A.N.", "mgKOH/g", "ASTM D 664", "<2.0"],
-      ["Foaming tendency", "mL", "ASTM D 892", "0/0"],
-      ["Foam stability", "mL", "ASTM D 892", "0/0/0"]
+    "columns": [
+      "Property",
+      "Unit",
+      "Test method",
+      "Value"
     ],
-    "notes": ["Technical properties and performance statements are reproduced from the supplied technical information. No additional test certification or independent verification is implied."],
+    "rows": [
+      [
+        "Density at 20°C",
+        "kg/L",
+        "ASTM D 1298",
+        "0.84"
+      ],
+      [
+        "Viscosity at 40°C",
+        "cSt",
+        "ASTM D 445",
+        "14"
+      ],
+      [
+        "Viscosity at 100°C",
+        "cSt",
+        "ASTM D 445",
+        "2.9"
+      ],
+      [
+        "Viscosity index",
+        "-",
+        "ASTM D 2270",
+        "97"
+      ],
+      [
+        "Pour point",
+        "°C",
+        "ASTM D 97",
+        "-15"
+      ],
+      [
+        "Flash point (COC)",
+        "°C",
+        "ASTM D 92",
+        "150"
+      ],
+      [
+        "Flash point (PMCC)",
+        "°C",
+        "ASTM D 93",
+        "168"
+      ],
+      [
+        "Fire point",
+        "°C",
+        "ASTM D 92",
+        "170"
+      ],
+      [
+        "Colour",
+        "-",
+        "ASTM D 1500",
+        "L4.0"
+      ],
+      [
+        "Sulphated ash",
+        "% mass",
+        "ASTM D 874",
+        "0.61"
+      ],
+      [
+        "T.A.N.",
+        "mgKOH/g",
+        "ASTM D 664",
+        "<2.0"
+      ],
+      [
+        "Foaming tendency",
+        "mL",
+        "ASTM D 892",
+        "0/0"
+      ],
+      [
+        "Foam stability",
+        "mL",
+        "ASTM D 892",
+        "0/0/0"
+      ]
+    ],
+    "notes": [
+      "Technical properties and performance statements are reproduced from the supplied technical information. No additional test certification or independent verification is implied."
+    ],
     "dosage": "0.50% / 5 L per 1000 L of diesel",
-    "edition": "2026-10-16"
+    "edition": "2026-10-16",
+    "summary": "Properties, test methods, application and dosage."
   }
 ]
