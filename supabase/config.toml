@@ -1,0 +1,11 @@
+[functions.ozow-checkout]
+# Guests are supported; the function verifies signed-in bearer tokens itself.
+verify_jwt = false
+
+[functions.reseller-application]
+# Public application endpoint; CAPTCHA, origin checks, bounded inputs and limits.
+verify_jwt = false
+
+[functions.ozow-webhook]
+# Ozow authenticates with Svix signatures, not a Supabase JWT.
+verify_jwt = false

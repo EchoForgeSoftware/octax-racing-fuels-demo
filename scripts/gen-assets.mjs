@@ -13,13 +13,17 @@ mkdirSync(ogDir, { recursive: true });
 const PAPER = "#f2efe6";
 const INK = "#191817";
 const LIME = "#c6f24e";
-const FLARE = "#e8451f";
+const FLARE = "#d52200"; // matches --color-flare
 
+// Favicon: the red rounded-square O from the OCTA wordmark (keep in sync with src/app/icon.svg).
 const iconSvg = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="${size}" height="${size}">
-  <rect width="48" height="48" rx="6" fill="${LIME}"/>
-  <path d="M16 15 L25 24 L16 33 M32 15 L23 24 L32 33" fill="none" stroke="${INK}" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect width="48" height="48" rx="8" fill="${PAPER}"/>
+  <path transform="translate(6 6.5) scale(0.5)" fill-rule="evenodd" fill="${FLARE}" d="M18 0 H54 Q72 0 72 18 V52 Q72 70 54 70 H18 Q0 70 0 52 V18 Q0 0 18 0 Z M24 18 Q18 18 18 24 V46 Q18 52 24 52 H48 Q54 52 54 46 V24 Q54 18 48 18 Z"/>
 </svg>`;
+
+// OCTA letterforms, mirrored from src/components/brand/Wordmark.tsx.
+const letters = `<path fill-rule="evenodd" fill="${FLARE}" d="M18 0 H54 Q72 0 72 18 V52 Q72 70 54 70 H18 Q0 70 0 52 V18 Q0 0 18 0 Z M24 18 Q18 18 18 24 V46 Q18 52 24 52 H48 Q54 52 54 46 V24 Q54 18 48 18 Z"/><path fill="${INK}" d="M142 0 H96 Q80 0 80 16 V54 Q80 70 96 70 H142 V52 H104 Q98 52 98 46 V24 Q98 18 104 18 H142 Z"/><path fill="${INK}" d="M148 0 H206 V18 H186 V70 H168 V18 H148 Z"/><path fill="${INK}" d="M208 70 L245 0 L282 70 Z"/><path fill="${PAPER}" d="M224 70 L245 30 L266 70 Z"/><path fill="${INK}" d="M235 70 L245 51 L255 70 Z"/>`;
 
 const stripe = Array.from({ length: 60 }, (_, i) => {
   const x = i * 28 - 200;
@@ -31,14 +35,11 @@ const ogSvg = `
   <rect width="1200" height="630" fill="${PAPER}"/>
   <g>${stripe}</g>
   <rect x="0" y="584" width="1200" height="46" fill="${LIME}"/>
-  <text x="72" y="150" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="${INK}">RACE FUELS // METHANOL // ETHANOL</text>
-  <text x="68" y="300" font-family="Arial Black, Arial, sans-serif" font-size="128" font-weight="900" fill="${INK}">OCTAX</text>
-  <text x="72" y="410" font-family="Arial Black, Arial, sans-serif" font-size="96" font-weight="900" fill="${INK}">RACING <tspan fill="${FLARE}">FUELS</tspan></text>
-  <text x="72" y="500" font-family="Arial, sans-serif" font-size="30" fill="${INK}">High-octane fuel, engineered for the grid.</text>
-  <g transform="translate(940 96)">
-    <rect x="0" y="0" width="180" height="52" fill="${FLARE}"/>
-    <text x="90" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="4" fill="${PAPER}">DEMO</text>
-  </g>
+  <text x="72" y="124" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="6" fill="${INK}">OCTA-X // OCTA-M // OCTA-BOOST</text>
+  <text x="336" y="372" font-family="Arial Black, Arial, sans-serif" font-size="250" font-weight="900" fill="${LIME}">X</text>
+  <g transform="translate(72 190) scale(1.55)">${letters}</g>
+  <text x="76" y="380" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="15" fill="${INK}">PERFORMANCE</text>
+  <text x="72" y="490" font-family="Arial Black, Arial, sans-serif" font-size="64" font-style="italic" font-weight="900" fill="${INK}">FUEL THE ADDICTION</text>
 </svg>`;
 
 async function main() {

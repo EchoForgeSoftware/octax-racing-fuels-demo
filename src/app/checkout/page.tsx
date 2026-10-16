@@ -6,7 +6,8 @@ import { buildMetadata } from "@/lib/metadata";
 export const metadata: Metadata = buildMetadata({
   path: "/checkout/",
   title: "Checkout",
-  description: "Enter delivery details to place your Octax Racing Fuels order. Demo checkout, no payment is taken.",
+  noindex: true,
+  description: "Enter delivery details to place your OCTA Performance order.",
 });
 
 const trail = [

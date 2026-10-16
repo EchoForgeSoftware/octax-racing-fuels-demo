@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { Archivo, Archivo_Black, Space_Mono } from "next/font/google";
+import { Archivo, Archivo_Black, Barlow_Condensed, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
+import { SiteChrome } from "@/components/SiteChrome";
 import { Footer } from "@/components/Footer";
-import { DemoBanner } from "@/components/DemoBanner";
 import { BackToTop } from "@/components/BackToTop";
 import { CartToast } from "@/components/CartToast";
 import { JsonLd } from "@/components/JsonLd";
@@ -21,6 +21,15 @@ const display = Archivo_Black({
 const sans = Archivo({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+// Condensed face for the product labels ("FUEL THE ADDICTION", UN lines, mix table).
+const label = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-label",
   display: "swap",
 });
 
@@ -59,17 +68,20 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${label.variable} ${mono.variable}`}
     >
       <body className="flex min-h-screen flex-col">
+        <a href="#main-content" className="sr-only z-[100] bg-lime p-3 text-ink focus:not-sr-only focus:fixed focus:left-4 focus:top-4">Skip to content</a>
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <Providers>
-          <DemoBanner />
-          <Nav />
-          <main className="flex-1">{children}</main>
-          <Footer />
-          <BackToTop />
-          <CartToast />
+          <SiteChrome><Nav /></SiteChrome>
+          {/* Bottom gap before the footer, dropped when a page ends on a full-bleed band. */}
+          <main id="main-content" tabIndex={-1} className="flex-1 pb-24 has-[[data-flush-footer]]:pb-0">{children}</main>
+          <SiteChrome>
+            <Footer />
+            <BackToTop />
+            <CartToast />
+          </SiteChrome>
         </Providers>
       </body>
     </html>

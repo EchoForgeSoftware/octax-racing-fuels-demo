@@ -1,17 +1,19 @@
-import { SITE, SITE_URL, absoluteUrl } from "./site";
+import { SITE, SITE_URL, absoluteUrl, hasContactEmail, hasContactPhone } from "./site";
 import type { Product } from "./products";
-import { fromPrice, totalStock } from "./products";
 
-const logoUrl = absoluteUrl("/og/default.png");
+const logoUrl = absoluteUrl("/og/logo.png");
 
 export function organizationSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE.name,
+    legalName: SITE.legalName,
     url: SITE_URL,
     logo: logoUrl,
-    email: SITE.email,
+    ...(hasContactEmail ? { email: SITE.email } : {}),
+    ...(hasContactPhone ? { telephone: SITE.phoneHref } : {}),
+    ...(SITE.registrationNumber ? { identifier: SITE.registrationNumber } : {}),
     description: SITE.description,
     sameAs: [],
   };
@@ -41,25 +43,26 @@ export function breadcrumbSchema(trail: { name: string; path: string }[]) {
 }
 
 export function productSchema(product: Product) {
-  const price = fromPrice(product);
-  const inStock = totalStock(product) > 0;
+  const url = absoluteUrl(`/shop/${product.slug}/`);
   return {
     "@context": "https://schema.org",
     "@type": "Product",
     name: product.name,
     description: product.description,
-    sku: product.variants[0]?.sku,
+    url,
     brand: { "@type": "Brand", name: SITE.name },
-    image: logoUrl,
-    offers: {
-      "@type": "AggregateOffer",
+    image: [absoluteUrl(`/products/${product.slug}.png`)],
+    offers: product.variants.filter((variant) => variant.price !== null).map((variant) => ({
+      "@type": "Offer",
+      name: `${product.name} ${variant.size}`,
+      sku: variant.sku,
       priceCurrency: SITE.currency,
-      lowPrice: price,
-      offerCount: product.variants.length,
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
-      url: absoluteUrl(`/shop/${product.slug}/`),
-    },
+      price: variant.price!.toFixed(2),
+      // No stock on hand: orders are taken and fulfilled to order.
+      availability: "https://schema.org/BackOrder",
+      itemCondition: "https://schema.org/NewCondition",
+      url,
+      seller: { "@type": "Organization", name: SITE.name },
+    })),
   };
 }

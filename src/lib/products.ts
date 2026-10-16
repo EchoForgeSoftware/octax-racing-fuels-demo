@@ -1,5 +1,7 @@
-// Sample catalogue for the demo. All products, prices and stock are illustrative
-// sample data, not a real price list.
+// OCTA Performance catalogue. Product names, UN numbers, hazard classes, mix
+// ratios and label wording come from the supplied product labels. Prices and
+// pack sizes come from the supplied price list (ZAR, VAT included, courier
+// excluded). No stock is held on hand, so stock is not tracked.
 
 export type Category = {
   slug: string;
@@ -10,8 +12,34 @@ export type Category = {
 export type Variant = {
   size: string;
   sku: string;
-  price: number; // in ZAR
-  stock: number;
+  /** ZAR, VAT included, courier excluded. null = subject to quotation. */
+  price: number | null;
+};
+
+export type Pictogram = "flame" | "goggles" | "gloves" | "respirator" | "no-flame";
+
+/** Everything printed on the product label, as supplied. */
+export type ProductLabel = {
+  /** "wide" is the 2:3 can label (OCTA-X, OCTA-M); "tall" the 9:16 jug and bottle label. */
+  layout: "wide" | "tall";
+  /** Lime mark after the OCTA wordmark: a letter (X, M) or a word (BOOST). */
+  mark: string;
+  /** Product name printed large, with an optional lime highlight (e.g. "96%"). */
+  title: string;
+  highlight?: string;
+  /** Left off where the product's dangerous-goods data has not been supplied yet. */
+  un?: string;
+  hazardClass?: string;
+  /** Whether the UN line sits above the product name (OCTA-X) or below it (OCTA-M). */
+  unPlacement: "above" | "below";
+  /** Show the alcohol chain doodle next to the mark. */
+  chain: boolean;
+  pictograms: Pictogram[];
+  disclaimer: string;
+  /** Mixing instructions (OCTA-BOOST). */
+  mix?: { lead: string; rows: { ratio: string; text: string }[] };
+  /** Short descriptor lines for tall labels without a mix table. */
+  lines?: string[];
 };
 
 export type Product = {
@@ -24,223 +52,263 @@ export type Product = {
   applications: string[];
   featured?: boolean;
   variants: Variant[];
+  label: ProductLabel;
 };
 
 export const categories: Category[] = [
   {
-    slug: "race-fuels",
-    name: "Race Fuels",
-    blurb:
-      "High-octane leaded and unleaded competition fuels blended for consistent power and detonation resistance.",
+    slug: "ethanol",
+    name: "Ethanol",
+    blurb: "OCTA-X: 96% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
   },
   {
     slug: "methanol",
     name: "Methanol",
-    blurb:
-      "High-purity methanol for methanol-burning engines, top fuel classes and speedway applications.",
-  },
-  {
-    slug: "ethanol",
-    name: "Ethanol",
-    blurb:
-      "Anhydrous ethanol and E85 blends for flex-fuel builds chasing cool intake charges and more timing.",
+    blurb: "OCTA-M: 100% methanol in its purest form for methanol-burning performance engines.",
   },
   {
     slug: "additives",
-    name: "Additives",
-    blurb:
-      "Octane boosters, upper-cylinder lubricants and fuel-system treatments to protect and sharpen your setup.",
+    name: "Fuel additives",
+    blurb: "OCTA-BOOST and OCTA-SHOT octane boosters, and OCTA-TORQUE diesel improver.",
   },
 ];
 
+/**
+ * Products announced but not yet on sale: shown as "coming soon" until the
+ * business supplies data sheets and prices. Prices are then set in the back
+ * office (Products & pricing), which switches them live.
+ */
+export type UpcomingProduct = {
+  key: string;
+  name: string;
+  line: string;
+  group: "fuel" | "track" | "merch" | "detailing";
+  description: string;
+  priceNote: string;
+  variants: { sku: string; size: string }[];
+};
+
+export const comingSoon: UpcomingProduct[] = [
+  {
+    key: "octa-fuel",
+    name: "OCTA-FUEL",
+    line: "Racing fuel",
+    group: "fuel",
+    description: "Racing fuel in 102, 105, 110 and 120 octane.",
+    priceNote: "Priced per litre · quotation on request",
+    variants: ["102", "105", "110", "120"].map((o) => ({ sku: `OCTA-FUEL-${o}`, size: `${o} octane (per litre)` })),
+  },
+  {
+    key: "octa-a",
+    name: "OCTA-A",
+    line: "Avgas",
+    group: "fuel",
+    description: "Aviation gasoline.",
+    priceNote: "Priced per litre · quotation on request",
+    variants: [{ sku: "OCTA-A-L", size: "Per litre" }],
+  },
+  {
+    key: "octa-n",
+    name: "OCTA-N",
+    line: "Nitro methane",
+    group: "fuel",
+    description: "Nitromethane in 5L, 25L and 210L.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-N-5", size: "5L" }, { sku: "OCTA-N-25", size: "25L" }, { sku: "OCTA-N-210", size: "210L plastic drum" }],
+  },
+  {
+    key: "octa-t",
+    name: "OCTA-T",
+    line: "Track Bite",
+    group: "track",
+    description: "Track bite in 5L and 25L.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-T-5", size: "5L" }, { sku: "OCTA-T-25", size: "25L" }],
+  },
+  {
+    key: "octa-detailing",
+    name: "OCTA Detailing",
+    line: "Detailing products",
+    group: "detailing",
+    description: "pH soaps, polishes and more.",
+    priceNote: "Coming later",
+    variants: [{ sku: "OCTA-DETAIL-SOAP", size: "pH soap" }, { sku: "OCTA-DETAIL-POLISH", size: "Polish" }],
+  },
+  {
+    key: "octa-merch",
+    name: "OCTA Merch",
+    line: "Merchandise",
+    group: "merch",
+    description: "Hoodies, hats, shirts and more.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-MERCH-HOODIE", size: "Hoodie" }, { sku: "OCTA-MERCH-HAT", size: "Hat" }, { sku: "OCTA-MERCH-SHIRT", size: "Shirt" }],
+  },
+];
+
+const PPE: Pictogram[] = ["flame", "goggles", "gloves", "respirator"];
+
 export const products: Product[] = [
   {
-    slug: "rf102-unleaded",
-    name: "Octax RF102 Unleaded Race Fuel",
-    category: "race-fuels",
-    short: "102 RON unleaded for modern high-compression and boosted engines.",
-    description:
-      "RF102 is an ash-free unleaded competition fuel for engines with catalytic converters, oxygen sensors and modern engine management. It resists detonation under boost while staying friendly to sensors and emissions hardware, making it a safe upgrade over pump premium for track days and club racing.",
-    specs: [
-      { label: "Octane (RON)", value: "102" },
-      { label: "Lead", value: "Unleaded" },
-      { label: "Oxygen content", value: "2.7%" },
-      { label: "Colour", value: "Clear" },
-    ],
-    applications: ["Track days", "Turbo and supercharged", "Sensor-equipped engines"],
-    featured: true,
-    variants: [
-      { size: "20L", sku: "OX-RF102-20", price: 1290, stock: 42 },
-      { size: "200L drum", sku: "OX-RF102-200", price: 11900, stock: 6 },
-    ],
-  },
-  {
-    slug: "rf110-leaded",
-    name: "Octax RF110 Leaded Race Fuel",
-    category: "race-fuels",
-    short: "110 RON leaded all-rounder for naturally aspirated and mild boost.",
-    description:
-      "RF110 is a leaded competition fuel that suits a wide spread of high-compression naturally aspirated engines and moderately boosted setups. The lead package cushions valve seats and lifts detonation resistance for aggressive timing without exotic tuning.",
-    specs: [
-      { label: "Octane (RON)", value: "110" },
-      { label: "Lead", value: "Leaded" },
-      { label: "Oxygen content", value: "0%" },
-      { label: "Colour", value: "Green" },
-    ],
-    applications: ["Circuit racing", "Naturally aspirated", "Mild boost"],
-    featured: true,
-    variants: [
-      { size: "20L", sku: "OX-RF110-20", price: 1490, stock: 55 },
-      { size: "200L drum", sku: "OX-RF110-200", price: 13800, stock: 9 },
-    ],
-  },
-  {
-    slug: "rf118-drag",
-    name: "Octax RF118 Leaded Drag Fuel",
-    category: "race-fuels",
-    short: "118 RON leaded fuel for high-boost and big-compression drag builds.",
-    description:
-      "RF118 is a high-lead, high-octane drag and pull fuel for engines running extreme cylinder pressure. It gives maximum detonation protection for large power adders and aggressive tune-ups on the strip.",
-    specs: [
-      { label: "Octane (RON)", value: "118" },
-      { label: "Lead", value: "High lead" },
-      { label: "Oxygen content", value: "0%" },
-      { label: "Colour", value: "Purple" },
-    ],
-    applications: ["Drag racing", "High boost", "Nitrous"],
-    variants: [
-      { size: "20L", sku: "OX-RF118-20", price: 1790, stock: 28 },
-      { size: "200L drum", sku: "OX-RF118-200", price: 16900, stock: 4 },
-    ],
-  },
-  {
-    slug: "e85-oxygenated",
-    name: "Octax E85 Oxygenated Race Fuel",
+    slug: "octa-x-ethanol",
+    name: "OCTA-X Ethanol 96%",
     category: "ethanol",
-    short: "Consistent 85% ethanol blend for flex-fuel and dedicated E85 builds.",
+    short: "96% ethanol in its purest form for performance use.",
     description:
-      "Unlike pump E85, Octax E85 holds a consistent ethanol percentage batch to batch, so your tune stays honest. The high latent heat drops intake temperatures and lets you run more timing and boost on the right hardware.",
+      "OCTA-X is ethanol in its purest form for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
-      { label: "Ethanol content", value: "85% (consistent)" },
-      { label: "Octane (RON)", value: "108 equivalent" },
-      { label: "Oxygen content", value: "29.8%" },
-      { label: "Colour", value: "Clear" },
+      { label: "Ethanol", value: "96%" },
+      { label: "UN number", value: "UN 1170" },
+      { label: "Hazard class", value: "Class 3, flammable liquid" },
+      { label: "Traceability", value: "MFD date and batch on every pack" },
     ],
-    applications: ["Flex fuel", "Turbo and supercharged", "Dyno tuning"],
+    applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
     featured: true,
     variants: [
-      { size: "20L", sku: "OX-E85-20", price: 690, stock: 80 },
-      { size: "200L drum", sku: "OX-E85-200", price: 6200, stock: 12 },
+      { size: "25L", sku: "OCTA-X-25", price: 760 },
+      { size: "210L plastic drum", sku: "OCTA-X-210", price: 6160 },
     ],
+    label: {
+      layout: "wide",
+      mark: "X",
+      title: "ETHANOL",
+      highlight: "96%",
+      un: "UN 1170",
+      hazardClass: "CLASS 3",
+      unPlacement: "above",
+      chain: true,
+      pictograms: PPE,
+      disclaimer:
+        "OCTA-X IS ETHANOL IN ITS PUREST FORM FOR PERFORMANCE USE. USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM ITS USE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+    },
   },
   {
-    slug: "ethanol-e100",
-    name: "Octax Anhydrous Ethanol E100",
-    category: "ethanol",
-    short: "99.9% anhydrous ethanol for blending and dedicated ethanol engines.",
-    description:
-      "Anhydrous (water-free) ethanol for teams that blend their own fuel or run dedicated E100 setups. Supplied at 99.9% purity so your target ethanol percentage is repeatable.",
-    specs: [
-      { label: "Purity", value: "99.9% anhydrous" },
-      { label: "Water content", value: "< 0.1%" },
-      { label: "Colour", value: "Clear" },
-      { label: "Handling", value: "Flammable" },
-    ],
-    applications: ["Fuel blending", "Dedicated ethanol", "Speedway"],
-    variants: [
-      { size: "25L", sku: "OX-E100-25", price: 990, stock: 34 },
-      { size: "200L drum", sku: "OX-E100-200", price: 7400, stock: 7 },
-    ],
-  },
-  {
-    slug: "methanol-pure",
-    name: "Octax Pure Methanol 99.9%",
+    slug: "octa-m-methanol",
+    name: "OCTA-M Methanol 100%",
     category: "methanol",
-    short: "High-purity methanol for methanol-burning race engines.",
+    short: "100% methanol in its purest form for performance use.",
     description:
-      "Race-grade methanol at 99.9% purity for sprint cars, speedway, top fuel classes and methanol drag engines. Consistent purity protects your tune and keeps corrosion in check when the system is maintained correctly.",
+      "OCTA-M is methanol in its purest form for performance use, for methanol-burning engines. Methanol is flammable and toxic: handle it with eye protection, gloves and a respirator, keep it away from open flame, and use it only in a fuel system built for methanol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
-      { label: "Purity", value: "99.9%" },
-      { label: "Water content", value: "< 0.1%" },
-      { label: "Colour", value: "Clear" },
-      { label: "Handling", value: "Toxic, flammable" },
+      { label: "Methanol", value: "100%" },
+      { label: "UN number", value: "UN 1230" },
+      { label: "Hazard class", value: "Class 3, flammable liquid" },
+      { label: "Traceability", value: "MFD date and batch on every pack" },
     ],
-    applications: ["Speedway", "Sprint cars", "Methanol drag"],
+    applications: ["Methanol-burning engines", "Performance use"],
     featured: true,
     variants: [
-      { size: "25L", sku: "OX-METH-25", price: 640, stock: 60 },
-      { size: "200L drum", sku: "OX-METH-200", price: 4800, stock: 15 },
+      { size: "25L", sku: "OCTA-M-25", price: 600 },
+      { size: "210L plastic drum", sku: "OCTA-M-210", price: 5500 },
     ],
+    label: {
+      layout: "wide",
+      mark: "M",
+      title: "METHANOL",
+      highlight: "100%",
+      un: "UN 1230",
+      hazardClass: "CLASS 3",
+      unPlacement: "below",
+      chain: true,
+      pictograms: [...PPE, "no-flame"],
+      disclaimer:
+        "OCTA-M IS METHANOL IN ITS PUREST FORM FOR PERFORMANCE USE. USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+    },
   },
   {
-    slug: "octane-booster",
-    name: "Octax Octane Booster Concentrate",
+    slug: "octa-boost",
+    name: "OCTA-BOOST Octane Booster",
     category: "additives",
-    short: "Concentrated booster to lift pump fuel a few points for spirited runs.",
+    short: "Octane booster for 95 octane pump fuel, with doses of 5L per 15-30L of base fuel.",
     description:
-      "A concentrated octane booster for lifting pump premium a few points when race fuel is not on hand. Dose per the label for the octane gain you need on the day.",
+      "OCTA-BOOST is an octane booster for performance use. Mix it only with 95 octane pump fuel. The technical sheet specifies 5L per 30L, 25L, 20L or 15L of base fuel (ratios of 1:6, 1:5, 1:4 or 1:3). Consult the full dosage table and re-check your tune whenever you change the mix.",
     specs: [
-      { label: "Treats", value: "Up to 60L per litre" },
-      { label: "Octane gain", value: "Up to 5 points" },
-      { label: "Form", value: "Liquid concentrate" },
-      { label: "Lead", value: "Unleaded" },
+      { label: "Mix with", value: "95 octane pump fuel only" },
+      { label: "Dose", value: "5L per 30L / 25L / 20L / 15L of 95 octane petrol" },
+      { label: "UN number", value: "UN 1170" },
+      { label: "Hazard class", value: "Class 3, flammable liquid" },
     ],
-    applications: ["Track days", "Street and strip", "Top-up"],
+    applications: ["95 octane pump fuel", "Performance use"],
+    featured: true,
+    // 5L HDPE jug; the 20L can is priced on quotation.
     variants: [
-      { size: "1L", sku: "OX-OB-1", price: 320, stock: 120 },
-      { size: "5L", sku: "OX-OB-5", price: 1390, stock: 40 },
+      { size: "5L", sku: "OCTA-BOOST-5", price: 440 },
+      { size: "20L", sku: "OCTA-BOOST-20", price: null },
     ],
+    label: {
+      layout: "tall",
+      mark: "BOOST",
+      title: "OCTANE",
+      highlight: "BOOSTER",
+      un: "UN 1170",
+      hazardClass: "CLASS 3",
+      unPlacement: "below",
+      chain: false,
+      pictograms: PPE,
+      disclaimer:
+        "USE AT OWN RISK. OCTA-BOOST IS FOR PERFORMANCE USE ONLY. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE OF OCTA-BOOST, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+      mix: {
+        lead: "MIX ONLY WITH 95 OCTANE PUMP FUEL",
+        rows: [
+          { ratio: "1:6", text: "5L / 30L FUEL" },
+          { ratio: "1:5", text: "5L / 25L FUEL" },
+          { ratio: "1:4", text: "5L / 20L FUEL" },
+          { ratio: "1:3", text: "5L / 15L FUEL" },
+        ],
+      },
+    },
   },
   {
-    slug: "upper-cylinder-lube",
-    name: "Octax Upper Cylinder Lubricant",
+    slug: "octa-shot",
+    name: "OCTA-SHOT Fuel Octane Booster",
     category: "additives",
-    short: "Lubricity additive for methanol and high-ethanol fuel systems.",
+    short: "Fuel octane booster in a 500ml bottle.",
     description:
-      "Methanol and high-ethanol fuels are dry and can starve pumps and injectors of lubrication. This upper-cylinder lubricant restores lubricity to protect fuel-system components in alcohol setups.",
+      "OCTA-SHOT is OCTA's fuel octane booster in a 500ml bottle, the compact partner to the 5L OCTA-BOOST. Follow the dosing instructions supplied with the product, and re-check your tune whenever you change your fuel.",
     specs: [
-      { label: "For", value: "Methanol and E85/E100" },
-      { label: "Dose", value: "1-2% by volume" },
-      { label: "Form", value: "Liquid" },
-      { label: "Protects", value: "Pumps, injectors, seals" },
+      { label: "Size", value: "500ml bottle" },
+      { label: "Use", value: "Fuel octane booster" },
     ],
-    applications: ["Methanol engines", "E85 and E100", "Alcohol drag"],
-    variants: [
-      { size: "1L", sku: "OX-UCL-1", price: 280, stock: 95 },
-      { size: "5L", sku: "OX-UCL-5", price: 1180, stock: 30 },
-    ],
+    applications: ["Petrol engines", "Performance use"],
+    featured: true,
+    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 150 }],
+    label: {
+      layout: "tall",
+      mark: "SHOT",
+      title: "OCTANE",
+      highlight: "BOOSTER",
+      unPlacement: "below",
+      chain: false,
+      pictograms: ["goggles", "gloves"],
+      lines: ["500ML BOTTLE", "FOR PETROL ENGINES"],
+      disclaimer:
+        "USE AT OWN RISK. OCTA-SHOT IS FOR PERFORMANCE USE ONLY. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM ITS USE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+    },
   },
   {
-    slug: "fuel-system-cleaner",
-    name: "Octax Fuel System Cleaner",
+    slug: "octa-torque",
+    name: "OCTA-TORQUE Diesel Improver",
     category: "additives",
-    short: "Detergent treatment to clear injectors and restore spray pattern.",
+    short: "Diesel improver in a 500ml bottle.",
     description:
-      "A strong detergent treatment that clears injector deposits and restores spray pattern between race weekends, so fuelling stays crisp and repeatable.",
+      "OCTA-TORQUE is OCTA's diesel improver in a 500ml bottle, for diesel engines. Follow the dosing instructions supplied with the product.",
     specs: [
-      { label: "Treats", value: "Up to 60L per bottle" },
-      { label: "Form", value: "Liquid" },
-      { label: "Use", value: "Every few tanks" },
-      { label: "Safe for", value: "Petrol and E85 systems" },
+      { label: "Size", value: "500ml bottle" },
+      { label: "Use", value: "Diesel improver" },
     ],
-    applications: ["Maintenance", "Injector cleaning", "Between events"],
-    variants: [{ size: "500ml", sku: "OX-FSC-500", price: 180, stock: 140 }],
-  },
-  {
-    slug: "valve-saver-lead-substitute",
-    name: "Octax Valve Saver Lead Substitute",
-    category: "additives",
-    short: "Valve-seat protection for older engines run on unleaded fuel.",
-    description:
-      "A lead-substitute additive that protects unhardened valve seats in classic and older race engines when running on unleaded fuel, guarding against valve-seat recession.",
-    specs: [
-      { label: "Protects", value: "Unhardened valve seats" },
-      { label: "Treats", value: "Up to 100L per bottle" },
-      { label: "Form", value: "Liquid" },
-      { label: "For", value: "Classic and vintage engines" },
-    ],
-    applications: ["Classic race engines", "Historic motorsport", "Unleaded conversion"],
-    variants: [{ size: "250ml", sku: "OX-VS-250", price: 210, stock: 75 }],
+    applications: ["Diesel engines"],
+    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 120 }],
+    label: {
+      layout: "tall",
+      mark: "TORQUE",
+      title: "DIESEL",
+      highlight: "IMPROVER",
+      unPlacement: "below",
+      chain: false,
+      pictograms: ["goggles", "gloves"],
+      lines: ["500ML BOTTLE", "FOR DIESEL ENGINES"],
+      disclaimer:
+        "USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM THE USE OF OCTA-TORQUE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+    },
   },
 ];
 
@@ -260,10 +328,8 @@ export function featuredProducts(): Product[] {
   return products.filter((p) => p.featured);
 }
 
+/** Lowest listed price; quote-only sizes are ignored. */
 export function fromPrice(p: Product): number {
-  return Math.min(...p.variants.map((v) => v.price));
-}
-
-export function totalStock(p: Product): number {
-  return p.variants.reduce((sum, v) => sum + v.stock, 0);
+  const listed = p.variants.flatMap((v) => (v.price === null ? [] : [v.price]));
+  return Math.min(...listed);
 }

@@ -1,41 +1,58 @@
 import Link from "next/link";
-import { SITE } from "@/lib/site";
+import Image from "next/image";
+import { SITE, hasContactEmail, hasContactPhone } from "@/lib/site";
+import { OctaLogo } from "./brand/Wordmark";
+import zrgLogo from "@/assets/zrg-x-logo.png";
 
 const columns = [
   {
     title: "Shop",
     links: [
       { label: "All products", href: "/shop/" },
-      { label: "Race fuels", href: "/shop/?category=race-fuels" },
-      { label: "Methanol", href: "/shop/?category=methanol" },
-      { label: "Ethanol", href: "/shop/?category=ethanol" },
-      { label: "Additives", href: "/shop/?category=additives" },
+      { label: "OCTA-X Ethanol 96%", href: "/shop/octa-x-ethanol/" },
+      { label: "OCTA-M Methanol 100%", href: "/shop/octa-m-methanol/" },
+      { label: "OCTA-BOOST", href: "/shop/octa-boost/" },
+      { label: "OCTA-SHOT", href: "/shop/octa-shot/" },
+      { label: "OCTA-TORQUE", href: "/shop/octa-torque/" },
     ],
   },
   {
     title: "Company",
     links: [
+      { label: "My account", href: "/account/" },
       { label: "Information", href: "/information/" },
+      { label: "Become a reseller", href: "/agents/" },
+      { label: "Technical data sheets", href: "/information/#data-sheets" },
       { label: "Contact", href: "/contact/" },
       { label: "Privacy policy", href: "/privacy/" },
       { label: "Terms of service", href: "/terms/" },
+      { label: "Delivery & returns", href: "/delivery-returns/" },
     ],
   },
 ];
 
 export function Footer() {
   return (
-    <footer className="mt-24 border-t-2 border-ink bg-ink text-paper">
+    <footer className="border-t-2 border-ink bg-ink text-paper">
       <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6">
         <div className="grid gap-12 lg:grid-cols-[1.4fr_1fr_1fr_1fr]">
           <div>
-            <p className="font-display text-4xl uppercase leading-none">
-              Octax<span className="text-lime">.</span>
+            <OctaLogo tone="light" className="h-14 w-auto" />
+            <p className="mt-5 font-label text-2xl font-extrabold uppercase italic text-lime">
+              {SITE.tagline}
             </p>
-            <p className="mt-4 max-w-xs text-sm text-paper/70">
-              High-octane race fuels, methanol, ethanol and additives for motorsport,
-              karting and marine.
+            <p className="mt-3 max-w-xs text-sm text-paper/70">
+              OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster for
+              performance use.
             </p>
+            <div className="mt-6 inline-flex items-center gap-3">
+              <span className="block bg-white p-2">
+                <Image src={zrgLogo} alt={SITE.legalName} className="h-10 w-auto" />
+              </span>
+              <span className="max-w-[10rem] text-xs text-paper/60">
+                OCTA Performance is a brand of {SITE.legalName}
+              </span>
+            </div>
           </div>
 
           {columns.map((col) => (
@@ -56,12 +73,13 @@ export function Footer() {
           <div>
             <h2 className="kicker text-lime">Contact</h2>
             <ul className="mt-4 space-y-2.5 text-sm">
-              <li>
+              {hasContactEmail && <li>
                 <a href={`mailto:${SITE.email}`} className="text-paper/80 hover:text-lime">{SITE.email}</a>
-              </li>
-              <li>
+              </li>}
+              {hasContactPhone && <li>
                 <a href={`tel:${SITE.phoneHref}`} className="text-paper/80 hover:text-lime">{SITE.phoneDisplay}</a>
-              </li>
+              </li>}
+              {!hasContactEmail && !hasContactPhone && <li className="text-paper/60">Contact details will be published before ordering opens.</li>}
             </ul>
           </div>
         </div>
@@ -69,7 +87,7 @@ export function Footer() {
 
       <div className="border-t border-paper/15">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-6 font-mono text-xs uppercase tracking-wider text-paper/60 sm:flex-row sm:px-6">
-          <p>&copy; {new Date().getFullYear()} Octax Racing Fuels · Demo</p>
+          <p>&copy; {new Date().getFullYear()} {SITE.legalName}</p>
           <p>
             Made and maintained by{" "}
             <a href="https://echosoftware.co.za" className="text-lime hover:underline" rel="noopener">

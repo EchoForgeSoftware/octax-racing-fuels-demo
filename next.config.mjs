@@ -3,6 +3,8 @@ import { BASE_PATH } from "./site.config.mjs";
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: "export",
+  // Keep the watched preview separate from production-build artifacts.
+  distDir: process.env.NODE_ENV === "development" ? ".next-dev" : ".next",
   basePath: BASE_PATH,
   trailingSlash: true,
   images: {

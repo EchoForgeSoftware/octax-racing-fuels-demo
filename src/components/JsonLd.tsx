@@ -1,3 +1,5 @@
+import { serializeJsonLd } from "@/lib/serialize";
+
 export function JsonLd({ data }: { data: object | object[] }) {
   const items = Array.isArray(data) ? data : [data];
   return (
@@ -6,7 +8,7 @@ export function JsonLd({ data }: { data: object | object[] }) {
         <script
           key={i}
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(d) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLd(d) }}
         />
       ))}
     </>

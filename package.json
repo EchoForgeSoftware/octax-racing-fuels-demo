@@ -4,27 +4,43 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "build": "next build",
+    "test": "node --test scripts/order.test.mjs scripts/payment.test.mjs scripts/payment-db.test.mjs scripts/payment-api.test.mjs scripts/security.test.mjs scripts/reseller.test.mjs scripts/reseller-db.test.mjs scripts/customer-history.test.mjs scripts/backoffice.test.mjs scripts/backoffice-db.test.mjs",
+    "pretest": "node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs",
+    "payment:catalogue": "node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs",
     "predev": "node scripts/gen-llms.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/gen-assets.mjs && node scripts/gen-llms.mjs",
-    "build": "next build",
+    "prebuild": "node scripts/check-launch.mjs && node scripts/gen-assets.mjs && node scripts/gen-product-assets.mjs && node scripts/gen-llms.mjs && node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs",
+    "postbuild": "node scripts/harden-export.mjs && node scripts/check-export.mjs",
+    "check:export": "node scripts/check-export.mjs",
+    "launch:check": "node scripts/check-launch.mjs --strict",
     "start": "next start",
-    "serve": "npx serve out"
+    "serve": "node scripts/preview.mjs"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.118.0",
     "gsap": "^3.15.0",
     "next": "^15.5.25",
+    "pdf-lib": "^1.17.1",
     "react": "19.0.0",
     "react-dom": "19.0.0"
   },
   "devDependencies": {
+    "@electric-sql/pglite": "^0.5.10",
+    "@next/env": "^15.5.28",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
+    "exceljs": "^4.4.0",
     "png-to-ico": "^2.1.8",
     "sharp": "^0.35.4",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0"
+  },
+  "overrides": {
+    "next": {
+      "postcss": "8.5.30"
+    }
   }
 }

@@ -5,6 +5,7 @@
 
 # next.js
 /.next/
+/.next-dev/
 /out/
 next-env.d.ts
 
@@ -14,6 +15,9 @@ next-env.d.ts
 # generated assets (produced by scripts at build time; icon.svg is authored, not ignored)
 /public/llms.txt
 /public/og/default.png
+/public/og/products/
+/public/og/logo.png
+/public/products/
 /src/app/apple-icon.png
 /src/app/favicon.ico
 
@@ -42,3 +46,15 @@ yarn-error.log*
 
 # claude / local tooling
 .claude/
+/tmp/pdfs/
+
+# wrangler files
+.wrangler
+.dev.vars*
+!.dev.vars.example
+
+!.env.example
+
+# Generated artwork, brand packs and preview images (rebuilt by scripts/assemble-brand-pack.py and friends)
+/output/
+/tmp/

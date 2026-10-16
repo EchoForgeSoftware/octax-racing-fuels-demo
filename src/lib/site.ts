@@ -5,7 +5,12 @@ export {
   BASE_PATH,
   SITE_URL,
   INDEXABLE,
+  LEGAL,
+  hasContactEmail,
+  hasContactPhone,
   SITE,
+  BANK,
+  hasBankDetails,
   absoluteUrl,
   asset,
 } from "../../site.config.mjs";
