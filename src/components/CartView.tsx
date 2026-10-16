@@ -6,6 +6,8 @@ import { formatPrice } from "@/lib/format";
 import { getProduct } from "@/lib/products";
 import { ProductShot } from "./pack/ProductShot";
 import { Icon } from "./Icon";
+import { OrderTotals } from "./OrderTotals";
+import { courierNote } from "@/lib/courier";
 
 export function CartView() {
   const { items, count, setQty, remove, subtotal, ready } = useCart();
@@ -61,6 +63,9 @@ export function CartView() {
                 <p className="num mt-1.5 font-mono text-xs uppercase tracking-wider text-muted">
                   {i.size} &middot; {formatPrice(i.price)} each
                 </p>
+                <p className="num mt-1 font-mono text-xs uppercase tracking-wider text-ink-soft">
+                  {courierNote(i.size, i.qty)}
+                </p>
               </div>
 
               <div className="flex flex-wrap items-center justify-between gap-3 sm:col-start-3 sm:row-start-1 sm:justify-end">
@@ -106,25 +111,7 @@ export function CartView() {
 
       <aside className="border-2 border-ink bg-panel p-6 shadow-[8px_8px_0_0_var(--color-ink)] lg:sticky lg:top-24">
         <h2 className="font-display text-2xl">Order summary</h2>
-        <dl className="num mt-5 space-y-2.5 text-sm">
-          <div className="flex justify-between">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">
-              Subtotal ({count} item{count === 1 ? "" : "s"})
-            </dt>
-            <dd className="font-bold">{formatPrice(subtotal)}</dd>
-          </div>
-          <div className="flex justify-between">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Courier</dt>
-            <dd className="text-right text-muted">Quoted separately</dd>
-          </div>
-        </dl>
-        <div className="mt-5 flex items-end justify-between border-t-2 border-ink pt-4">
-          <span className="kicker">
-            Total
-            <span className="mt-1 block font-normal normal-case tracking-normal text-muted">Incl. VAT, excl. courier</span>
-          </span>
-          <span className="num font-display text-3xl text-flare">{formatPrice(subtotal)}</span>
-        </div>
+        <OrderTotals items={items} subtotal={subtotal} label={`Subtotal (${count} item${count === 1 ? "" : "s"})`} />
         <Link
           href="/checkout/"
           className="mt-6 flex items-center justify-center gap-2 border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink"

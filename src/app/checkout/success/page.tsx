@@ -5,7 +5,7 @@ import { buildMetadata } from "@/lib/metadata";
 export const metadata: Metadata = buildMetadata({
   path: "/checkout/success/",
   title: "Order Confirmed",
-  description: "Your demo order with OCTA Performance has been confirmed.",
+  description: "Your order with OCTA Performance has been received.",
 });
 
 export default function CheckoutSuccessPage() {

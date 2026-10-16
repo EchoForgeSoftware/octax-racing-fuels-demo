@@ -40,10 +40,6 @@ const ogSvg = `
   <g transform="translate(72 190) scale(1.55)">${letters}</g>
   <text x="76" y="380" font-family="Arial, sans-serif" font-size="30" font-weight="700" letter-spacing="15" fill="${INK}">PERFORMANCE</text>
   <text x="72" y="490" font-family="Arial Black, Arial, sans-serif" font-size="64" font-style="italic" font-weight="900" fill="${INK}">FUEL THE ADDICTION</text>
-  <g transform="translate(940 96)">
-    <rect x="0" y="0" width="180" height="52" fill="${FLARE}"/>
-    <text x="90" y="35" text-anchor="middle" font-family="Arial, sans-serif" font-size="26" font-weight="700" letter-spacing="4" fill="${PAPER}">DEMO</text>
-  </g>
 </svg>`;
 
 async function main() {

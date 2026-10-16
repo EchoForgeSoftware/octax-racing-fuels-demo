@@ -18,10 +18,10 @@ export function OrderConfirmation() {
       <div className="animate-pop mx-auto grid h-14 w-14 place-items-center bg-lime text-ink shadow-[5px_5px_0_0_var(--color-ink)]">
         <Icon name="check" size={28} strokeWidth={3} />
       </div>
-      <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Order confirmed</h1>
+      <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Order received</h1>
       <p className="mt-4 text-ink-soft">
-        Thanks for your order. We would normally email a confirmation and dispatch
-        within 24 to 48 hours.
+        Thanks for your order. We will contact you to confirm payment and delivery,
+        and dispatch within 24 to 48 hours.
       </p>
 
       <div className="mt-6 border-2 border-ink bg-ink p-4 text-left">
@@ -29,10 +29,6 @@ export function OrderConfirmation() {
         <p className="num mt-1 font-display text-3xl text-paper" aria-live="polite">
           {ref ?? "OX-······"}
         </p>
-      </div>
-
-      <div className="mt-4 border-2 border-dashed border-ink bg-paper-2 p-4 text-sm text-ink-soft">
-        This is a demo order. No payment was taken and nothing will be shipped.
       </div>
 
       <div className="mt-7 flex flex-wrap justify-center gap-3">

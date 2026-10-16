@@ -54,10 +54,6 @@ export default function ContactPage() {
               </dl>
             </div>
 
-            <div className="border-2 border-ink p-6 text-sm text-muted">
-              Contact details and location are placeholders in this demo. Real details are
-              added when the site goes to production.
-            </div>
           </aside>
         </div>
       </div>

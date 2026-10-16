@@ -37,7 +37,7 @@ const faqs = [
   },
   {
     q: "How is it delivered?",
-    a: "Prices on the site include VAT and exclude courier, which is quoted separately. Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA fuels are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
+    a: "Prices on the site include VAT. Courier is R200 per pack. Delivery is free on 10 or more of the same 5L or 25L product, or 12 or more of the same 500ml product; 210L drums always pay the standard R200 courier. Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA fuels are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
   },
 ];
 
@@ -141,11 +141,11 @@ export default function InformationPage() {
         <section className="mt-14">
           <h2 className="font-display text-2xl">Ordering and delivery</h2>
           <p className="mt-4 text-ink-soft">
-            Add products to your cart and check out online. Prices include VAT and exclude
-            courier, which is quoted separately. Orders are dispatched within a
+            Add products to your cart and check out online. Prices include VAT, and courier is
+            added at R200 per pack, free on 10 or more of the same 5L or 25L product or 12
+            or more of the same 500ml product. Orders are dispatched within a
             24 to 48 hour window to your workshop or a nominated track address, subject to
-            dangerous-goods transport rules for your area. This is a demo store, so no
-            payment is taken and no order is actually placed.
+            dangerous-goods transport rules for your area. 
           </p>
         </section>
 

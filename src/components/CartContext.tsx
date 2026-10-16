@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { products } from "@/lib/products";
 
 export type CartItem = {
   sku: string;
@@ -36,6 +37,20 @@ type CartState = {
 const STORAGE_KEY = "octa-cart-v2";
 const CartCtx = createContext<CartState | null>(null);
 
+/**
+ * Saved carts hold a snapshot of each item. Refresh name, size and price from
+ * the current catalogue so price-list changes reach existing carts, and drop
+ * items that are no longer sold or are now priced on quotation.
+ */
+function reprice(saved: CartItem[]): CartItem[] {
+  return saved.flatMap((item) => {
+    const product = products.find((p) => p.slug === item.slug);
+    const variant = product?.variants.find((v) => v.sku === item.sku);
+    if (!product || !variant || variant.price === null) return [];
+    return [{ ...item, name: product.name, size: variant.size, price: variant.price }];
+  });
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
@@ -44,7 +59,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(JSON.parse(raw) as CartItem[]);
+      if (raw) setItems(reprice(JSON.parse(raw) as CartItem[]));
     } catch {
       // ignore corrupt or unavailable storage
     }

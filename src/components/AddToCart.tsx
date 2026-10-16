@@ -6,6 +6,7 @@ import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/products";
 import { Icon } from "./Icon";
+import { courierFor, courierNote, freeDeliveryHint } from "@/lib/courier";
 
 // No stock is held on hand, so quantity is only capped at a sane order size.
 const MAX_QTY = 99;
@@ -35,6 +36,8 @@ export function AddToCart({
   const quote = variant.price === null;
   // The price shown follows the quantity, so the customer sees the line total as they change it.
   const total = (variant.price ?? 0) * qty;
+  const courier = courierFor(variant.size, qty);
+  const hint = freeDeliveryHint(variant.size, qty);
 
   function handleAdd() {
     if (variant.price === null) return;
@@ -59,8 +62,20 @@ export function AddToCart({
           <>
             <div className="num font-display text-4xl" aria-live="polite">{formatPrice(total)}</div>
             <span className="num mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">
-              {qty > 1 && <>{formatPrice(variant.price ?? 0)} each · </>}Incl. VAT · excl. courier
+              {qty > 1 && <>{formatPrice(variant.price ?? 0)} each · </>}Incl. VAT
             </span>
+            <div className="num mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-3 text-sm">
+              <span className={courier.kind === "free" ? "font-bold text-ink" : "text-ink-soft"}>
+                {courierNote(variant.size, qty)}
+              </span>
+              {hint && <span className="font-mono text-[0.68rem] uppercase tracking-wider text-flare">{hint}</span>}
+            </div>
+            {courier.kind !== "quote" && (
+              <div className="num mt-1 flex items-baseline justify-between gap-4 text-sm">
+                <span className="text-ink-soft">Total incl. courier</span>
+                <span className="font-bold">{formatPrice(total + (courier.kind === "fee" ? courier.fee : 0))}</span>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -138,7 +153,6 @@ export function AddToCart({
           </button>
         </>
       )}
-      <p className="mt-3 text-center font-mono text-xs text-muted">Demo checkout, no payment is taken.</p>
     </div>
   );
 }

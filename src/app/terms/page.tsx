@@ -28,8 +28,6 @@ export default function TermsPage() {
         <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4rem)]">Terms of service</h1>
         <p className="mt-4 text-ink-soft">
           These terms cover the sale of fuels and additives through this site. They are
-          a demonstration template and should be reviewed by the business before the
-          site goes live.
         </p>
 
         <div className="mt-10 space-y-8 text-muted">

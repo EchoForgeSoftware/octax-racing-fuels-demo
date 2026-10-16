@@ -124,15 +124,16 @@ export function JerryCan({ product, volume, uid }: PackProps) {
   );
 }
 
-// 210 L plastic drum: rounded HDPE body, two bungs on the lid.
+// 210 L plastic drum: rounded blue HDPE body, two bungs on the lid.
+const DRUM_BLUE = "oklch(0.52 0.15 252)";
 const DRUM_BODY = "M24 14 H202 Q224 14 224 36 V286 Q224 308 202 308 H24 Q2 308 2 286 V36 Q2 14 24 14 Z";
 
-/** 210 L white HDPE plastic drum with moulded rolling rings and red bung caps. */
+/** 210 L blue HDPE plastic drum with moulded rolling rings and red bung caps. */
 export function Drum({ product, uid }: PackProps) {
   const clip = `${uid}-drum`;
   const ring = (y: number) => (
     <g key={y}>
-      <rect x="-1" y={y} width="228" height="14" rx="7" fill={HDPE} stroke={INK} strokeWidth="2.5" />
+      <rect x="-1" y={y} width="228" height="14" rx="7" fill={DRUM_BLUE} stroke={INK} strokeWidth="2.5" />
       <line x1="6" y1={y + 10} x2="220" y2={y + 10} stroke={INK} strokeWidth="1.5" opacity="0.18" />
     </g>
   );
@@ -149,12 +150,12 @@ export function Drum({ product, uid }: PackProps) {
       <ThreadedCap x={36} y={0} w={34} h={18} />
       <ThreadedCap x={160} y={2} w={26} h={16} />
 
-      <path d={DRUM_BODY} fill={HDPE} />
+      <path d={DRUM_BODY} fill={DRUM_BLUE} />
       <g clipPath={`url(#${clip})`}>
-        <rect x="0" y="60" width="226" height="250" fill={MILK} opacity="0.45" />
-        <rect x="2" y="14" width="18" height="294" fill={INK} opacity="0.06" />
-        <rect x="196" y="14" width="28" height="294" fill={INK} opacity="0.09" />
-        <rect x="24" y="44" width="8" height="236" fill="#fff" opacity="0.9" />
+        <rect x="2" y="14" width="18" height="294" fill={INK} opacity="0.12" />
+        <rect x="196" y="14" width="28" height="294" fill={INK} opacity="0.2" />
+        <rect x="24" y="44" width="8" height="236" fill="#fff" opacity="0.35" />
+        <rect x="38" y="44" width="3" height="236" fill="#fff" opacity="0.2" />
       </g>
       <path d={DRUM_BODY} fill="none" stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
 

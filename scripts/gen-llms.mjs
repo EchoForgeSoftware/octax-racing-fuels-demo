@@ -13,8 +13,6 @@ const content = `# ${SITE.name}
 
 > ${SITE.description}
 
-This is a demonstration e-commerce site; no real orders are placed.
-
 ## Main pages
 - [Home](${u("/")}): Overview of OCTA Performance and its products.
 - [Shop](${u("/shop/")}): The OCTA range: ethanol, methanol and octane booster.
@@ -28,7 +26,7 @@ This is a demonstration e-commerce site; no real orders are placed.
 - [OCTA-SHOT](${u("/shop/octa-shot/")}): Fuel octane booster, 500ml.
 - [OCTA-TORQUE](${u("/shop/octa-torque/")}): Diesel improver, 500ml.
 
-Prices are in ZAR, include VAT and exclude courier.
+Prices are in ZAR and include VAT. Courier is R200 per pack; free on 10+ of the same 5L or 25L product or 12+ of the same 500ml product; 210L drums always pay R200 per drum.
 
 OCTA Performance is a brand of ${SITE.legalName}.
 

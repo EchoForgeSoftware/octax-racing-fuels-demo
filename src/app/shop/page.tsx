@@ -30,7 +30,8 @@ export default function ShopPage() {
           <h1 className="mt-3 font-display text-[clamp(2.4rem,8vw,5rem)]">Shop OCTA</h1>
           <p className="mt-4 max-w-2xl text-ink-soft">
             Ethanol, methanol, octane boosters and diesel improver for performance use.
-            Prices include VAT and exclude courier.
+            Prices include VAT. Courier is R200 per pack, free on 10 or more of the same
+            5L or 25L product or 12 or more of the same 500ml product.
           </p>
         </header>
 

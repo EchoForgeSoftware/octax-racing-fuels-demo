@@ -46,11 +46,11 @@ export function ContactForm() {
         className="border-2 border-ink bg-lime p-6"
       >
         <h2 className="font-display text-xl uppercase text-ink">
-          Message ready to send
+          Message sent
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
-          This is a demo, so nothing was actually sent. On the live site this would
-          reach the OCTA Performance team and we would reply with a product recommendation.
+          Thanks for getting in touch. The OCTA Performance team will reply with a
+          product recommendation.
         </p>
         <button
           type="button"

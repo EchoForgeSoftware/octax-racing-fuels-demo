@@ -82,7 +82,7 @@ export function Footer() {
 
       <div className="border-t border-paper/15">
         <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 py-6 font-mono text-xs uppercase tracking-wider text-paper/60 sm:flex-row sm:px-6">
-          <p>&copy; {new Date().getFullYear()} {SITE.legalName} · Demo</p>
+          <p>&copy; {new Date().getFullYear()} {SITE.legalName}</p>
           <p>
             Made and maintained by{" "}
             <a href="https://echosoftware.co.za" className="text-lime hover:underline" rel="noopener">

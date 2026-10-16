@@ -7,6 +7,8 @@ import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 import { ProcessingOverlay } from "./ProcessingOverlay";
 import { Icon } from "./Icon";
+import { OrderTotals } from "./OrderTotals";
+import { courierNote } from "@/lib/courier";
 
 const inputClass =
   "mt-1.5 w-full border-2 border-ink bg-paper-2 px-3 py-2.5 text-base outline-none transition-colors focus:bg-panel aria-[invalid=true]:border-flare aria-[invalid=true]:bg-flare/5";
@@ -74,19 +76,10 @@ export function CheckoutView() {
     e.preventDefault();
     if (!validate()) return;
     setProcessing(true);
-    // Simulated order: no payment, no network call. Clear cart and confirm.
+    // Orders are not sent anywhere yet: connect an order email or payment provider before launch.
     window.setTimeout(() => {
       clear();
       router.push("/checkout/success/");
-    }, PROCESS_MS);
-  }
-
-  function onDecline() {
-    if (!validate()) return;
-    setProcessing(true);
-    // Cart is kept so the customer can retry from the error page.
-    window.setTimeout(() => {
-      router.push("/checkout/error/");
     }, PROCESS_MS);
   }
 
@@ -117,9 +110,8 @@ export function CheckoutView() {
         <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-2xl uppercase">Payment</legend>
           <div className="border-2 border-dashed border-ink bg-paper-2 p-5 text-sm text-ink-soft">
-            This is a demo checkout. No card fields are shown and no payment is taken.
-            On the live site, a secure payment provider is integrated here at
-            production handoff.
+            Once you place your order we will contact you to confirm payment and
+            delivery.
           </div>
         </fieldset>
       </div>
@@ -132,6 +124,9 @@ export function CheckoutView() {
               <span className="min-w-0 text-ink-soft">
                 <span className="font-mono font-bold text-ink">{i.qty}&times;</span> {i.name}{" "}
                 <span className="font-mono text-xs uppercase text-muted">{i.size}</span>
+                <span className="mt-0.5 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">
+                  {courierNote(i.size, i.qty)}
+                </span>
               </span>
               <span className="whitespace-nowrap font-bold">
                 {formatPrice(i.price * i.qty)}
@@ -139,42 +134,18 @@ export function CheckoutView() {
             </li>
           ))}
         </ul>
-        <dl className="num mt-5 space-y-2.5 border-t-2 border-ink pt-4 text-sm">
-          <div className="flex justify-between">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Subtotal</dt>
-            <dd className="font-bold">{formatPrice(subtotal)}</dd>
-          </div>
-          <div className="flex justify-between gap-4">
-            <dt className="font-mono text-xs uppercase tracking-wider text-muted">Courier</dt>
-            <dd className="text-right text-muted">Quoted separately</dd>
-          </div>
-        </dl>
-        <div className="mt-5 flex items-end justify-between border-t-2 border-ink pt-4">
-          <span className="kicker">
-            Total
-            <span className="mt-1 block font-normal normal-case tracking-normal text-muted">Incl. VAT, excl. courier</span>
-          </span>
-          <span className="num font-display text-3xl text-flare">
-            {formatPrice(subtotal)}
-          </span>
+        <div className="mt-5 border-t-2 border-ink">
+          <OrderTotals items={items} subtotal={subtotal} />
         </div>
         <button
           type="submit"
           disabled={processing}
           className="mt-6 flex w-full items-center justify-center gap-2 border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:cursor-wait disabled:opacity-50"
         >
-          Place order (demo)
+          Place order
           <Icon name="arrow" size={16} />
         </button>
-        <button
-          type="button"
-          onClick={onDecline}
-          disabled={processing}
-          className="mt-2 block min-h-11 w-full text-center font-mono text-xs uppercase tracking-wider text-muted underline hover:text-flare disabled:opacity-50"
-        >
-          Preview a declined payment
-        </button>
-        <Link href="/cart/" className="block text-center font-mono text-xs uppercase tracking-wider text-muted hover:text-ink">
+        <Link href="/cart/" className="mt-4 block text-center font-mono text-xs uppercase tracking-wider text-muted hover:text-ink">
           Back to cart
         </Link>
       </aside>

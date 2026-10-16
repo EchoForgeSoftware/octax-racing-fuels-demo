@@ -4,7 +4,6 @@ import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
 import { Footer } from "@/components/Footer";
-import { DemoBanner } from "@/components/DemoBanner";
 import { BackToTop } from "@/components/BackToTop";
 import { CartToast } from "@/components/CartToast";
 import { JsonLd } from "@/components/JsonLd";
@@ -73,7 +72,6 @@ export default function RootLayout({
       <body className="flex min-h-screen flex-col">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />
         <Providers>
-          <DemoBanner />
           <Nav />
           {/* Bottom gap before the footer, dropped when a page ends on a full-bleed band. */}
           <main className="flex-1 pb-24 has-[[data-flush-footer]]:pb-0">{children}</main>
