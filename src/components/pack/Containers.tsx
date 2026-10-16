@@ -77,7 +77,7 @@ function ThreadedCap({ x, y, w, h }: { x: number; y: number; w: number; h: numbe
 const CAN_BODY =
   "M0 82 Q0 40 42 40 H168 Q210 40 210 82 V300 Q210 320 190 320 H138 Q105 311 72 320 H20 Q0 320 0 300 Z";
 
-/** 20 L white HDPE jerry can with red cap, after the supplied can photos. */
+/** 20/25 L white HDPE jerry can with red cap, after the supplied can photos. */
 export function JerryCan({ product, volume, uid }: PackProps) {
   const clip = `${uid}-can`;
   return (

@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
@@ -27,14 +28,16 @@ export function AddToCart({
   const [added, setAdded] = useState(false);
 
   const variant = product.variants[variantIndex];
-  const outOfStock = variant.stock <= 0;
+  // Sizes without a listed price are sold on quotation, not through the cart.
+  const quote = variant.price === null;
+  const outOfStock = !quote && variant.stock <= 0;
   const maxQty = Math.max(1, variant.stock);
 
   // Keep the quantity within what the selected size has in stock, however it was picked.
   useEffect(() => setQty((q) => Math.min(q, maxQty)), [maxQty]);
 
   function handleAdd() {
-    if (outOfStock) return;
+    if (outOfStock || variant.price === null) return;
     add(
       { sku: variant.sku, slug: product.slug, name: product.name, size: variant.size, price: variant.price },
       qty,
@@ -48,13 +51,24 @@ export function AddToCart({
       <div className="flex items-end justify-between border-b-2 border-ink pb-4">
         <div>
           <span className="kicker text-muted">Price</span>
-          <div className="num font-display text-4xl">{formatPrice(variant.price)}</div>
-          <span className="mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">Incl. VAT · excl. courier</span>
+          {quote ? (
+            <>
+              <div className="font-display text-3xl">On request</div>
+              <span className="mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">Subject to quotation</span>
+            </>
+          ) : (
+            <>
+              <div className="num font-display text-4xl">{formatPrice(variant.price ?? 0)}</div>
+              <span className="mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">Incl. VAT · excl. courier</span>
+            </>
+          )}
         </div>
-        <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider">
-          <span className={`h-2 w-2 ${variant.stock > 0 ? "bg-lime" : "bg-flare"}`} />
-          {variant.stock > 0 ? `${variant.stock} in stock` : "Sold out"}
-        </span>
+        {!quote && (
+          <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider">
+            <span className={`h-2 w-2 ${variant.stock > 0 ? "bg-lime" : "bg-flare"}`} />
+            {variant.stock > 0 ? `${variant.stock} in stock` : "Sold out"}
+          </span>
+        )}
       </div>
 
       <fieldset className="mt-5">
@@ -76,6 +90,22 @@ export function AddToCart({
         </div>
       </fieldset>
 
+      {quote ? (
+        <>
+          <p className="mt-5 text-sm text-ink-soft">
+            The {variant.size} size is priced on quotation. Send us your quantity and
+            delivery area and we will come back with a price.
+          </p>
+          <Link
+            href="/contact/"
+            className="mt-6 flex w-full items-center justify-center gap-2 border-2 border-ink bg-ink px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-lime hover:text-ink"
+          >
+            Request a quote
+            <Icon name="arrow" size={16} />
+          </Link>
+        </>
+      ) : (
+      <>
       <div className="mt-5 flex items-center gap-3">
         <span className="kicker text-muted">Qty</span>
         <div className="flex items-center border-2 border-ink">
@@ -111,6 +141,8 @@ export function AddToCart({
           "Add to cart"
         )}
       </button>
+      </>
+      )}
       <p className="mt-3 text-center font-mono text-xs text-muted">Demo checkout, no payment is taken.</p>
     </div>
   );

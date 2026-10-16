@@ -12,7 +12,8 @@ export type Category = {
 export type Variant = {
   size: string;
   sku: string;
-  price: number; // in ZAR, VAT included, courier excluded
+  /** ZAR, VAT included, courier excluded. null = subject to quotation. */
+  price: number | null;
   stock: number;
 };
 
@@ -24,7 +25,7 @@ export type ProductLabel = {
   layout: "wide" | "tall";
   /** Lime mark after the OCTA wordmark: a letter (X, M) or a word (BOOST). */
   mark: string;
-  /** Product name printed large, with an optional lime highlight (e.g. "95%"). */
+  /** Product name printed large, with an optional lime highlight (e.g. "96%"). */
   title: string;
   highlight?: string;
   /** Left off where the product's dangerous-goods data has not been supplied yet. */
@@ -59,12 +60,12 @@ export const categories: Category[] = [
   {
     slug: "ethanol",
     name: "Ethanol",
-    blurb: "OCTA-X: 95% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
+    blurb: "OCTA-X: 96% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
   },
   {
     slug: "methanol",
     name: "Methanol",
-    blurb: "OCTA-M: methanol in its purest form for methanol-burning performance engines.",
+    blurb: "OCTA-M: 100% methanol in its purest form for methanol-burning performance engines.",
   },
   {
     slug: "additives",
@@ -83,13 +84,13 @@ const PPE: Pictogram[] = ["flame", "goggles", "gloves", "respirator"];
 export const products: Product[] = [
   {
     slug: "octa-x-ethanol",
-    name: "OCTA-X Ethanol 95%",
+    name: "OCTA-X Ethanol 96%",
     category: "ethanol",
-    short: "95% ethanol in its purest form for performance use.",
+    short: "96% ethanol in its purest form for performance use.",
     description:
       "OCTA-X is ethanol in its purest form for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
-      { label: "Ethanol", value: "95%" },
+      { label: "Ethanol", value: "96%" },
       { label: "UN number", value: "UN 1170" },
       { label: "Hazard class", value: "Class 3, flammable liquid" },
       { label: "Traceability", value: "MFD date and batch on every pack" },
@@ -97,14 +98,14 @@ export const products: Product[] = [
     applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
     featured: true,
     variants: [
-      { size: "20L", sku: "OCTA-X-20", price: 555.68, stock: 34 },
-      { size: "210L drum", sku: "OCTA-X-210", price: 5230.89, stock: 7 },
+      { size: "25L", sku: "OCTA-X-25", price: 760, stock: 34 },
+      { size: "210L drum", sku: "OCTA-X-210", price: 6160, stock: 7 },
     ],
     label: {
       layout: "wide",
       mark: "X",
       title: "ETHANOL",
-      highlight: "95%",
+      highlight: "96%",
       un: "UN 1170",
       hazardClass: "CLASS 3",
       unPlacement: "above",
@@ -116,13 +117,13 @@ export const products: Product[] = [
   },
   {
     slug: "octa-m-methanol",
-    name: "OCTA-M Methanol",
+    name: "OCTA-M Methanol 100%",
     category: "methanol",
-    short: "Methanol in its purest form for performance use.",
+    short: "100% methanol in its purest form for performance use.",
     description:
       "OCTA-M is methanol in its purest form for performance use, for methanol-burning engines. Methanol is flammable and toxic: handle it with eye protection, gloves and a respirator, keep it away from open flame, and use it only in a fuel system built for methanol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
-      { label: "Product", value: "Methanol" },
+      { label: "Methanol", value: "100%" },
       { label: "UN number", value: "UN 1230" },
       { label: "Hazard class", value: "Class 3, flammable liquid" },
       { label: "Traceability", value: "MFD date and batch on every pack" },
@@ -130,13 +131,14 @@ export const products: Product[] = [
     applications: ["Methanol-burning engines", "Performance use"],
     featured: true,
     variants: [
-      { size: "20L", sku: "OCTA-M-20", price: 477.94, stock: 60 },
-      { size: "210L drum", sku: "OCTA-M-210", price: 4414.62, stock: 15 },
+      { size: "25L", sku: "OCTA-M-25", price: 600, stock: 60 },
+      { size: "210L drum", sku: "OCTA-M-210", price: 5500, stock: 15 },
     ],
     label: {
       layout: "wide",
       mark: "M",
       title: "METHANOL",
+      highlight: "100%",
       un: "UN 1230",
       hazardClass: "CLASS 3",
       unPlacement: "below",
@@ -161,8 +163,11 @@ export const products: Product[] = [
     ],
     applications: ["95 octane pump fuel", "Performance use"],
     featured: true,
-    // Ships in the 5L HDPE jug.
-    variants: [{ size: "5L", sku: "OCTA-BOOST-5", price: 229.94, stock: 40 }],
+    // 5L HDPE jug; the 20L can is priced on quotation.
+    variants: [
+      { size: "5L", sku: "OCTA-BOOST-5", price: 440, stock: 40 },
+      { size: "20L", sku: "OCTA-BOOST-20", price: null, stock: 0 },
+    ],
     label: {
       layout: "tall",
       mark: "BOOST",
@@ -198,7 +203,7 @@ export const products: Product[] = [
     ],
     applications: ["Petrol engines", "Performance use"],
     featured: true,
-    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 97.97, stock: 120 }],
+    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 150, stock: 120 }],
     label: {
       layout: "tall",
       mark: "SHOT",
@@ -224,7 +229,7 @@ export const products: Product[] = [
       { label: "Use", value: "Diesel improver" },
     ],
     applications: ["Diesel engines"],
-    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 77.68, stock: 90 }],
+    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 120, stock: 90 }],
     label: {
       layout: "tall",
       mark: "TORQUE",
@@ -256,8 +261,10 @@ export function featuredProducts(): Product[] {
   return products.filter((p) => p.featured);
 }
 
+/** Lowest listed price; quote-only sizes are ignored. */
 export function fromPrice(p: Product): number {
-  return Math.min(...p.variants.map((v) => v.price));
+  const listed = p.variants.flatMap((v) => (v.price === null ? [] : [v.price]));
+  return Math.min(...listed);
 }
 
 export function totalStock(p: Product): number {

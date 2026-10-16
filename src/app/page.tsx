@@ -12,18 +12,18 @@ export const metadata: Metadata = {
     path: "/",
     title: "Ethanol, Methanol & Octane Booster",
     description:
-      "OCTA Performance: OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
+      "OCTA Performance: OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
   }),
   title: {
     absolute: "OCTA Performance | Fuel the Addiction",
   },
 };
 
-const ticker = ["Fuel the addiction", "OCTA-X Ethanol 95%", "OCTA-M Methanol", "OCTA-BOOST", "UN 1170 · UN 1230", "Batch-numbered"];
+const ticker = ["Fuel the addiction", "OCTA-X Ethanol 96%", "OCTA-M Methanol 100%", "OCTA-BOOST", "UN 1170 · UN 1230", "Batch-numbered"];
 
 const props = [
   { n: "01", h: "Batch-numbered", b: "Every pack has a manufacture date and batch number written on its label, so each one can be traced." },
-  { n: "02", h: "Three products", b: "OCTA-X ethanol 95% and OCTA-M methanol for alcohol builds, and OCTA-BOOST to lift 95 octane pump fuel." },
+  { n: "02", h: "Three products", b: "OCTA-X ethanol 96% and OCTA-M methanol for alcohol builds, and OCTA-BOOST to lift 95 octane pump fuel." },
   { n: "03", h: "To your workshop", b: "Order online and have OCTA dispatched to your workshop or track inside a 24 to 48 hour window." },
 ];
 

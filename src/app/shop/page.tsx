@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/shop/",
   title: "Shop",
   description:
-    "Browse the OCTA Performance range: OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster, with pack sizes, prices and stock.",
+    "Browse the OCTA Performance range: OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster, with pack sizes, prices and stock.",
 });
 
 const trail = [

@@ -56,7 +56,7 @@ export function productSchema(product: Product) {
       "@type": "AggregateOffer",
       priceCurrency: SITE.currency,
       lowPrice: price,
-      offerCount: product.variants.length,
+      offerCount: product.variants.filter((v) => v.price !== null).length,
       availability: inStock
         ? "https://schema.org/InStock"
         : "https://schema.org/OutOfStock",

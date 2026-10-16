@@ -2,7 +2,7 @@
 // and the colours the product shot uses.
 import type { Product } from "./products";
 
-/** 210L ships in a steel drum, 20L in the jerry can, 5L in the jug, 500ml in a bottle. */
+/** 210L ships in a steel drum, 20L and 25L in the jerry can, 5L in the jug, 500ml in a bottle. */
 export type PackKind = "can" | "drum" | "jug" | "bottle";
 
 export function packKind(size: string): PackKind {
@@ -12,7 +12,7 @@ export function packKind(size: string): PackKind {
   return litres >= 2 ? "jug" : "bottle";
 }
 
-/** "20L" -> "20L", "210L drum" -> "210L", "500ml" -> "500ml" (as embossed on the packs). */
+/** "25L" -> "25L", "210L drum" -> "210L", "500ml" -> "500ml" (as embossed on the packs). */
 export function volumeLabel(size: string): string {
   const m = size.match(/(\d+(?:\.\d+)?)\s*(ml|l)/i);
   if (!m) return size.toUpperCase();

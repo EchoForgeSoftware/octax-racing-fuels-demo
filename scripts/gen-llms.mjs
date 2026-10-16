@@ -23,8 +23,8 @@ and no real orders are placed.
 - [Contact](${u("/contact/")}): Enquiries about products, orders and delivery.
 
 ## Products
-- [OCTA-X Ethanol 95%](${u("/shop/octa-x-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
-- [OCTA-M Methanol](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
+- [OCTA-X Ethanol 96%](${u("/shop/octa-x-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
+- [OCTA-M Methanol 100%](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
 - [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 1:7 to 1:4, 5L. UN 1170, Class 3.
 - [OCTA-SHOT](${u("/shop/octa-shot/")}): Fuel octane booster, 500ml.
 - [OCTA-TORQUE](${u("/shop/octa-torque/")}): Diesel improver, 500ml.

@@ -157,8 +157,9 @@ function AlcoholLabel({ product }: { product: Product }) {
         </>
       ) : (
         <>
-          <text x={W / 2} y={298} textAnchor="middle" style={cond(800, true)} fontSize="60" fill={INK}>
+          <text x={W / 2} y={298} textAnchor="middle" style={cond(800, true)} fontSize={l.highlight ? 52 : 60} fill={INK}>
             {l.title}
+            {l.highlight && <tspan fill={MUTED_LIME}> {l.highlight}</tspan>}
           </text>
           <text x={W / 2} y={324} textAnchor="middle" style={cond(600)} fontSize="21" fill={INK}>
             {l.un} {l.hazardClass}

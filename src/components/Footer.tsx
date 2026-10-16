@@ -9,8 +9,8 @@ const columns = [
     title: "Shop",
     links: [
       { label: "All products", href: "/shop/" },
-      { label: "OCTA-X Ethanol 95%", href: "/shop/octa-x-ethanol/" },
-      { label: "OCTA-M Methanol", href: "/shop/octa-m-methanol/" },
+      { label: "OCTA-X Ethanol 96%", href: "/shop/octa-x-ethanol/" },
+      { label: "OCTA-M Methanol 100%", href: "/shop/octa-m-methanol/" },
       { label: "OCTA-BOOST", href: "/shop/octa-boost/" },
       { label: "OCTA-SHOT", href: "/shop/octa-shot/" },
       { label: "OCTA-TORQUE", href: "/shop/octa-torque/" },
@@ -38,7 +38,7 @@ export function Footer() {
               {SITE.tagline}
             </p>
             <p className="mt-3 max-w-xs text-sm text-paper/70">
-              OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster for
+              OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster for
               performance use.
             </p>
             <div className="mt-6 inline-flex items-center gap-3">
