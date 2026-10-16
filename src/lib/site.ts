@@ -6,6 +6,8 @@ export {
   SITE_URL,
   INDEXABLE,
   SITE,
+  BANK,
+  hasBankDetails,
   absoluteUrl,
   asset,
 } from "../../site.config.mjs";

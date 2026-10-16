@@ -9,6 +9,7 @@ import { ProcessingOverlay } from "./ProcessingOverlay";
 import { Icon } from "./Icon";
 import { OrderTotals } from "./OrderTotals";
 import { courierNote } from "@/lib/courier";
+import { buildOrder, saveOrder } from "@/lib/order";
 
 const inputClass =
   "mt-1.5 w-full border-2 border-ink bg-paper-2 px-3 py-2.5 text-base outline-none transition-colors focus:bg-panel aria-[invalid=true]:border-flare aria-[invalid=true]:bg-flare/5";
@@ -76,7 +77,15 @@ export function CheckoutView() {
     e.preventDefault();
     if (!validate()) return;
     setProcessing(true);
-    // Orders are not sent anywhere yet: connect an order email or payment provider before launch.
+    // Save the order for the confirmation page (amount to pay, EFT reference).
+    // Orders are not sent anywhere yet: connect an order email before launch.
+    const data = new FormData(formRef.current ?? undefined);
+    saveOrder(
+      buildOrder(items, {
+        name: String(data.get("fullname") ?? "").trim(),
+        email: String(data.get("email") ?? "").trim(),
+      }),
+    );
     window.setTimeout(() => {
       clear();
       router.push("/checkout/success/");
@@ -109,9 +118,13 @@ export function CheckoutView() {
 
         <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-2xl uppercase">Payment</legend>
-          <div className="border-2 border-dashed border-ink bg-paper-2 p-5 text-sm text-ink-soft">
-            Once you place your order we will contact you to confirm payment and
-            delivery.
+          <div className="flex gap-4 border-2 border-ink bg-paper-2 p-5 text-sm text-ink-soft">
+            <span className="grid h-10 w-10 shrink-0 place-items-center bg-ink font-mono text-xs font-bold text-lime">EFT</span>
+            <p>
+              Pay by EFT (bank transfer). After you place your order you will get our
+              bank details and your order reference. Your order is dispatched once the
+              payment reflects.
+            </p>
           </div>
         </fieldset>
       </div>

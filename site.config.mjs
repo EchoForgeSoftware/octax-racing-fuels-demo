@@ -28,6 +28,19 @@ export const SITE = {
   locale: "en_ZA",
 };
 
+// EFT payment details shown after checkout. While any field is empty the bank
+// details stay hidden and customers are told the details will be sent to them,
+// so nobody can pay into a placeholder account.
+export const BANK = {
+  accountHolder: "",
+  bank: "",
+  accountNumber: "",
+  branchCode: "",
+  accountType: "",
+};
+
+export const hasBankDetails = Object.values(BANK).every((v) => v.trim() !== "");
+
 /** Build an absolute URL from a site-relative path like "/shop". */
 export function absoluteUrl(path = "/") {
   const clean = path.startsWith("/") ? path : `/${path}`;

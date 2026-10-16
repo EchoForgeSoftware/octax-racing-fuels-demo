@@ -6,6 +6,7 @@ const paths = {
   check: "M20 6 9 17l-5-5",
   close: "M6 6l12 12M6 18L18 6",
   arrow: "M5 12h14M13 6l6 6-6 6",
+  copy: "M9 9h11v11H9z M5 15V4h11",
 } as const;
 
 export type IconName = keyof typeof paths;

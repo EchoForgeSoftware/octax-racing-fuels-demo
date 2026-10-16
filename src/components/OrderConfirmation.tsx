@@ -3,35 +3,93 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "./Icon";
+import { BankDetails } from "./BankDetails";
+import { formatPrice } from "@/lib/format";
+import { readOrder, type PlacedOrder } from "@/lib/order";
+import { SITE, hasBankDetails } from "@/lib/site";
 
 export function OrderConfirmation() {
-  // Generated on the client after mount so the static HTML stays stable.
-  const [ref, setRef] = useState<string | null>(null);
+  // Read on the client after mount so the static HTML stays stable.
+  const [order, setOrder] = useState<PlacedOrder | null>(null);
 
   useEffect(() => {
-    const n = Math.floor(100000 + Math.random() * 900000);
-    setRef(`OX-${n}`);
+    setOrder(readOrder());
   }, []);
 
   return (
-    <div className="mx-auto max-w-xl border-2 border-ink bg-panel p-8 text-center shadow-[10px_10px_0_0_var(--color-lime)] sm:p-10">
-      <div className="animate-pop mx-auto grid h-14 w-14 place-items-center bg-lime text-ink shadow-[5px_5px_0_0_var(--color-ink)]">
-        <Icon name="check" size={28} strokeWidth={3} />
-      </div>
-      <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Order received</h1>
-      <p className="mt-4 text-ink-soft">
-        Thanks for your order. We will contact you to confirm payment and delivery,
-        and dispatch within 24 to 48 hours.
-      </p>
-
-      <div className="mt-6 border-2 border-ink bg-ink p-4 text-left">
-        <p className="kicker text-lime">Order reference</p>
-        <p className="num mt-1 font-display text-3xl text-paper" aria-live="polite">
-          {ref ?? "OX-······"}
+    <div className="mx-auto max-w-xl border-2 border-ink bg-panel p-8 shadow-[10px_10px_0_0_var(--color-lime)] sm:p-10">
+      <div className="text-center">
+        <div className="animate-pop mx-auto grid h-14 w-14 place-items-center bg-lime text-ink shadow-[5px_5px_0_0_var(--color-ink)]">
+          <Icon name="check" size={28} strokeWidth={3} />
+        </div>
+        <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Order received</h1>
+        <p className="mt-4 text-ink-soft">
+          Thanks{order?.name ? `, ${order.name.split(" ")[0]}` : ""}. Pay by EFT using the details
+          below and your order reference. We dispatch within 24 to 48 hours once your
+          payment reflects.
         </p>
       </div>
 
-      <div className="mt-7 flex flex-wrap justify-center gap-3">
+      {order && (
+        <div className="mt-7 grid grid-cols-2 gap-px border-2 border-ink bg-ink">
+          <div className="bg-paper p-4">
+            <p className="kicker text-muted">Order reference</p>
+            <p className="num mt-1 whitespace-nowrap font-display text-xl sm:text-2xl">{order.ref}</p>
+          </div>
+          <div className="bg-paper p-4">
+            <p className="kicker text-muted">Amount to pay</p>
+            <p className="num mt-1 font-display text-2xl text-flare">{formatPrice(order.total)}</p>
+            <p className="num mt-0.5 text-xs text-muted">
+              {formatPrice(order.subtotal)} + {order.courier > 0 ? `${formatPrice(order.courier)} courier` : "free delivery"}
+            </p>
+          </div>
+        </div>
+      )}
+
+      <section className="mt-7">
+        <h2 className="font-display text-xl">Pay by EFT</h2>
+        {hasBankDetails ? (
+          <>
+            <div className="mt-3">
+              <BankDetails reference={order?.ref} />
+            </div>
+            <ol className="mt-4 space-y-2 text-sm text-ink-soft">
+              <li>1. Use <strong className="text-ink">{order?.ref ?? "your order reference"}</strong> as the payment reference.</li>
+              <li>
+                2. Email your proof of payment to{" "}
+                <a href={`mailto:${SITE.email}${order ? `?subject=Proof of payment ${order.ref}` : ""}`} className="font-bold text-ink underline hover:text-flare">
+                  {SITE.email}
+                </a>.
+              </li>
+              <li>3. We dispatch once the payment reflects in our account.</li>
+            </ol>
+          </>
+        ) : (
+          <p className="mt-3 border-2 border-dashed border-ink bg-paper-2 p-4 text-sm text-ink-soft">
+            We will send our bank details to {order?.email || "you"} with your order
+            reference. Your order is dispatched once payment reflects.
+          </p>
+        )}
+      </section>
+
+      {order && order.items.length > 0 && (
+        <section className="mt-7">
+          <h2 className="kicker text-muted">Your order</h2>
+          <ul className="num mt-3 divide-y divide-line border-2 border-ink text-sm">
+            {order.items.map((i) => (
+              <li key={i.sku} className="flex justify-between gap-3 px-4 py-2.5">
+                <span className="min-w-0">
+                  <span className="font-mono font-bold">{i.qty}&times;</span> {i.name}{" "}
+                  <span className="font-mono text-xs uppercase text-muted">{i.size}</span>
+                </span>
+                <span className="whitespace-nowrap font-bold">{formatPrice(i.price * i.qty)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <div className="mt-8 flex flex-wrap justify-center gap-3">
         <Link href="/shop/" className="border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink">
           Continue shopping
         </Link>
