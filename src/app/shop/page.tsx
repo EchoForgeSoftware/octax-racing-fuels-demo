@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/shop/",
   title: "Shop",
   description:
-    "Browse the OCTA Performance range: OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster, with pack sizes, prices and stock.",
+    "Browse the OCTA Performance range: OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster, with pack sizes and prices.",
 });
 
 const trail = [
@@ -29,8 +29,8 @@ export default function ShopPage() {
           <p className="kicker text-flare">Catalogue</p>
           <h1 className="mt-3 font-display text-[clamp(2.4rem,8vw,5rem)]">Shop OCTA</h1>
           <p className="mt-4 max-w-2xl text-ink-soft">
-            Ethanol, methanol and octane booster for performance use. Pack sizes,
-            prices and stock shown here are sample data for this demo.
+            Ethanol, methanol, octane boosters and diesel improver for performance use.
+            Prices include VAT and exclude courier.
           </p>
         </header>
 

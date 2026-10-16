@@ -1,13 +1,15 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
-import { fromPrice, totalStock, getCategory } from "@/lib/products";
+import { fromPrice, getCategory } from "@/lib/products";
 import { formatPrice } from "@/lib/format";
+import { volumeLabel } from "@/lib/pack";
 import { ProductShot } from "./pack/ProductShot";
 
 export function ProductCard({ product }: { product: Product }) {
   const price = fromPrice(product);
-  const stock = totalStock(product);
   const category = getCategory(product.category);
+  // Pack sizes in place of a stock badge: no stock is held on hand.
+  const sizes = product.variants.map((v) => volumeLabel(v.size)).join(" · ");
 
   return (
     <Link
@@ -23,17 +25,14 @@ export function ProductCard({ product }: { product: Product }) {
 
       <div className="flex flex-1 flex-col p-4">
         <h3 className="font-display text-lg uppercase leading-none">{product.name}</h3>
-        <p className="mt-2 line-clamp-2 text-sm text-muted">{product.short}</p>
-        <div className="mt-4 flex items-end justify-between border-t-2 border-ink pt-3">
+        <p className="mb-4 mt-2 line-clamp-2 text-sm text-muted">{product.short}</p>
+        <div className="mt-auto flex items-end justify-between gap-3 border-t-2 border-ink pt-3">
           <div>
             <span className="kicker text-muted">From</span>
             <div className="num font-display text-2xl">{formatPrice(price)}</div>
             <span className="font-mono text-[0.6rem] uppercase tracking-wider text-muted">Incl. VAT</span>
           </div>
-          <span className="flex items-center gap-1.5 font-mono text-[0.68rem] font-bold uppercase tracking-wider">
-            <span className={`h-2 w-2 ${stock > 0 ? "bg-lime" : "bg-flare"}`} />
-            {stock > 0 ? "In stock" : "Sold out"}
-          </span>
+          <span className="num text-right font-mono text-[0.68rem] font-bold uppercase tracking-wider">{sizes}</span>
         </div>
       </div>
     </Link>

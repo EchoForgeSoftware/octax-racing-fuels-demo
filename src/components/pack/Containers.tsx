@@ -1,5 +1,4 @@
 import type { Product } from "@/lib/products";
-import { categoryColor } from "@/lib/pack";
 import { BrandLabel, labelSize } from "../brand/BrandLabel";
 
 // Flat livery illustrations of the three OCTA containers, each drawn in its own
@@ -16,7 +15,7 @@ const DISPLAY = { fontFamily: "var(--font-display), sans-serif" };
 
 export const PACK_SIZE = {
   can: { w: 210, h: 320 },
-  drum: { w: 226, h: 304 },
+  drum: { w: 226, h: 308 },
   jug: { w: 176, h: 310 },
   bottle: { w: 120, h: 250 },
 } as const;
@@ -125,26 +124,46 @@ export function JerryCan({ product, volume, uid }: PackProps) {
   );
 }
 
-/** 210 L steel drum: black body, hoops and chimes in the category colour. */
-export function Drum({ product }: PackProps) {
-  const color = categoryColor[product.category];
+// 210 L plastic drum: rounded HDPE body, two bungs on the lid.
+const DRUM_BODY = "M24 14 H202 Q224 14 224 36 V286 Q224 308 202 308 H24 Q2 308 2 286 V36 Q2 14 24 14 Z";
+
+/** 210 L white HDPE plastic drum with moulded rolling rings and red bung caps. */
+export function Drum({ product, uid }: PackProps) {
+  const clip = `${uid}-drum`;
+  const ring = (y: number) => (
+    <g key={y}>
+      <rect x="-1" y={y} width="228" height="14" rx="7" fill={HDPE} stroke={INK} strokeWidth="2.5" />
+      <line x1="6" y1={y + 10} x2="220" y2={y + 10} stroke={INK} strokeWidth="1.5" opacity="0.18" />
+    </g>
+  );
+
   return (
     <g>
-      <rect x="3" y="10" width="220" height="284" rx="6" fill={INK} stroke={INK} strokeWidth={STROKE} />
-      <rect x="20" y="12" width="12" height="280" fill="#fff" opacity="0.18" />
-      <rect x="38" y="12" width="4" height="280" fill="#fff" opacity="0.12" />
-      <rect x="190" y="12" width="31" height="280" fill="#fff" opacity="0.05" />
-      {[50, 254].map((y) => (
-        <g key={y}>
-          <rect x="1" y={y} width="224" height="10" rx="2" fill={color} stroke={INK} strokeWidth="2.5" />
-          <rect x="1" y={y + 6} width="224" height="4" fill={INK} opacity="0.25" />
-        </g>
-      ))}
-      <rect x="0" y="2" width="226" height="13" rx="4" fill={color} stroke={INK} strokeWidth={STROKE} />
-      <rect x="0" y="289" width="226" height="13" rx="4" fill={color} stroke={INK} strokeWidth={STROKE} />
-      <rect x="2" y="9" width="222" height="5" fill={INK} opacity="0.2" />
+      <defs>
+        <clipPath id={clip}>
+          <path d={DRUM_BODY} />
+        </clipPath>
+      </defs>
 
-      <PlacedLabel product={product} cx={113} y={68} maxW={140} maxH={180} />
+      {/* Bung caps on the lid */}
+      <ThreadedCap x={36} y={0} w={34} h={18} />
+      <ThreadedCap x={160} y={2} w={26} h={16} />
+
+      <path d={DRUM_BODY} fill={HDPE} />
+      <g clipPath={`url(#${clip})`}>
+        <rect x="0" y="60" width="226" height="250" fill={MILK} opacity="0.45" />
+        <rect x="2" y="14" width="18" height="294" fill={INK} opacity="0.06" />
+        <rect x="196" y="14" width="28" height="294" fill={INK} opacity="0.09" />
+        <rect x="24" y="44" width="8" height="236" fill="#fff" opacity="0.9" />
+      </g>
+      <path d={DRUM_BODY} fill="none" stroke={INK} strokeWidth={STROKE} strokeLinejoin="round" />
+
+      {/* Moulded top chime and rolling rings */}
+      <path d="M8 30 H218" stroke={INK} strokeWidth="2" opacity="0.3" />
+      {ring(40)}
+      {ring(266)}
+
+      <PlacedLabel product={product} cx={113} y={62} maxW={140} maxH={196} />
     </g>
   );
 }

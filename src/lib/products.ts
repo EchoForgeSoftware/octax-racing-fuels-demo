@@ -1,7 +1,7 @@
 // OCTA Performance catalogue. Product names, UN numbers, hazard classes, mix
 // ratios and label wording come from the supplied product labels. Prices and
 // pack sizes come from the supplied price list (ZAR, VAT included, courier
-// excluded). Stock levels are still sample data for the demo.
+// excluded). No stock is held on hand, so stock is not tracked.
 
 export type Category = {
   slug: string;
@@ -14,7 +14,6 @@ export type Variant = {
   sku: string;
   /** ZAR, VAT included, courier excluded. null = subject to quotation. */
   price: number | null;
-  stock: number;
 };
 
 export type Pictogram = "flame" | "goggles" | "gloves" | "respirator" | "no-flame";
@@ -98,8 +97,8 @@ export const products: Product[] = [
     applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
     featured: true,
     variants: [
-      { size: "25L", sku: "OCTA-X-25", price: 760, stock: 34 },
-      { size: "210L drum", sku: "OCTA-X-210", price: 6160, stock: 7 },
+      { size: "25L", sku: "OCTA-X-25", price: 760 },
+      { size: "210L plastic drum", sku: "OCTA-X-210", price: 6160 },
     ],
     label: {
       layout: "wide",
@@ -131,8 +130,8 @@ export const products: Product[] = [
     applications: ["Methanol-burning engines", "Performance use"],
     featured: true,
     variants: [
-      { size: "25L", sku: "OCTA-M-25", price: 600, stock: 60 },
-      { size: "210L drum", sku: "OCTA-M-210", price: 5500, stock: 15 },
+      { size: "25L", sku: "OCTA-M-25", price: 600 },
+      { size: "210L plastic drum", sku: "OCTA-M-210", price: 5500 },
     ],
     label: {
       layout: "wide",
@@ -165,8 +164,8 @@ export const products: Product[] = [
     featured: true,
     // 5L HDPE jug; the 20L can is priced on quotation.
     variants: [
-      { size: "5L", sku: "OCTA-BOOST-5", price: 440, stock: 40 },
-      { size: "20L", sku: "OCTA-BOOST-20", price: null, stock: 0 },
+      { size: "5L", sku: "OCTA-BOOST-5", price: 440 },
+      { size: "20L", sku: "OCTA-BOOST-20", price: null },
     ],
     label: {
       layout: "tall",
@@ -203,7 +202,7 @@ export const products: Product[] = [
     ],
     applications: ["Petrol engines", "Performance use"],
     featured: true,
-    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 150, stock: 120 }],
+    variants: [{ size: "500ml", sku: "OCTA-SHOT-500", price: 150 }],
     label: {
       layout: "tall",
       mark: "SHOT",
@@ -229,7 +228,7 @@ export const products: Product[] = [
       { label: "Use", value: "Diesel improver" },
     ],
     applications: ["Diesel engines"],
-    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 120, stock: 90 }],
+    variants: [{ size: "500ml", sku: "OCTA-TORQUE-500", price: 120 }],
     label: {
       layout: "tall",
       mark: "TORQUE",
@@ -265,8 +264,4 @@ export function featuredProducts(): Product[] {
 export function fromPrice(p: Product): number {
   const listed = p.variants.flatMap((v) => (v.price === null ? [] : [v.price]));
   return Math.min(...listed);
-}
-
-export function totalStock(p: Product): number {
-  return p.variants.reduce((sum, v) => sum + v.stock, 0);
 }

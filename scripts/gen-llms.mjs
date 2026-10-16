@@ -13,8 +13,7 @@ const content = `# ${SITE.name}
 
 > ${SITE.description}
 
-This is a demonstration e-commerce site. Products, prices and stock are sample data
-and no real orders are placed.
+This is a demonstration e-commerce site; no real orders are placed.
 
 ## Main pages
 - [Home](${u("/")}): Overview of OCTA Performance and its products.

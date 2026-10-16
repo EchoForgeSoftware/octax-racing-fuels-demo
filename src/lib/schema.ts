@@ -1,6 +1,6 @@
 import { SITE, SITE_URL, absoluteUrl } from "./site";
 import type { Product } from "./products";
-import { fromPrice, totalStock } from "./products";
+import { fromPrice } from "./products";
 
 const logoUrl = absoluteUrl("/og/default.png");
 
@@ -43,7 +43,6 @@ export function breadcrumbSchema(trail: { name: string; path: string }[]) {
 
 export function productSchema(product: Product) {
   const price = fromPrice(product);
-  const inStock = totalStock(product) > 0;
   return {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -57,9 +56,8 @@ export function productSchema(product: Product) {
       priceCurrency: SITE.currency,
       lowPrice: price,
       offerCount: product.variants.filter((v) => v.price !== null).length,
-      availability: inStock
-        ? "https://schema.org/InStock"
-        : "https://schema.org/OutOfStock",
+      // No stock on hand: orders are taken and fulfilled to order.
+      availability: "https://schema.org/BackOrder",
       url: absoluteUrl(`/shop/${product.slug}/`),
     },
   };

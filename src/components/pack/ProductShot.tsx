@@ -7,7 +7,7 @@ import { Bottle, Drum, JerryCan, Jug, PACK_SIZE } from "./Containers";
 
 const INK = "var(--color-ink)";
 const LIME = "var(--color-lime)";
-const packWord = { can: "jerry can", drum: "steel drum", jug: "jug", bottle: "bottle" } as const;
+const packWord = { can: "jerry can", drum: "plastic drum", jug: "jug", bottle: "bottle" } as const;
 
 type Props = {
   product: Product;

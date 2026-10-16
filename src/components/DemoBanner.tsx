@@ -7,7 +7,7 @@ export function DemoBanner() {
         aria-hidden="true"
       />
       <span className="font-mono text-[0.68rem] font-bold uppercase tracking-[0.16em] text-lime">
-        Demo build · sample products, prices &amp; stock · no real orders
+        Demo build · no real orders or payments
       </span>
       <span
         className="hidden h-2 w-8 shrink-0 sm:block"
