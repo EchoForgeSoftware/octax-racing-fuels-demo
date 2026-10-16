@@ -209,10 +209,10 @@ function BoostLabel({ product }: { product: Product }) {
           </text>
           {l.mix.rows.map((r, i) => (
             <g key={r.ratio}>
-              <text x={142} y={272 + i * 27} textAnchor="end" style={cond(600)} fontSize="22" fill={MUTED_LIME}>
+              <text x={120} y={265 + i * 24} textAnchor="end" style={cond(600)} fontSize="22" fill={MUTED_LIME}>
                 {r.ratio}
               </text>
-              <text x={154} y={272 + i * 27} style={cond(600)} fontSize="22" fill={INK}>
+              <text x={132} y={265 + i * 24} style={cond(600)} fontSize="18" fill={INK}>
                 {r.text}
               </text>
             </g>

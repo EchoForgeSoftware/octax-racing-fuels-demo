@@ -5,11 +5,28 @@
 // - 210L drums always pay the standard R200 courier per drum;
 // - any other size is quoted separately.
 import { formatPrice } from "./format";
+import { courierRates, localTown } from "./courierRates";
 
-export const COURIER_FEE = 200;
+export { localTown };
+
+export type DeliveryMethod = "own" | "courier" | "collect";
+
+/** How an order to this town is delivered: our own vehicle inside the local area (free), else courier. */
+export function deliveryFor(city: string | null | undefined): { method: "own"; town: string } | { method: "courier" } {
+  const town = localTown(city);
+  return town ? { method: "own", town } : { method: "courier" };
+}
+
+export const DELIVERY_LABEL: Record<DeliveryMethod, string> = {
+  own: "OCTA delivery (local area, free)",
+  courier: "Courier",
+  collect: "Collected",
+};
+
+export const COURIER_FEE = courierRates.fee;
 
 /** Free-delivery threshold per pack size, in litres. */
-const FREE_FROM: Record<number, number> = { 5: 10, 25: 10, 0.5: 12 };
+const FREE_FROM: Record<number, number> = courierRates.freeFrom;
 
 export type Courier =
   | { kind: "fee"; fee: number; freeFrom: number | null }
@@ -30,7 +47,9 @@ export function courierFor(size: string, qty: number): Courier {
 }
 
 /** Courier across the cart: total fee, and whether any line still needs a quote. */
-export function cartCourier(lines: { size: string; qty: number }[]): { fee: number; quoted: boolean } {
+export function cartCourier(lines: { size: string; qty: number }[], city?: string | null): { fee: number; quoted: boolean; local: string | null } {
+  const local = localTown(city);
+  if (local) return { fee: 0, quoted: false, local };
   let fee = 0;
   let quoted = false;
   for (const line of lines) {
@@ -38,7 +57,7 @@ export function cartCourier(lines: { size: string; qty: number }[]): { fee: numb
     if (c.kind === "fee") fee += c.fee;
     if (c.kind === "quote") quoted = true;
   }
-  return { fee, quoted };
+  return { fee, quoted, local: null };
 }
 
 /** Short description of a line's courier, e.g. "Courier R600.00 (3 × R200.00)". */

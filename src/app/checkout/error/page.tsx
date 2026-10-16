@@ -5,6 +5,7 @@ import { buildMetadata } from "@/lib/metadata";
 export const metadata: Metadata = buildMetadata({
   path: "/checkout/error/",
   title: "Payment Failed",
+  noindex: true,
   description: "The payment could not be completed. Your cart has been kept so you can try again.",
 });
 
@@ -17,22 +18,22 @@ export default function CheckoutErrorPage() {
             <path d="M6 6l12 12M6 18L18 6" strokeLinecap="round" />
           </svg>
         </div>
-        <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Payment declined</h1>
+        <h1 className="mt-5 font-display text-[clamp(2rem,7vw,3.5rem)] leading-none">Payment needs checking</h1>
         <p className="mt-4 text-ink-soft">
-          The payment could not be completed. No money has been taken. Your cart has been
-          kept, so you can check your details and try again.
+          We could not confirm payment from this page. Check the order status and
+          your bank before paying again. Your cart has been kept.
         </p>
         <div className="mt-6 border-2 border-ink bg-ink p-4 text-left">
-          <p className="kicker text-lime">Common causes</p>
+          <p className="kicker text-lime">Before trying again</p>
           <ul className="mt-3 space-y-2 text-sm text-paper/80">
-            <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 bg-flare" />Card details entered incorrectly</li>
-            <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 bg-flare" />Insufficient funds or a bank hold</li>
-            <li className="flex gap-2"><span className="mt-2 h-1.5 w-1.5 shrink-0 bg-flare" />The bank flagged the transaction for review</li>
+            <li>Check the verified status if you used Ozow.</li>
+            <li>Confirm whether your bank shows a completed transfer.</li>
+            <li>Contact support with your order reference if the result is unclear.</li>
           </ul>
         </div>
         <div className="mt-7 flex flex-wrap justify-center gap-3">
-          <Link href="/checkout/" className="border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink">
-            Try again
+          <Link href="/checkout/ozow/" className="border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink">
+            Check Ozow payment
           </Link>
           <Link href="/cart/" className="border-2 border-ink px-6 py-3.5 font-display uppercase text-ink transition-colors hover:bg-ink hover:text-lime">
             Back to cart

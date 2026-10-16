@@ -1,3 +1,4 @@
+import { LiveDescription } from "@/components/LivePrice";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -15,6 +16,8 @@ import { LabelArtwork } from "@/components/brand/BrandLabel";
 import { PictogramIcon, pictogramName } from "@/components/brand/Pictograms";
 import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbSchema, productSchema } from "@/lib/schema";
+import { ProductDataSheet } from "@/components/TechnicalDataSheets";
+import { getTechnicalSheet } from "@/lib/technicalSheets";
 
 type Params = { slug: string };
 
@@ -34,6 +37,7 @@ export async function generateMetadata({
     path: `/shop/${product.slug}/`,
     title: product.name,
     description: product.short,
+    ogImage: `/og/products/${product.slug}.png`,
   });
 }
 
@@ -48,6 +52,7 @@ export default async function ProductPage({
 
   const category = getCategory(product.category);
   const label = product.label;
+  const technicalSheet = getTechnicalSheet(product.slug);
   const related = products.filter((p) => p.slug !== product.slug);
 
   const trail = [
@@ -73,7 +78,7 @@ export default async function ProductPage({
           <h1 className="mt-3 font-display text-[clamp(2rem,6vw,3.5rem)] leading-[0.9]">
             {product.name}
           </h1>
-          <p className="mt-5 text-ink-soft">{product.description}</p>
+          <p className="mt-5 text-ink-soft"><LiveDescription slug={product.slug} fallback={product.description} /></p>
         </ProductBuy>
 
         {/* Specs + applications */}
@@ -110,6 +115,7 @@ export default async function ProductPage({
                 for guidance.
               </p>
             </div>
+            {technicalSheet && <ProductDataSheet sheet={technicalSheet} />}
           </section>
         </Reveal>
 

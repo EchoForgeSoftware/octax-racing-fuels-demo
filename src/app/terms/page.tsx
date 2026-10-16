@@ -4,6 +4,8 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { JsonLd } from "@/components/JsonLd";
 import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbSchema } from "@/lib/schema";
+import { BusinessDetails } from "@/components/BusinessDetails";
+import { LEGAL } from "@/lib/site";
 
 export const metadata: Metadata = buildMetadata({
   path: "/terms/",
@@ -27,17 +29,28 @@ export default function TermsPage() {
         <p className="kicker text-flare">Legal</p>
         <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4rem)]">Terms of service</h1>
         <p className="mt-4 text-ink-soft">
-          These terms cover the sale of fuels and additives through this site. They are
+          These terms cover orders for OCTA fuels and additives. Read them with our{" "}
+          <Link href="/delivery-returns/" className="underline">delivery and returns policy</Link>{" "}
+          and the product handling information before ordering. Version {LEGAL.version}.
         </p>
 
         <div className="mt-10 space-y-8 text-muted">
+          <BusinessDetails />
           <section>
             <h2 className="font-display text-xl text-ink">Orders and pricing</h2>
             <p className="mt-2">
-              Prices are shown in South African Rand and may change. An order is a
+              Prices are shown in South African Rand, including VAT; courier is
+              shown separately. Review the products, quantities, delivery details
+              and total at checkout, and use the cart to correct errors before
+              submitting. An order is a
               request to buy; it is accepted once we confirm it. We may decline or
               cancel an order, for example where stock or delivery restrictions apply.
             </p>
+          </section>
+
+          <section>
+            <h2 className="font-display text-xl text-ink">Payments and confirmation</h2>
+            <p className="mt-2">When available, choose Ozow&apos;s hosted payment page or manual EFT to the published bank account. Use the order reference for manual transfers. A return from a payment page is not proof of payment; we verify the payment result. Payment and order references are displayed in your browser, and signed-in customers can view saved orders in their account. Please keep a copy. Contact us if a payment or order needs correction.</p>
           </section>
 
           <section>
@@ -65,19 +78,29 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-xl text-ink">Returns</h2>
             <p className="mt-2">
-              For safety reasons, opened fuel and additive containers cannot be
-              returned. Contact us about damaged or incorrect deliveries and we will put
-              it right.
+              Your rights concerning faulty, unsafe, damaged or incorrectly
+              supplied products are preserved. Cancellation, cooling-off and
+              refund rights apply where the law provides them, including any
+              lawful exceptions for the specific transaction. See the{" "}
+              <Link href="/delivery-returns/" className="underline">delivery and returns policy</Link>{" "}
+              and contact us before transporting or returning dangerous goods.
             </p>
           </section>
 
           <section>
             <h2 className="font-display text-xl text-ink">Liability</h2>
             <p className="mt-2">
-              Products must be used in line with their intended application and all
-              safety guidance. We are not liable for loss or damage caused by improper
-              storage, handling or use.
+              Products must be used in line with their intended application, the
+              product label and safety guidance. Confirm suitability for your
+              equipment before use. Nothing in these terms removes a consumer
+              right or excludes liability that cannot lawfully be excluded under
+              applicable South African law. Safety instructions do not replace
+              our obligations as the supplier.
             </p>
+          </section>
+          <section>
+            <h2 className="font-display text-xl text-ink">Questions and complaints</h2>
+            <p className="mt-2">Use the published <Link href="/contact/" className="underline">support contact</Link> with your order reference and a description of the issue. We will assess it and explain the next steps. These terms do not prevent you from approaching a competent regulator, tribunal or court, or exercising statutory remedies.</p>
           </section>
         </div>
       </div>

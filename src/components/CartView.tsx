@@ -45,7 +45,7 @@ export function CartView() {
           const product = getProduct(i.slug);
           return (
             <li key={i.sku} className="grid grid-cols-[4.5rem_1fr] gap-x-4 gap-y-3 p-4 sm:grid-cols-[5.5rem_1fr_auto] sm:items-center">
-              <Link href={`/shop/${i.slug}/`} tabIndex={-1} aria-hidden="true" className="row-span-2 block self-start border-2 border-ink sm:row-span-1">
+              <Link href={`/shop/${i.slug}/`} tabIndex={-1} aria-hidden="true" className="block self-start border-2 border-ink">
                 {product && (
                   <ProductShot
                     product={product}
@@ -68,8 +68,9 @@ export function CartView() {
                 </p>
               </div>
 
-              <div className="flex flex-wrap items-center justify-between gap-3 sm:col-start-3 sm:row-start-1 sm:justify-end">
-                <div className="flex items-center border-2 border-ink">
+              {/* Phones: one full-width row of quantity, line total and remove, the same for every item. */}
+              <div className="col-span-2 flex items-center gap-3 sm:col-span-1 sm:col-start-3 sm:row-start-1 sm:justify-end">
+                <div className="flex shrink-0 items-center border-2 border-ink">
                   <button
                     type="button"
                     aria-label={`Decrease ${i.name} quantity`}
@@ -91,7 +92,7 @@ export function CartView() {
                   </button>
                 </div>
 
-                <div className="num font-display text-lg sm:w-24 sm:text-right">
+                <div className="num flex-1 whitespace-nowrap text-right font-display text-lg sm:w-28 sm:flex-none">
                   {formatPrice(i.price * i.qty)}
                 </div>
 
@@ -99,7 +100,7 @@ export function CartView() {
                   type="button"
                   onClick={() => remove(i.sku)}
                   aria-label={`Remove ${i.name} from cart`}
-                  className="grid h-10 w-10 place-items-center border-2 border-transparent text-muted transition-colors hover:border-ink hover:text-flare"
+                  className="grid h-10 w-10 shrink-0 place-items-center border-2 border-transparent text-muted transition-colors hover:border-ink hover:text-flare"
                 >
                   <Icon name="close" size={16} />
                 </button>

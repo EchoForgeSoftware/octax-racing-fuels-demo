@@ -1,6 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
-import { SITE } from "@/lib/site";
+import { SITE, hasContactEmail, hasContactPhone } from "@/lib/site";
 import { OctaLogo } from "./brand/Wordmark";
 import zrgLogo from "@/assets/zrg-x-logo.png";
 
@@ -19,10 +19,14 @@ const columns = [
   {
     title: "Company",
     links: [
+      { label: "My account", href: "/account/" },
       { label: "Information", href: "/information/" },
+      { label: "Become a reseller", href: "/agents/" },
+      { label: "Technical data sheets", href: "/information/#data-sheets" },
       { label: "Contact", href: "/contact/" },
       { label: "Privacy policy", href: "/privacy/" },
       { label: "Terms of service", href: "/terms/" },
+      { label: "Delivery & returns", href: "/delivery-returns/" },
     ],
   },
 ];
@@ -69,12 +73,13 @@ export function Footer() {
           <div>
             <h2 className="kicker text-lime">Contact</h2>
             <ul className="mt-4 space-y-2.5 text-sm">
-              <li>
+              {hasContactEmail && <li>
                 <a href={`mailto:${SITE.email}`} className="text-paper/80 hover:text-lime">{SITE.email}</a>
-              </li>
-              <li>
+              </li>}
+              {hasContactPhone && <li>
                 <a href={`tel:${SITE.phoneHref}`} className="text-paper/80 hover:text-lime">{SITE.phoneDisplay}</a>
-              </li>
+              </li>}
+              {!hasContactEmail && !hasContactPhone && <li className="text-paper/60">Contact details will be published before ordering opens.</li>}
             </ul>
           </div>
         </div>

@@ -1,0 +1,72 @@
+[
+  {
+    "slug": "octa-boost",
+    "pages": 1,
+    "name": "OCTA-BOOST",
+    "category": "Octane booster",
+    "strapline": "For 95 octane petrol",
+    "description": "Solvent based octane improver.",
+    "benefits": ["Increase octane value", "No detrimental effect on fuel system", "Increase performance substantially"],
+    "tableTitle": "Recommended dosage / octane increase",
+    "columns": ["OCTA-BOOST", "95 octane petrol", "Reported increase*"],
+    "rows": [["5 L", "30 L", "8"], ["5 L", "25 L", "9"], ["5 L", "20 L", "11"], ["5 L", "15 L", "25"]],
+    "notes": ["*Octane-increase values are reproduced as supplied. The technical source does not state the test method or units for the increase.", "The petrol volume is the base fuel volume before the additive is added. Use only with 95 octane petrol as specified in the supplied table."],
+    "dosage": "5 L per 15-30 L of 95 octane petrol; see the table.",
+    "edition": "2026-10-16"
+  },
+  {
+    "slug": "octa-shot",
+    "pages": 1,
+    "name": "OCTA-SHOT",
+    "category": "Fuel octane booster",
+    "strapline": "500 mL / unleaded petrol",
+    "description": "Solvent based octane improver and emission reducer for unleaded gasoline.",
+    "benefits": ["Increase octane value", "Reduce emissions due to cleaner burning of fuel", "Provides wear protection for older vehicles and maintains modern vehicle emission systems at optimum performance"],
+    "tableTitle": "Recommended dosage / octane increase",
+    "columns": ["OCTA-SHOT", "Petrol volume", "93 fuel*", "95 fuel*"],
+    "rows": [["500 mL", "250 L", "2", "1"], ["500 mL", "200 L", "4", "2"], ["500 mL", "100 L", "5", "2.5"], ["500 mL", "50 L", "6.5", "3"]],
+    "notes": ["*The 93 and 95 columns show the reported octane increase for the respective base fuels. The technical source does not state the test method or units for the increase.", "The petrol volume is the base fuel volume before the additive is added."],
+    "dosage": "500 mL per 50-250 L of petrol; see the table.",
+    "edition": "2026-10-16"
+  },
+  {
+    "slug": "octa-torque",
+    "pages": 2,
+    "name": "OCTA-TORQUE",
+    "category": "Diesel performance improver",
+    "strapline": "For diesel fuel injection systems",
+    "description": "Application: all diesel fuel injection systems. Recommended dosage: 0.50% (5 L per 1000 L of diesel).",
+    "benefits": [
+      "Enhanced engine power and acceleration by restoring injector and combustion performance to their designed output",
+      "Improved fuel economy thanks to the one-tank clean-up demonstrated in critical industry tests",
+      "Cetane improvement of two numbers (average), resulting in better cold starting, lower noise and smoother running",
+      "Excellent keep clean and clean up injector performance, resulting in reduced environmental emissions, extended maintenance intervals and improved fuel economy",
+      "Improved fuel lubricity leading to complete pump and fuel system protection",
+      "Protects engines from the formation of harmful deposits",
+      "Extends the life of the fuel system by preventing corrosion from occurring and causing damage",
+      "Protects the environment by reducing harmful CO2 and NOx emissions",
+      "Helps prevent unscheduled maintenance and fuel filter blocking by keeping fuel systems clean",
+      "Faster fuel fill up and reduced forecourt spillage"
+    ],
+    "tableTitle": "Technical properties",
+    "columns": ["Property", "Unit", "Test method", "Value"],
+    "rows": [
+      ["Density at 20°C", "kg/L", "ASTM D 1298", "0.84"],
+      ["Viscosity at 40°C", "cSt", "ASTM D 445", "14"],
+      ["Viscosity at 100°C", "cSt", "ASTM D 445", "2.9"],
+      ["Viscosity index", "-", "ASTM D 2270", "97"],
+      ["Pour point", "°C", "ASTM D 97", "-15"],
+      ["Flash point (COC)", "°C", "ASTM D 92", "150"],
+      ["Flash point (PMCC)", "°C", "ASTM D 93", "168"],
+      ["Fire point", "°C", "ASTM D 92", "170"],
+      ["Colour", "-", "ASTM D 1500", "L4.0"],
+      ["Sulphated ash", "% mass", "ASTM D 874", "0.61"],
+      ["T.A.N.", "mgKOH/g", "ASTM D 664", "<2.0"],
+      ["Foaming tendency", "mL", "ASTM D 892", "0/0"],
+      ["Foam stability", "mL", "ASTM D 892", "0/0/0"]
+    ],
+    "notes": ["Technical properties and performance statements are reproduced from the supplied technical information. No additional test certification or independent verification is implied."],
+    "dosage": "0.50% / 5 L per 1000 L of diesel",
+    "edition": "2026-10-16"
+  }
+]

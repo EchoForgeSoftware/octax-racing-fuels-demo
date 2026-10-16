@@ -68,13 +68,80 @@ export const categories: Category[] = [
   },
   {
     slug: "additives",
-    name: "Octane booster",
-    blurb: "OCTA-BOOST in 5L for mixing with 95 octane pump fuel, and OCTA-SHOT fuel octane booster in 500ml.",
+    name: "Fuel additives",
+    blurb: "OCTA-BOOST and OCTA-SHOT octane boosters, and OCTA-TORQUE diesel improver.",
+  },
+];
+
+/**
+ * Products announced but not yet on sale: shown as "coming soon" until the
+ * business supplies data sheets and prices. Prices are then set in the back
+ * office (Products & pricing), which switches them live.
+ */
+export type UpcomingProduct = {
+  key: string;
+  name: string;
+  line: string;
+  group: "fuel" | "track" | "merch" | "detailing";
+  description: string;
+  priceNote: string;
+  variants: { sku: string; size: string }[];
+};
+
+export const comingSoon: UpcomingProduct[] = [
+  {
+    key: "octa-fuel",
+    name: "OCTA-FUEL",
+    line: "Racing fuel",
+    group: "fuel",
+    description: "Racing fuel in 102, 105, 110 and 120 octane.",
+    priceNote: "Priced per litre · quotation on request",
+    variants: ["102", "105", "110", "120"].map((o) => ({ sku: `OCTA-FUEL-${o}`, size: `${o} octane (per litre)` })),
   },
   {
-    slug: "diesel",
-    name: "Diesel improver",
-    blurb: "OCTA-TORQUE: diesel improver in a 500ml bottle.",
+    key: "octa-a",
+    name: "OCTA-A",
+    line: "Avgas",
+    group: "fuel",
+    description: "Aviation gasoline.",
+    priceNote: "Priced per litre · quotation on request",
+    variants: [{ sku: "OCTA-A-L", size: "Per litre" }],
+  },
+  {
+    key: "octa-n",
+    name: "OCTA-N",
+    line: "Nitro methane",
+    group: "fuel",
+    description: "Nitromethane in 5L, 25L and 210L.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-N-5", size: "5L" }, { sku: "OCTA-N-25", size: "25L" }, { sku: "OCTA-N-210", size: "210L plastic drum" }],
+  },
+  {
+    key: "octa-t",
+    name: "OCTA-T",
+    line: "Track Bite",
+    group: "track",
+    description: "Track bite in 5L and 25L.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-T-5", size: "5L" }, { sku: "OCTA-T-25", size: "25L" }],
+  },
+  {
+    key: "octa-detailing",
+    name: "OCTA Detailing",
+    line: "Detailing products",
+    group: "detailing",
+    description: "pH soaps, polishes and more.",
+    priceNote: "Coming later",
+    variants: [{ sku: "OCTA-DETAIL-SOAP", size: "pH soap" }, { sku: "OCTA-DETAIL-POLISH", size: "Polish" }],
+  },
+  {
+    key: "octa-merch",
+    name: "OCTA Merch",
+    line: "Merchandise",
+    group: "merch",
+    description: "Hoodies, hats, shirts and more.",
+    priceNote: "Prices coming soon",
+    variants: [{ sku: "OCTA-MERCH-HOODIE", size: "Hoodie" }, { sku: "OCTA-MERCH-HAT", size: "Hat" }, { sku: "OCTA-MERCH-SHIRT", size: "Shirt" }],
   },
 ];
 
@@ -151,12 +218,12 @@ export const products: Product[] = [
     slug: "octa-boost",
     name: "OCTA-BOOST Octane Booster",
     category: "additives",
-    short: "Octane booster for 95 octane pump fuel, mixed from 1:7 to 1:4.",
+    short: "Octane booster for 95 octane pump fuel, with doses of 5L per 15-30L of base fuel.",
     description:
-      "OCTA-BOOST is an octane booster for performance use. Mix it only with 95 octane pump fuel: 1:7 is the maximum dilution, 1:5 is moderate and 1:4 is extreme. Re-check your tune whenever you change the mix.",
+      "OCTA-BOOST is an octane booster for performance use. Mix it only with 95 octane pump fuel. The technical sheet specifies 5L per 30L, 25L, 20L or 15L of base fuel (ratios of 1:6, 1:5, 1:4 or 1:3). Consult the full dosage table and re-check your tune whenever you change the mix.",
     specs: [
       { label: "Mix with", value: "95 octane pump fuel only" },
-      { label: "Ratios", value: "1:7 max dilution · 1:5 moderate · 1:4 extreme" },
+      { label: "Dose", value: "5L per 30L / 25L / 20L / 15L of 95 octane petrol" },
       { label: "UN number", value: "UN 1170" },
       { label: "Hazard class", value: "Class 3, flammable liquid" },
     ],
@@ -182,9 +249,10 @@ export const products: Product[] = [
       mix: {
         lead: "MIX ONLY WITH 95 OCTANE PUMP FUEL",
         rows: [
-          { ratio: "1:7", text: "MAXIMUM DILUTION" },
-          { ratio: "1:5", text: "MODERATE" },
-          { ratio: "1:4", text: "EXTREME" },
+          { ratio: "1:6", text: "5L / 30L FUEL" },
+          { ratio: "1:5", text: "5L / 25L FUEL" },
+          { ratio: "1:4", text: "5L / 20L FUEL" },
+          { ratio: "1:3", text: "5L / 15L FUEL" },
         ],
       },
     },
@@ -219,7 +287,7 @@ export const products: Product[] = [
   {
     slug: "octa-torque",
     name: "OCTA-TORQUE Diesel Improver",
-    category: "diesel",
+    category: "additives",
     short: "Diesel improver in a 500ml bottle.",
     description:
       "OCTA-TORQUE is OCTA's diesel improver in a 500ml bottle, for diesel engines. Follow the dosing instructions supplied with the product.",

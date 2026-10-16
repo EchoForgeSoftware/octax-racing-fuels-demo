@@ -21,10 +21,7 @@ export function Hero() {
 
     const ctx = gsap.context(() => {
       const tilt = el.querySelector<HTMLElement>("[data-tilt]");
-      const depths = el.querySelectorAll<HTMLElement>("[data-depth]");
-      depths.forEach((d) =>
-        gsap.set(d, { z: Number(d.dataset.depth || 0), transformStyle: "preserve-3d" }),
-      );
+      const motion = window.matchMedia("(prefers-reduced-motion: no-preference)").matches;
 
       const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
@@ -49,14 +46,15 @@ export function Hero() {
         tl.from(
           tilt,
           {
-            rotationY: -48,
-            rotationX: 16,
-            z: -280,
+            rotationY: motion ? -18 : 0,
+            y: 40,
             autoAlpha: 0,
             transformOrigin: "center center",
-            transformPerspective: 1200,
-            duration: 1.2,
+            transformPerspective: 1600,
+            duration: 1.1,
             ease: "power4.out",
+            // End exactly flat so a refresh never leaves the card part-rotated.
+            onComplete: () => { gsap.set(tilt, { rotationY: 0, rotationX: 0, y: 0 }); },
           },
           "-=1",
         );
@@ -81,16 +79,19 @@ export function Hero() {
         );
       });
 
-      // Pointer-driven 3D tilt with parallax depth.
-      if (tilt) {
+      // Pointer-driven tilt: mouse only (no touch drags), desktop two-column layout,
+      // small angles, and only once the entrance has finished.
+      const canTilt = motion && window.matchMedia("(hover: hover) and (pointer: fine) and (min-width: 1024px)").matches;
+      if (tilt && canTilt) {
         const ry = gsap.quickTo(tilt, "rotationY", { duration: 0.6, ease: "power3.out" });
         const rx = gsap.quickTo(tilt, "rotationX", { duration: 0.6, ease: "power3.out" });
         const onMove = (e: PointerEvent) => {
+          if (tl.isActive()) return;
           const r = tilt.getBoundingClientRect();
           const px = (e.clientX - (r.left + r.width / 2)) / (r.width / 2);
           const py = (e.clientY - (r.top + r.height / 2)) / (r.height / 2);
-          ry(gsap.utils.clamp(-14, 14, px * 14));
-          rx(gsap.utils.clamp(-14, 14, -py * 14));
+          ry(gsap.utils.clamp(-6, 6, px * 6));
+          rx(gsap.utils.clamp(-6, 6, -py * 6));
         };
         const onLeave = () => {
           ry(0);
@@ -154,12 +155,12 @@ export function Hero() {
         <div data-slab className="relative [perspective:1200px]">
           <div
             data-tilt
-            className="border-2 border-ink bg-ink text-paper shadow-[14px_14px_0_0_var(--color-lime)] [transform-style:preserve-3d]"
+            className="border-2 border-ink bg-ink text-paper shadow-[14px_14px_0_0_var(--color-lime)]"
           >
-            <div data-depth="60">
+            <div>
               {hero && <ProductShot product={hero} frame="square" className="block aspect-square w-full" />}
             </div>
-            <div data-depth="30" className="grid grid-cols-2 gap-px border-t-2 border-ink bg-paper/20">
+            <div className="grid grid-cols-2 gap-px border-t-2 border-ink bg-paper/20">
               {[
                 { k: "Ethanol", to: 96, suffix: "%", label: "96%" },
                 { k: "Litre can", to: 25, suffix: "L", label: "25L" },

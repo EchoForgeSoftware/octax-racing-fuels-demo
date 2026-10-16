@@ -6,6 +6,7 @@ import { buildMetadata } from "@/lib/metadata";
 export const metadata: Metadata = buildMetadata({
   path: "/cart/",
   title: "Your Cart",
+  noindex: true,
   description: "Review the OCTA products in your OCTA Performance cart before checkout.",
 });
 

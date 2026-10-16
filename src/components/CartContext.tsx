@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { products } from "@/lib/products";
+import { usePricing } from "./PricingContext";
 
 export type CartItem = {
   sku: string;
@@ -40,14 +41,16 @@ const CartCtx = createContext<CartState | null>(null);
 /**
  * Saved carts hold a snapshot of each item. Refresh name, size and price from
  * the current catalogue so price-list changes reach existing carts, and drop
- * items that are no longer sold or are now priced on quotation.
+ * items that are no longer sold or are now priced on quotation. `priceOf` gives
+ * the back-office price and the signed-in customer's own price.
  */
-function reprice(saved: CartItem[]): CartItem[] {
+function reprice(saved: CartItem[], priceOf: (sku: string, fallback: number | null) => number | null): CartItem[] {
   return saved.flatMap((item) => {
     const product = products.find((p) => p.slug === item.slug);
     const variant = product?.variants.find((v) => v.sku === item.sku);
-    if (!product || !variant || variant.price === null) return [];
-    return [{ ...item, name: product.name, size: variant.size, price: variant.price }];
+    const price = variant ? priceOf(variant.sku, variant.price) : null;
+    if (!product || !variant || price === null) return [];
+    return [{ ...item, name: product.name, size: variant.size, price }];
   });
 }
 
@@ -55,11 +58,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [items, setItems] = useState<CartItem[]>([]);
   const [ready, setReady] = useState(false);
   const [lastAdded, setLastAdded] = useState<AddedSignal | null>(null);
+  const pricing = usePricing();
+
+  // Prices change in the back office and differ per signed-in customer.
+  useEffect(() => {
+    setItems((prev) => (prev.length ? reprice(prev, pricing.price) : prev));
+  }, [pricing]);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(reprice(JSON.parse(raw) as CartItem[]));
+      if (raw) setItems(reprice(JSON.parse(raw) as CartItem[], (_sku, f) => f));
     } catch {
       // ignore corrupt or unavailable storage
     }
@@ -92,7 +101,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
               i.sku === item.sku ? { ...i, qty: i.qty + qty } : i,
             );
           }
-          return [...prev, { ...item, qty }];
+          return [...prev, { ...item, price: pricing.price(item.sku, item.price) ?? item.price, qty }];
         });
         setLastAdded({ name: item.name, qty, at: Date.now() });
       },
@@ -105,7 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         ),
       clear: () => setItems([]),
     };
-  }, [items, ready, lastAdded]);
+  }, [items, ready, lastAdded, pricing]);
 
   return <CartCtx.Provider value={api}>{children}</CartCtx.Provider>;
 }

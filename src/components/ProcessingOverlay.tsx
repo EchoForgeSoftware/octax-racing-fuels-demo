@@ -1,6 +1,6 @@
 "use client";
 
-export function ProcessingOverlay({ durationMs }: { durationMs: number }) {
+export function ProcessingOverlay({ durationMs, ozow = false }: { durationMs: number; ozow?: boolean }) {
   return (
     <div
       role="status"
@@ -12,9 +12,9 @@ export function ProcessingOverlay({ durationMs }: { durationMs: number }) {
           className="mx-auto block h-14 w-14 rounded-full border-4 border-lime border-t-transparent animate-spin-slow"
           aria-hidden="true"
         />
-        <p className="mt-7 font-display text-2xl uppercase text-paper">Placing your order</p>
+        <p className="mt-7 font-display text-2xl uppercase text-paper">{ozow ? "Connecting to Ozow" : "Placing your order"}</p>
         <p className="mt-2 font-mono text-xs uppercase tracking-[0.16em] text-paper/50">
-          Preparing your EFT reference &middot; do not close this window
+          {ozow ? "Preparing your secure payment" : "Preparing your EFT reference"} &middot; do not close this window
         </p>
         <div className="mt-7 h-2 w-full bg-paper/15">
           <div

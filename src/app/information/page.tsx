@@ -5,6 +5,7 @@ import { Reveal } from "@/components/anim/Reveal";
 import { JsonLd } from "@/components/JsonLd";
 import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbSchema } from "@/lib/schema";
+import { TechnicalDataSheets } from "@/components/TechnicalDataSheets";
 
 export const metadata: Metadata = buildMetadata({
   path: "/information/",
@@ -21,7 +22,7 @@ const trail = [
 const faqs = [
   {
     q: "How do I mix OCTA-BOOST?",
-    a: "Mix OCTA-BOOST only with 95 octane pump fuel. The label gives three ratios: 1:7 is the maximum dilution, 1:5 is moderate and 1:4 is extreme. Re-check your tune whenever you change the mix.",
+    a: "Mix OCTA-BOOST only with 95 octane pump fuel. The technical sheet specifies 5L per 30L, 25L, 20L or 15L of base fuel (1:6, 1:5, 1:4 or 1:3). Consult its full dosage table and re-check your tune whenever you change the mix.",
   },
   {
     q: "Should I run ethanol or methanol?",
@@ -37,7 +38,7 @@ const faqs = [
   },
   {
     q: "How is it delivered?",
-    a: "Prices on the site include VAT. Courier is R200 per pack. Delivery is free on 10 or more of the same 5L or 25L product, or 12 or more of the same 500ml product; 210L drums always pay the standard R200 courier. Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA fuels are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
+    a: "Prices on the site include VAT. Courier is R200 per pack. Delivery is free on 10 or more of the same 5L or 25L product, or 12 or more of the same 500ml product; 210L drums always pay the standard R200 courier. Dispatch and delivery arrangements are confirmed for the order and destination. OCTA fuels are dangerous goods, so appropriate transport arrangements are required.",
   },
 ];
 
@@ -68,7 +69,7 @@ const guide = [
   },
   {
     h: "OCTA-BOOST Octane Booster",
-    p: "An octane booster mixed only with 95 octane pump fuel: 1:7 for maximum dilution, 1:5 for moderate and 1:4 for extreme.",
+    p: "An octane booster mixed only with 95 octane pump fuel. The technical sheet gives doses of 5L per 30L, 25L, 20L or 15L of base fuel.",
     href: "/shop/octa-boost/",
     cta: "Shop OCTA-BOOST",
   },
@@ -103,6 +104,8 @@ export default function InformationPage() {
             build details.
           </p>
         </header>
+
+        <TechnicalDataSheets />
 
         <section className="mt-14 border-t-2 border-ink">
           {guide.map((g, i) => (
@@ -143,9 +146,9 @@ export default function InformationPage() {
           <p className="mt-4 text-ink-soft">
             Add products to your cart and check out online. Prices include VAT, and courier is
             added at R200 per pack, free on 10 or more of the same 5L or 25L product or 12
-            or more of the same 500ml product. Orders are dispatched within a
-            24 to 48 hour window to your workshop or a nominated track address, subject to
-            dangerous-goods transport rules for your area. 
+            or more of the same 500ml product. Dispatch and delivery arrangements are
+            confirmed for each order and destination, subject to appropriate
+            dangerous-goods transport arrangements. See the <Link href="/delivery-returns/" className="underline">delivery and returns information</Link>.
           </p>
         </section>
 

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
+import { hasContactEmail, SITE } from "@/lib/site";
 
 type Errors = Partial<Record<"name" | "email" | "message", string>>;
 
@@ -35,41 +37,43 @@ export function ContactForm() {
       e.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
       return;
     }
+    if (!hasContactEmail) return;
+    const topic = String(data.get("topic") ?? "Enquiry");
+    const body = `Name: ${String(data.get("name") ?? "").trim()}\nEmail: ${String(data.get("email") ?? "").trim()}\n\n${String(data.get("message") ?? "").trim()}`;
+    window.location.href = `mailto:${SITE.email}?subject=${encodeURIComponent(`OCTA enquiry: ${topic}`)}&body=${encodeURIComponent(body)}`;
     setSent(true);
-    e.currentTarget.reset();
   }
 
-  if (sent) {
-    return (
+  return <>
+    {sent && (
       <div
         role="status"
         className="border-2 border-ink bg-lime p-6"
       >
         <h2 className="font-display text-xl uppercase text-ink">
-          Message sent
+          Email draft opened
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
-          Thanks for getting in touch. The OCTA Performance team will reply with a
-          product recommendation.
+          Your email app should open with your message. Review it and press Send
+          there. If no email app opens, email {SITE.email} directly. This website
+          has not sent the message for you.
         </p>
         <button
           type="button"
           onClick={() => setSent(false)}
           className="kicker mt-4 inline-block border-b-2 border-ink pb-1 hover:text-flare"
         >
-          Send another message
+          Back to my message
         </button>
       </div>
-    );
-  }
-
-  return (
-    <form onSubmit={onSubmit} noValidate className="space-y-5">
+    )}
+    <form hidden={sent} onSubmit={onSubmit} noValidate className="space-y-5">
+      {!hasContactEmail && <p role="status" className="border-2 border-dashed border-ink bg-paper-2 p-3 text-sm text-ink-soft">Contact details are being finalised. This preview cannot send messages yet.</p>}
       <div>
         <label htmlFor="name" className={labelClass}>
           Name
         </label>
-        <input id="name" name="name" type="text" autoComplete="name" className={inputClass} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} />
+        <input id="name" name="name" type="text" autoComplete="name" maxLength={200} className={inputClass} aria-invalid={!!errors.name} aria-describedby={errors.name ? "name-err" : undefined} />
         {errors.name && (
           <p id="name-err" className="mt-1 font-mono text-xs text-flare">{errors.name}</p>
         )}
@@ -79,7 +83,7 @@ export function ContactForm() {
         <label htmlFor="email" className={labelClass}>
           Email
         </label>
-        <input id="email" name="email" type="email" autoComplete="email" className={inputClass} aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-err" : undefined} />
+        <input id="email" name="email" type="email" autoComplete="email" maxLength={254} className={inputClass} aria-invalid={!!errors.email} aria-describedby={errors.email ? "email-err" : undefined} />
         {errors.email && (
           <p id="email-err" className="mt-1 font-mono text-xs text-flare">{errors.email}</p>
         )}
@@ -101,7 +105,7 @@ export function ContactForm() {
         <label htmlFor="message" className={labelClass}>
           Message
         </label>
-        <textarea id="message" name="message" rows={5} className={inputClass} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-err" : undefined} />
+        <textarea id="message" name="message" rows={5} maxLength={3000} className={inputClass} aria-invalid={!!errors.message} aria-describedby={errors.message ? "message-err" : undefined} />
         {errors.message && (
           <p id="message-err" className="mt-1 font-mono text-xs text-flare">{errors.message}</p>
         )}
@@ -109,10 +113,12 @@ export function ContactForm() {
 
       <button
         type="submit"
-        className="w-full border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink sm:w-auto"
+        disabled={!hasContactEmail}
+        className="w-full border-2 border-ink bg-flare px-6 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:opacity-50 sm:w-auto"
       >
-        Send message
+        Open email draft
       </button>
+      <p className="text-xs text-muted">This opens your email app; you choose when to send. See our <Link href="/privacy/" className="underline">privacy notice</Link>. Please do not include banking passwords or identity documents.</p>
     </form>
-  );
+  </>;
 }

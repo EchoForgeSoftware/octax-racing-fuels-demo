@@ -6,6 +6,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/checkout/success/",
   title: "Order Confirmed",
   description: "Your order with OCTA Performance has been received. Pay by EFT using your order reference.",
+  noindex: true,
 });
 
 export default function CheckoutSuccessPage() {

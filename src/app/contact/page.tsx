@@ -4,7 +4,8 @@ import { ContactForm } from "@/components/ContactForm";
 import { JsonLd } from "@/components/JsonLd";
 import { buildMetadata } from "@/lib/metadata";
 import { breadcrumbSchema } from "@/lib/schema";
-import { SITE } from "@/lib/site";
+import { SITE, hasContactEmail, hasContactPhone } from "@/lib/site";
+import { BusinessDetails } from "@/components/BusinessDetails";
 
 export const metadata: Metadata = buildMetadata({
   path: "/contact/",
@@ -43,16 +44,18 @@ export default function ContactPage() {
             <div className="border-2 border-ink bg-ink p-6 text-paper">
               <h2 className="kicker text-lime">Reach us directly</h2>
               <dl className="mt-4 space-y-4 text-sm">
-                <div>
+                {hasContactEmail && <div>
                   <dt className="font-mono text-xs uppercase tracking-wider text-paper/50">Email</dt>
                   <dd className="mt-1"><a href={`mailto:${SITE.email}`} className="text-lime hover:underline">{SITE.email}</a></dd>
-                </div>
-                <div>
+                </div>}
+                {hasContactPhone && <div>
                   <dt className="font-mono text-xs uppercase tracking-wider text-paper/50">Phone</dt>
                   <dd className="mt-1"><a href={`tel:${SITE.phoneHref}`} className="text-lime hover:underline">{SITE.phoneDisplay}</a></dd>
-                </div>
+                </div>}
+                {!hasContactEmail && !hasContactPhone && <p>Our contact details will be published before ordering opens.</p>}
               </dl>
             </div>
+            <BusinessDetails />
 
           </aside>
         </div>

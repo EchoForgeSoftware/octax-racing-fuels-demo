@@ -1,0 +1,102 @@
+{
+  "termsVersion": "2026-10-16",
+  "items": [
+    {
+      "sku": "OCTA-X-25",
+      "slug": "octa-x-ethanol",
+      "name": "OCTA-X Ethanol 96%",
+      "size": "25L",
+      "price": 760
+    },
+    {
+      "sku": "OCTA-X-210",
+      "slug": "octa-x-ethanol",
+      "name": "OCTA-X Ethanol 96%",
+      "size": "210L plastic drum",
+      "price": 6160
+    },
+    {
+      "sku": "OCTA-M-25",
+      "slug": "octa-m-methanol",
+      "name": "OCTA-M Methanol 100%",
+      "size": "25L",
+      "price": 600
+    },
+    {
+      "sku": "OCTA-M-210",
+      "slug": "octa-m-methanol",
+      "name": "OCTA-M Methanol 100%",
+      "size": "210L plastic drum",
+      "price": 5500
+    },
+    {
+      "sku": "OCTA-BOOST-5",
+      "slug": "octa-boost",
+      "name": "OCTA-BOOST Octane Booster",
+      "size": "5L",
+      "price": 440
+    },
+    {
+      "sku": "OCTA-BOOST-20",
+      "slug": "octa-boost",
+      "name": "OCTA-BOOST Octane Booster",
+      "size": "20L",
+      "price": null
+    },
+    {
+      "sku": "OCTA-SHOT-500",
+      "slug": "octa-shot",
+      "name": "OCTA-SHOT Fuel Octane Booster",
+      "size": "500ml",
+      "price": 150
+    },
+    {
+      "sku": "OCTA-TORQUE-500",
+      "slug": "octa-torque",
+      "name": "OCTA-TORQUE Diesel Improver",
+      "size": "500ml",
+      "price": 120
+    }
+  ],
+  "courier": {
+    "fee": 200,
+    "freeFrom": {
+      "5": 10,
+      "25": 10,
+      "0.5": 12
+    },
+    "localRadiusKm": 35,
+    "localTowns": [
+      "alberton",
+      "bapsfontein",
+      "bedfordview",
+      "benoni",
+      "boksburg",
+      "brakpan",
+      "centurion",
+      "daveyton",
+      "delmas",
+      "duduza",
+      "edenvale",
+      "etwatwa",
+      "germiston",
+      "heidelberg",
+      "isando",
+      "johannesburg",
+      "katlehong",
+      "kempton park",
+      "kwathema",
+      "midrand",
+      "modderfontein",
+      "nigel",
+      "olifantsfontein",
+      "randburg",
+      "sandton",
+      "springs",
+      "tembisa",
+      "thokoza",
+      "tsakane",
+      "vosloorus"
+    ]
+  }
+}

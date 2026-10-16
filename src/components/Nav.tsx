@@ -5,12 +5,9 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "./CartContext";
 import { OctaLogo } from "./brand/Wordmark";
-
-const links = [
-  { href: "/shop/", label: "Shop" },
-  { href: "/information/", label: "Info" },
-  { href: "/contact/", label: "Contact" },
-];
+import { useAuth } from "./AuthContext";
+import { Icon } from "./Icon";
+import { navigationLinks } from "@/lib/navigation";
 
 function isActive(pathname: string, href: string) {
   return href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -19,6 +16,9 @@ function isActive(pathname: string, href: string) {
 export function Nav() {
   const pathname = usePathname();
   const { count, ready } = useCart();
+  const { user } = useAuth();
+  const accountLabel = user ? "Customer dashboard" : "Sign in";
+  const links = navigationLinks(Boolean(user));
   const [open, setOpen] = useState(false);
   const [pop, setPop] = useState(false);
   const prevCount = useRef(count);
@@ -72,6 +72,16 @@ export function Nav() {
         </nav>
 
         <div className="flex items-center gap-2">
+          <Link
+            href={user ? "/account/" : "/account/login/"}
+            aria-label={accountLabel}
+            className={`flex h-11 items-center gap-2 border-2 border-ink px-3 transition-colors hover:bg-lime ${user ? "md:hidden" : ""} ${
+              pathname.startsWith("/account") ? "bg-lime" : ""
+            }`}
+          >
+            <Icon name="user" size={18} strokeWidth={2.5} />
+            <span className="kicker hidden sm:inline">{user ? "Customer" : "Sign in"}</span>
+          </Link>
           <Link
             href="/cart/"
             aria-label={`Cart, ${ready ? count : 0} item${(ready ? count : 0) === 1 ? "" : "s"}`}

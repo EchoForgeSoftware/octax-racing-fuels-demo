@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useCart } from "./CartContext";
+import { usePricing } from "./PricingContext";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/products";
 import { Icon } from "./Icon";
@@ -22,6 +23,7 @@ export function AddToCart({
   onVariantChange?: (index: number) => void;
 }) {
   const { add } = useCart();
+  const pricing = usePricing();
   const [ownIndex, setOwnIndex] = useState(0);
   const variantIndex = controlledIndex ?? ownIndex;
   const setVariantIndex = (i: number) => {
@@ -32,17 +34,21 @@ export function AddToCart({
   const [added, setAdded] = useState(false);
 
   const variant = product.variants[variantIndex];
+  // Back-office price, or the signed-in customer's agreed price.
+  const unit = pricing.price(variant.sku, variant.price);
+  const list = pricing.listPrice(variant.sku, variant.price);
+  const ownPrice = !!pricing.client && unit !== null && list !== null && unit < list;
   // Sizes without a listed price are sold on quotation, not through the cart.
-  const quote = variant.price === null;
+  const quote = unit === null;
   // The price shown follows the quantity, so the customer sees the line total as they change it.
-  const total = (variant.price ?? 0) * qty;
+  const total = (unit ?? 0) * qty;
   const courier = courierFor(variant.size, qty);
   const hint = freeDeliveryHint(variant.size, qty);
 
   function handleAdd() {
-    if (variant.price === null) return;
+    if (unit === null) return;
     add(
-      { sku: variant.sku, slug: product.slug, name: product.name, size: variant.size, price: variant.price },
+      { sku: variant.sku, slug: product.slug, name: product.name, size: variant.size, price: unit },
       qty,
     );
     setAdded(true);
@@ -52,7 +58,7 @@ export function AddToCart({
   return (
     <div className="border-2 border-ink bg-panel p-5">
       <div className="border-b-2 border-ink pb-4">
-        <span className="kicker text-muted">{!quote && qty > 1 ? `Price for ${qty}` : "Price"}</span>
+        <span className="kicker text-muted">{ownPrice ? "Your price" : "Price"}{!quote && qty > 1 ? ` for ${qty}` : ""}</span>
         {quote ? (
           <>
             <div className="font-display text-3xl">On request</div>
@@ -62,7 +68,7 @@ export function AddToCart({
           <>
             <div className="num font-display text-4xl" aria-live="polite">{formatPrice(total)}</div>
             <span className="num mt-1 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">
-              {qty > 1 && <>{formatPrice(variant.price ?? 0)} each · </>}Incl. VAT
+              {qty > 1 && <>{formatPrice(unit ?? 0)} each · </>}{ownPrice && <><s>{formatPrice(list ?? 0)}</s> website · </>}Incl. VAT
             </span>
             <div className="num mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-3 text-sm">
               <span className={courier.kind === "free" ? "font-bold text-ink" : "text-ink-soft"}>

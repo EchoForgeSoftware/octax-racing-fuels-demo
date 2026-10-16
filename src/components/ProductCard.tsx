@@ -1,12 +1,11 @@
 import Link from "next/link";
 import type { Product } from "@/lib/products";
-import { fromPrice, getCategory } from "@/lib/products";
-import { formatPrice } from "@/lib/format";
+import { getCategory } from "@/lib/products";
+import { LivePrice } from "./LivePrice";
 import { volumeLabel } from "@/lib/pack";
 import { ProductShot } from "./pack/ProductShot";
 
 export function ProductCard({ product }: { product: Product }) {
-  const price = fromPrice(product);
   const category = getCategory(product.category);
   // Pack sizes in place of a stock badge: no stock is held on hand.
   const sizes = product.variants.map((v) => volumeLabel(v.size)).join(" · ");
@@ -28,8 +27,7 @@ export function ProductCard({ product }: { product: Product }) {
         <p className="mb-4 mt-2 line-clamp-2 text-sm text-muted">{product.short}</p>
         <div className="mt-auto flex items-end justify-between gap-3 border-t-2 border-ink pt-3">
           <div>
-            <span className="kicker text-muted">From</span>
-            <div className="num font-display text-2xl">{formatPrice(price)}</div>
+            <LivePrice product={product} />
             <span className="font-mono text-[0.6rem] uppercase tracking-wider text-muted">Incl. VAT</span>
           </div>
           <span className="num text-right font-mono text-[0.68rem] font-bold uppercase tracking-wider">{sizes}</span>

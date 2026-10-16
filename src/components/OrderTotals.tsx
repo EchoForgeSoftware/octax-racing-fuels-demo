@@ -3,14 +3,16 @@ import { cartCourier } from "@/lib/courier";
 import type { CartItem } from "./CartContext";
 
 /** Subtotal, courier and total rows shared by the cart and checkout summaries. */
-export function OrderTotals({ items, subtotal, label = "Subtotal" }: {
+export function OrderTotals({ items, subtotal, label = "Subtotal", city }: {
   items: CartItem[];
   subtotal: number;
   label?: string;
+  /** Delivery town, when known: inside the local area delivery is free. */
+  city?: string;
 }) {
-  const { fee, quoted } = cartCourier(items);
+  const { fee, quoted, local } = cartCourier(items, city);
   const total = subtotal + fee;
-  const courierText = fee > 0 ? formatPrice(fee) : quoted ? "Quoted separately" : "Free";
+  const courierText = local ? "Free OCTA delivery" : fee > 0 ? formatPrice(fee) : quoted ? "Quoted separately" : "Free";
 
   return (
     <>
@@ -23,6 +25,9 @@ export function OrderTotals({ items, subtotal, label = "Subtotal" }: {
           <dt className="font-mono text-xs uppercase tracking-wider text-muted">Courier</dt>
           <dd className={fee > 0 ? "font-bold" : "text-right text-muted"}>{courierText}</dd>
         </div>
+        {local && (
+          <p className="text-right text-xs text-muted">We deliver free within 35 km of Benoni, Brakpan, Boksburg and Kempton Park.</p>
+        )}
         {quoted && fee > 0 && (
           <p className="text-right text-xs text-muted">Some items: courier quoted separately</p>
         )}
