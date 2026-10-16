@@ -9,7 +9,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/terms/",
   title: "Terms of Service",
   description:
-    "The terms that apply to ordering race fuels, methanol, ethanol and additives from Octax Racing Fuels, including pricing, delivery and safe handling.",
+    "The terms that apply to ordering OCTA-X, OCTA-M and OCTA-BOOST from OCTA Performance, including pricing, delivery and safe handling.",
 });
 
 const trail = [
@@ -45,7 +45,7 @@ export default function TermsPage() {
           <section>
             <h2 className="font-display text-xl text-ink">Safe handling and eligibility</h2>
             <p className="mt-2">
-              Race fuels, methanol and ethanol are flammable and some are toxic. By
+              OCTA-X, OCTA-M and OCTA-BOOST are flammable and methanol is toxic. By
               ordering you confirm you are able to receive, store and handle these
               products safely and lawfully. See the{" "}
               <Link href="/information/" className="text-flare hover:underline">

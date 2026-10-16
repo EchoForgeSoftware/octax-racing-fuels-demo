@@ -8,9 +8,9 @@ import { breadcrumbSchema } from "@/lib/schema";
 
 export const metadata: Metadata = buildMetadata({
   path: "/information/",
-  title: "Fuel Information & Selection Guide",
+  title: "Product Guide & Safe Handling",
   description:
-    "How to choose between race fuel octanes, methanol, ethanol and E85, plus safe handling, storage and delivery information for Octax Racing Fuels.",
+    "How to choose between OCTA-X ethanol, OCTA-M methanol and OCTA-BOOST octane booster, with mix ratios, safe handling, storage and delivery information.",
 });
 
 const trail = [
@@ -20,20 +20,24 @@ const trail = [
 
 const faqs = [
   {
-    q: "What octane fuel does my engine need?",
-    a: "It depends on compression ratio, boost and ignition timing. Higher cylinder pressure needs higher octane to resist detonation. Naturally aspirated builds often run well on 102 to 110, while high-boost and big-compression engines move to 118. When in doubt, tune conservatively and step up octane rather than chasing timing on a fuel that is too low.",
+    q: "How do I mix OCTA-BOOST?",
+    a: "Mix OCTA-BOOST only with 95 octane pump fuel. The label gives three ratios: 1:7 is the maximum dilution, 1:5 is moderate and 1:4 is extreme. Re-check your tune whenever you change the mix.",
   },
   {
-    q: "Can I mix race fuel with pump fuel?",
-    a: "Leaded race fuel should not be run through catalytic converters or oxygen sensors. Unleaded race fuels like RF102 blend safely with pump premium to lift octane, but blending changes the effective octane and oxygen content, so re-check your tune.",
+    q: "Should I run ethanol or methanol?",
+    a: "Run the fuel your engine and fuel system are built for. Both are alcohol fuels that carry their own oxygen and cool the intake charge, but methanol needs much more fuel flow than ethanol and is toxic. If you are unsure, contact us with your build details.",
   },
   {
-    q: "Why run methanol or E85 instead of petrol?",
-    a: "Alcohol fuels have a high latent heat of vaporisation, which cools the intake charge and allows more timing and boost. They also carry their own oxygen. The trade-off is higher fuel flow, the need for compatible fuel-system parts, and lubricity additives to protect pumps and injectors.",
+    q: "What safety gear do I need?",
+    a: "Every OCTA label shows the same protective equipment: eye protection, gloves and a respirator. All three products are flammable liquids (UN Class 3), so keep them away from open flame, sparks and heat.",
   },
   {
-    q: "How is fuel delivered?",
-    a: "Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. Fuels are classed as dangerous goods, so delivery follows the relevant transport and storage regulations for your area.",
+    q: "What are the MFD and BATCH boxes on the label for?",
+    a: "Traceability. The manufacture date and batch number are written on every pack with a marker, so any pack can be traced back to its batch.",
+  },
+  {
+    q: "How is it delivered?",
+    a: "Orders are dispatched within a 24 to 48 hour window to your workshop or a track address. OCTA products are dangerous goods (OCTA-X and OCTA-BOOST are UN 1170, OCTA-M is UN 1230), so delivery follows the transport and storage regulations for your area.",
   },
 ];
 
@@ -51,28 +55,22 @@ function faqSchema() {
 
 const guide = [
   {
-    h: "Race fuels: 102 to 118",
-    p: "Our race fuels span 102 RON unleaded up to 118 RON leaded drag fuel. Unleaded grades suit modern, sensor-equipped and boosted engines; leaded grades add valve-seat protection and detonation resistance for high-compression and forced-induction builds.",
-    href: "/shop/?category=race-fuels",
-    cta: "Shop race fuels",
+    h: "OCTA-X Ethanol 95%",
+    p: "Ethanol in its purest form for performance use. Ethanol carries its own oxygen and cools the intake charge as it evaporates, which suits ethanol-fuelled and flex-fuel builds with an alcohol-rated fuel system.",
+    href: "/shop/octa-x-ethanol/",
+    cta: "Shop OCTA-X",
   },
   {
-    h: "Methanol",
-    p: "High-purity methanol for speedway, sprint cars and dedicated methanol drag engines. Purity matters: consistent 99.9% methanol keeps your tune stable and reduces corrosion risk when the fuel system is maintained.",
-    href: "/shop/?category=methanol",
-    cta: "Shop methanol",
+    h: "OCTA-M Methanol",
+    p: "Methanol in its purest form for methanol-burning performance engines. Methanol is toxic as well as flammable: handle it with eye protection, gloves and a respirator, and keep it away from open flame.",
+    href: "/shop/octa-m-methanol/",
+    cta: "Shop OCTA-M",
   },
   {
-    h: "Ethanol and E85",
-    p: "Anhydrous E100 for blending or dedicated ethanol builds, and a consistent E85 blend for flex-fuel setups. Consistency is the point: unlike pump E85, our blend holds its ethanol percentage so your tune stays honest.",
-    href: "/shop/?category=ethanol",
-    cta: "Shop ethanol",
-  },
-  {
-    h: "Additives",
-    p: "Octane boosters for a quick lift, upper-cylinder lubricants for alcohol fuels, injector cleaners and lead substitutes for classic engines. The right additive protects hardware and keeps fuelling repeatable.",
-    href: "/shop/?category=additives",
-    cta: "Shop additives",
+    h: "OCTA-BOOST Octane Booster",
+    p: "An octane booster mixed only with 95 octane pump fuel: 1:7 for maximum dilution, 1:5 for moderate and 1:4 for extreme.",
+    href: "/shop/octa-boost/",
+    cta: "Shop OCTA-BOOST",
   },
 ];
 
@@ -85,10 +83,10 @@ export default function InformationPage() {
       <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
         <header>
           <p className="kicker text-flare">Field manual</p>
-          <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4.5rem)] leading-[0.9]">Fuel information &amp; selection guide</h1>
+          <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4.5rem)] leading-[0.9]">Product guide &amp; safe handling</h1>
           <p className="mt-5 max-w-2xl text-lg text-ink-soft">
-            A quick guide to choosing the right fuel for your engine and class, plus safe
-            handling, storage and delivery. If you are still unsure,{" "}
+            A quick guide to the three OCTA products, plus safe handling, storage and
+            delivery. If you are still unsure,{" "}
             <Link href="/contact/" className="text-flare underline">contact us</Link> with your
             build details.
           </p>
@@ -114,7 +112,8 @@ export default function InformationPage() {
           <ul className="mt-5 space-y-3">
             {[
               "Store fuels in approved, sealed containers away from heat, sparks and direct sunlight.",
-              "Methanol is toxic and absorbs through skin; wear appropriate gloves and eye protection.",
+              "Wear eye protection, gloves and a respirator, as shown on every OCTA label.",
+              "Methanol is toxic and absorbs through skin; never handle OCTA-M without gloves.",
               "Alcohol fuels attract water over time; keep containers sealed and use fresh stock.",
               "Transport dangerous goods according to your local regulations and quantity limits.",
               "Keep a suitable fire extinguisher on hand when handling or decanting fuel.",

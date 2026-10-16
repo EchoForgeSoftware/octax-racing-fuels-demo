@@ -9,6 +9,7 @@ export function organizationSchema() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE.name,
+    legalName: SITE.legalName,
     url: SITE_URL,
     logo: logoUrl,
     email: SITE.email,

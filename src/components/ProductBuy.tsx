@@ -2,11 +2,9 @@
 
 import { useState, type ReactNode } from "react";
 import type { Product } from "@/lib/products";
-import { packKind } from "@/lib/pack";
+import { packKind, packName } from "@/lib/pack";
 import { AddToCart } from "./AddToCart";
 import { ProductShot } from "./pack/ProductShot";
-
-const packName = { can: "Jerry can", drum: "Steel drum", bottle: "Bottle" } as const;
 
 // Product hero: the container shown follows the size picked in AddToCart.
 export function ProductBuy({ product, children }: { product: Product; children: ReactNode }) {
@@ -41,7 +39,7 @@ export function ProductBuy({ product, children }: { product: Product; children: 
                 <ProductShot product={product} variant={v} frame="square" decorative className="block aspect-square w-full" />
                 <span className="block border-t-2 border-ink px-2 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-wider">
                   {v.size}
-                  <span className="block font-normal text-muted">{packName[packKind(v.size)]}</span>
+                  <span className="block font-normal text-muted">{packName(packKind(v.size))}</span>
                 </span>
               </button>
             ))}

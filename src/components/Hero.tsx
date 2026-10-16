@@ -4,10 +4,14 @@ import Link from "next/link";
 import { useRef } from "react";
 import { gsap, useIsoLayoutEffect } from "@/lib/gsap";
 import { Magnetic } from "./anim/Magnetic";
+import { ProductShot } from "./pack/ProductShot";
+import { getProduct } from "@/lib/products";
 
 // The hero entrance plays for everyone (the site owner asked for it to be visible
 // on load); it is kept smooth and non-looping. Only the ambient pointer tilt is a
 // continuous effect, and it responds to direct user input.
+const hero = getProduct("octa-x-ethanol");
+
 export function Hero() {
   const scopeRef = useRef<HTMLElement | null>(null);
 
@@ -116,34 +120,33 @@ export function Hero() {
         <div>
           <p data-kicker className="kicker inline-flex items-center gap-2 text-muted">
             <span className="h-2 w-2 bg-lime" />
-            Batch-tested fuel for the grid
+            OCTA Performance
           </p>
 
-          {/* Sized so the widest line ("fuel for the", ~8.2em) fits its column at every width. */}
-          <h1 className="mt-5 font-display text-[clamp(2.1rem,10.5vw,6rem)] leading-[0.86] [perspective:900px] lg:text-[clamp(4rem,6.6vw,5.4rem)]">
-            <span data-line className="block">High-octane</span>
-            <span data-line className="block">fuel for the</span>
+          {/* Brand line from the labels. Sized so "addiction" (~7em with its padding) fits the column. */}
+          <h1 className="mt-5 font-display text-[clamp(2.4rem,12vw,6.5rem)] leading-[0.86] [perspective:900px] lg:text-[clamp(4.4rem,7.4vw,6.2rem)]">
+            <span data-line className="block">Fuel the</span>
             <span data-line className="block">
-              <span className="bg-lime px-3 text-ink">grid</span>
+              <span className="bg-lime px-3 text-ink">addiction</span>
             </span>
           </h1>
 
           <p data-sub className="mt-7 max-w-xl text-lg text-ink-soft">
-            Race fuels, methanol, ethanol and additives built for consistent power,
-            detonation resistance and repeatable tunes. Order online, dispatched to your
-            workshop or the paddock.
+            OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster for
+            performance use. Every pack carries a batch number for traceability. Order
+            online, delivered to your workshop.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">
             <div data-cta>
               <Magnetic>
                 <Link href="/shop/" className="inline-block border-2 border-ink bg-flare px-7 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink">
-                  Shop fuels
+                  Shop OCTA
                 </Link>
               </Magnetic>
             </div>
             <Link data-cta href="/information/" className="kicker border-b-2 border-ink pb-1 text-ink transition-colors hover:text-flare">
-              How to choose &rarr;
+              Product guide &rarr;
             </Link>
           </div>
         </div>
@@ -151,16 +154,15 @@ export function Hero() {
         <div data-slab className="relative [perspective:1200px]">
           <div
             data-tilt
-            className="border-2 border-ink bg-ink p-6 text-paper shadow-[14px_14px_0_0_var(--color-lime)] [transform-style:preserve-3d]"
+            className="border-2 border-ink bg-ink text-paper shadow-[14px_14px_0_0_var(--color-lime)] [transform-style:preserve-3d]"
           >
-            <p data-depth="30" className="kicker text-lime">Octane range</p>
-            <p data-depth="80" className="font-display text-[clamp(3.5rem,14vw,7rem)] leading-none text-paper">
-              102<span className="text-lime">-</span>118
-            </p>
-            <div data-depth="40" className="mt-6 grid grid-cols-2 gap-px border-2 border-paper/20 bg-paper/20">
+            <div data-depth="60">
+              {hero && <ProductShot product={hero} frame="square" className="block aspect-square w-full" />}
+            </div>
+            <div data-depth="30" className="grid grid-cols-2 gap-px border-t-2 border-ink bg-paper/20">
               {[
-                { k: "Methanol", to: 99, suffix: ".9%", label: "99.9%" },
-                { k: "Dispatch", to: 48, suffix: "h", label: "48h" },
+                { k: "Ethanol", to: 95, suffix: "%", label: "95%" },
+                { k: "Litre can", to: 25, suffix: "L", label: "25L" },
               ].map((s) => (
                 <div key={s.k} className="bg-ink p-4">
                   <span data-count={s.to} data-suffix={s.suffix} className="font-display text-3xl text-paper">

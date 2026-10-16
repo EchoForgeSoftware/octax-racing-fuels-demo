@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCart } from "./CartContext";
-import { Logo } from "./Logo";
+import { OctaLogo } from "./brand/Wordmark";
 
 const links = [
   { href: "/shop/", label: "Shop" },
@@ -47,9 +47,8 @@ export function Nav() {
   return (
     <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
-        <Link href="/" className="flex items-center gap-2.5" aria-label="Octax Racing Fuels home">
-          <Logo className="h-9 w-9" />
-          <span className="font-display text-xl uppercase tracking-tight">Octax</span>
+        <Link href="/" className="flex items-center" aria-label="OCTA Performance home">
+          <OctaLogo className="h-9 w-auto" />
         </Link>
 
         <nav className="hidden items-center gap-1 md:flex" aria-label="Primary">

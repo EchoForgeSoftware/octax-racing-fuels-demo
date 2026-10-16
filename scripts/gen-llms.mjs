@@ -17,16 +17,17 @@ This is a demonstration e-commerce site. Products, prices and stock are sample d
 and no real orders are placed.
 
 ## Main pages
-- [Home](${u("/")}): Overview of Octax Racing Fuels and featured products.
-- [Shop](${u("/shop/")}): Full catalogue of race fuels, methanol, ethanol and additives.
-- [Information](${u("/information/")}): Fuel selection guide, safe handling and delivery.
-- [Contact](${u("/contact/")}): Enquiries about fuel advice, orders and delivery.
+- [Home](${u("/")}): Overview of OCTA Performance and its products.
+- [Shop](${u("/shop/")}): The OCTA range: ethanol, methanol and octane booster.
+- [Information](${u("/information/")}): Product guide, mix ratios, safe handling and delivery.
+- [Contact](${u("/contact/")}): Enquiries about products, orders and delivery.
 
-## Product categories
-- [Race fuels](${u("/shop/?category=race-fuels")}): 102 to 118 octane leaded and unleaded competition fuels.
-- [Methanol](${u("/shop/?category=methanol")}): High-purity methanol for methanol-burning engines.
-- [Ethanol](${u("/shop/?category=ethanol")}): Anhydrous ethanol and consistent E85 blends.
-- [Additives](${u("/shop/?category=additives")}): Octane boosters, lubricants and fuel-system treatments.
+## Products
+- [OCTA-X Ethanol 95%](${u("/shop/octa-x-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
+- [OCTA-M Methanol](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
+- [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 1:7 to 1:4. UN 1170, Class 3.
+
+OCTA Performance is a brand of ${SITE.legalName}.
 
 ## Notes
 - Built and maintained by Echo Software (https://echosoftware.co.za).

@@ -2,12 +2,12 @@
 
 import { useId } from "react";
 import type { Product, Variant } from "@/lib/products";
-import { categoryColor, onCategory, packKind, productCode, volumeLabel } from "@/lib/pack";
-import { Bottle, Drum, JerryCan, PACK_SIZE } from "./Containers";
+import { categoryColor, onCategory, packKind, volumeLabel } from "@/lib/pack";
+import { Drum, JerryCan, Jug, PACK_SIZE } from "./Containers";
 
 const INK = "var(--color-ink)";
 const LIME = "var(--color-lime)";
-const packWord = { can: "jerry can", drum: "steel drum", bottle: "bottle" } as const;
+const packWord = { can: "jerry can", drum: "steel drum", jug: "jug" } as const;
 
 type Props = {
   product: Product;
@@ -29,7 +29,7 @@ export function ProductShot({ product, variant, frame = "card", className, decor
   const volume = volumeLabel(v.size);
   const color = categoryColor[product.category];
   const onColor = onCategory(product.category);
-  const code = productCode(product);
+  const mark = product.label.mark;
 
   const W = 400;
   const H = frame === "card" ? 300 : 400;
@@ -39,7 +39,7 @@ export function ProductShot({ product, variant, frame = "card", className, decor
   // Fit the container into the stage, standing on the floor line.
   const size = PACK_SIZE[kind];
   const maxH = floorY - (frame === "card" ? 22 : 36);
-  const maxW = kind === "drum" ? 230 : 220;
+  const maxW = kind === "jug" ? 200 : 230;
   const s = Math.min(maxH / size.h, maxW / size.w);
   const pw = size.w * s;
   const px = W * 0.58 - pw / 2;
@@ -56,18 +56,18 @@ export function ProductShot({ product, variant, frame = "card", className, decor
       <rect width={W} height={H} fill="var(--color-paper)" />
       {/* Diagonal colour slab */}
       <path d={`M0 0 H${W} V${H * 0.56} L0 ${H * 0.78} Z`} fill={color} />
-      {/* Oversized outlined product code behind the container */}
+      {/* Oversized outlined product mark (X, M, BOOST) behind the container */}
       <text
-        x="-6"
-        y={H * 0.5}
+        x="-10"
+        y={mark.length > 1 ? H * 0.5 : H * 0.62}
         style={{ fontFamily: "var(--font-display), sans-serif" }}
-        fontSize={code.length > 4 ? 120 : 150}
+        fontSize={mark.length > 1 ? 120 : H * 0.7}
         fill="none"
         stroke={onColor}
         strokeWidth="2"
         opacity="0.45"
       >
-        {code}
+        {mark}
       </text>
 
       {/* Floor shadow */}
@@ -80,15 +80,7 @@ export function ProductShot({ product, variant, frame = "card", className, decor
       <g transform={`translate(${px} ${py}) scale(${s})`}>
         {kind === "can" && <JerryCan product={product} volume={volume} uid={uid} />}
         {kind === "drum" && <Drum product={product} volume={volume} uid={uid} />}
-        {kind === "bottle" && (
-          <Bottle
-            product={product}
-            volume={volume}
-            uid={uid}
-            // Black bottle on a black slab needs a light rim to keep its silhouette.
-            outline={product.category === "additives" ? "var(--color-paper)" : INK}
-          />
-        )}
+        {kind === "jug" && <Jug product={product} volume={volume} uid={uid} />}
       </g>
 
       {/* Hazard band floor */}

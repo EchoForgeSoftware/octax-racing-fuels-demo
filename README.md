@@ -1,8 +1,13 @@
-# Octax Racing Fuels (demo)
+# OCTA Performance (demo)
 
-Demonstration e-commerce site for Octax Racing Fuels: high-octane race fuels,
-methanol, ethanol and additives, with catalogue, cart and a simulated checkout.
-All products, prices and stock are sample data.
+Demonstration e-commerce site for OCTA Performance, a brand of ZRG-X (PTY) LTD:
+OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster, with
+catalogue, cart and a simulated checkout. Product names, UN numbers, mix ratios
+and label wording come from the real product labels; pack sizes, prices and
+stock are sample data.
+
+Product labels and containers are drawn as SVG in `src/components/brand/` and
+`src/components/pack/`, driven by the `label` data in `src/lib/products.ts`.
 
 ## Stack
 

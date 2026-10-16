@@ -10,21 +10,21 @@ import { buildMetadata } from "@/lib/metadata";
 export const metadata: Metadata = {
   ...buildMetadata({
     path: "/",
-    title: "Race Fuels, Methanol, Ethanol & Additives",
+    title: "Ethanol, Methanol & Octane Booster",
     description:
-      "Octax Racing Fuels supplies high-octane race fuels, methanol, ethanol and performance additives for motorsport, with consistent quality and online ordering.",
+      "OCTA Performance: OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
   }),
   title: {
-    absolute: "Octax Racing Fuels | Race Fuels, Methanol, Ethanol & Additives",
+    absolute: "OCTA Performance | Fuel the Addiction",
   },
 };
 
-const ticker = ["Ethanol E100", "Methanol 99.9%", "E85 blend", "RF110 leaded", "Octane boost", "RF118 drag", "Upper-cylinder lube"];
+const ticker = ["Fuel the addiction", "OCTA-X Ethanol 95%", "OCTA-M Methanol", "OCTA-BOOST", "UN 1170 · UN 1230", "Batch-numbered"];
 
 const props = [
-  { n: "01", h: "Batch-tested", b: "Every blend is tested so octane, ethanol percentage and purity are repeatable. Your tune stays honest event to event." },
-  { n: "02", h: "Class-matched", b: "From 102 unleaded to 118 leaded drag fuel, methanol and E85, stocked for naturally aspirated, boosted and alcohol setups." },
-  { n: "03", h: "To the paddock", b: "Order online and have fuel and additives dispatched to your workshop or track inside a 24 to 48 hour window." },
+  { n: "01", h: "Batch-numbered", b: "Every pack has a manufacture date and batch number written on its label, so each one can be traced." },
+  { n: "02", h: "Three products", b: "OCTA-X ethanol 95% and OCTA-M methanol for alcohol builds, and OCTA-BOOST to lift 95 octane pump fuel." },
+  { n: "03", h: "To your workshop", b: "Order online and have OCTA dispatched to your workshop or track inside a 24 to 48 hour window." },
 ];
 
 export default function HomePage() {

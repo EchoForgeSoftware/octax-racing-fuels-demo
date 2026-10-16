@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Archivo, Archivo_Black, Space_Mono } from "next/font/google";
+import { Archivo, Archivo_Black, Barlow_Condensed, Space_Mono } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/Providers";
 import { Nav } from "@/components/Nav";
@@ -21,6 +21,15 @@ const display = Archivo_Black({
 const sans = Archivo({
   subsets: ["latin"],
   variable: "--font-sans",
+  display: "swap",
+});
+
+// Condensed face for the product labels ("FUEL THE ADDICTION", UN lines, mix table).
+const label = Barlow_Condensed({
+  subsets: ["latin"],
+  weight: ["500", "600", "800"],
+  style: ["normal", "italic"],
+  variable: "--font-label",
   display: "swap",
 });
 
@@ -59,7 +68,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${display.variable} ${sans.variable} ${mono.variable}`}
+      className={`${display.variable} ${sans.variable} ${label.variable} ${mono.variable}`}
     >
       <body className="flex min-h-screen flex-col">
         <JsonLd data={[organizationSchema(), websiteSchema()]} />

@@ -32,7 +32,8 @@ type CartState = {
   lastAdded: AddedSignal | null;
 };
 
-const STORAGE_KEY = "octax-cart-v1";
+// v2: catalogue changed to the OCTA range, so carts from the sample catalogue are dropped.
+const STORAGE_KEY = "octa-cart-v2";
 const CartCtx = createContext<CartState | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {

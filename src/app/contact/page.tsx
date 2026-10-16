@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/contact/",
   title: "Contact",
   description:
-    "Get in touch with Octax Racing Fuels for fuel selection advice, orders, delivery and bulk or trade enquiries.",
+    "Get in touch with OCTA Performance for product advice, orders, delivery and bulk or trade enquiries.",
 });
 
 const trail = [
@@ -29,8 +29,8 @@ export default function ContactPage() {
           <p className="kicker text-flare">Get in touch</p>
           <h1 className="mt-3 font-display text-[clamp(2.4rem,8vw,5rem)]">Contact us</h1>
           <p className="mt-4 text-ink-soft">
-            Tell us about your engine, class and the fuel you are running now, and we will
-            recommend the right blend. For orders and delivery, include your location.
+            Tell us about your engine and the fuel you are running now, and we will
+            recommend the right OCTA product. For orders and delivery, include your location.
           </p>
         </header>
 

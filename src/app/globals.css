@@ -19,6 +19,7 @@
   --font-display: var(--font-display), "Archivo Black", system-ui, sans-serif;
   --font-sans: var(--font-sans), "Archivo", system-ui, sans-serif;
   --font-mono: var(--font-mono), "Space Mono", ui-monospace, monospace;
+  --font-label: var(--font-label), "Barlow Condensed", system-ui, sans-serif;
 
   --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
 }

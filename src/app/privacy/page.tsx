@@ -10,7 +10,7 @@ export const metadata: Metadata = buildMetadata({
   path: "/privacy/",
   title: "Privacy Policy",
   description:
-    "How Octax Racing Fuels collects, uses and protects the personal information you provide when ordering fuels and additives online.",
+    "How OCTA Performance collects, uses and protects the personal information you provide when ordering OCTA products online.",
 });
 
 const trail = [
@@ -28,7 +28,7 @@ export default function PrivacyPage() {
         <p className="kicker text-flare">Legal</p>
         <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4rem)]">Privacy policy</h1>
         <p className="mt-4 text-ink-soft">
-          This policy explains what personal information Octax Racing Fuels collects
+          This policy explains what personal information OCTA Performance collects
           and how it is used. It is a demonstration template and should be reviewed by
           the business before the site goes live.
         </p>

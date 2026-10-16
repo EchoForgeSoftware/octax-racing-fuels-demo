@@ -50,7 +50,7 @@ export function ContactForm() {
         </h2>
         <p className="mt-2 text-sm text-ink-soft">
           This is a demo, so nothing was actually sent. On the live site this would
-          reach the Octax sales team and we would reply with a fuel recommendation.
+          reach the OCTA Performance team and we would reply with a product recommendation.
         </p>
         <button
           type="button"

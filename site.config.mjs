@@ -12,12 +12,15 @@ export const SITE_URL = `${ORIGIN}${BASE_PATH}`;
 export const INDEXABLE = false;
 
 export const SITE = {
-  name: "Octax Racing Fuels",
-  shortName: "Octax",
-  tagline: "Race fuels, methanol, ethanol and additives",
+  name: "OCTA Performance",
+  shortName: "OCTA",
+  tagline: "Fuel the addiction",
   description:
-    "Octax Racing Fuels supplies high-octane race fuels, methanol, ethanol and performance additives for motorsport, karting and marine, with online ordering and delivery.",
-  email: "sales@octaxracingfuels.example",
+    "OCTA Performance supplies OCTA-X ethanol 95%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
+  // Company that owns the OCTA brand, as printed on the product labels.
+  legalName: "ZRG-X (PTY) LTD",
+  // Email and phone are placeholders until the real contact details are supplied.
+  email: "sales@octaperformance.example",
   phoneDisplay: "+27 00 000 0000",
   phoneHref: "+270000000000",
   currency: "ZAR",
