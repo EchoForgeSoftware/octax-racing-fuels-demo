@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
 import type { Product } from "@/lib/products";
+import { Icon } from "./Icon";
 
 export function AddToCart({ product }: { product: Product }) {
   const { add } = useCart();
@@ -13,6 +14,7 @@ export function AddToCart({ product }: { product: Product }) {
 
   const variant = product.variants[variantIndex];
   const outOfStock = variant.stock <= 0;
+  const maxQty = Math.max(1, variant.stock);
 
   function handleAdd() {
     if (outOfStock) return;
@@ -29,7 +31,7 @@ export function AddToCart({ product }: { product: Product }) {
       <div className="flex items-end justify-between border-b-2 border-ink pb-4">
         <div>
           <span className="kicker text-muted">Price</span>
-          <div className="font-display text-4xl">{formatPrice(variant.price)}</div>
+          <div className="num font-display text-4xl">{formatPrice(variant.price)}</div>
         </div>
         <span className="flex items-center gap-1.5 font-mono text-xs font-bold uppercase tracking-wider">
           <span className={`h-2 w-2 ${variant.stock > 0 ? "bg-lime" : "bg-flare"}`} />
@@ -44,8 +46,13 @@ export function AddToCart({ product }: { product: Product }) {
             <button
               key={v.sku}
               type="button"
-              onClick={() => setVariantIndex(i)}
-              className={`border-2 border-ink px-4 py-2 font-mono text-sm font-bold uppercase transition-colors ${
+              aria-pressed={i === variantIndex}
+              onClick={() => {
+                setVariantIndex(i);
+                // Keep the quantity within what the newly picked size has in stock.
+                setQty((q) => Math.min(q, Math.max(1, v.stock)));
+              }}
+              className={`min-h-11 border-2 border-ink px-4 py-2 font-mono text-sm font-bold uppercase transition-colors ${
                 i === variantIndex ? "bg-ink text-lime" : "hover:bg-lime"
               }`}
             >
@@ -58,16 +65,21 @@ export function AddToCart({ product }: { product: Product }) {
       <div className="mt-5 flex items-center gap-3">
         <span className="kicker text-muted">Qty</span>
         <div className="flex items-center border-2 border-ink">
-          <button type="button" aria-label="Decrease quantity" className="px-3 py-2 hover:bg-lime" onClick={() => setQty((q) => Math.max(1, q - 1))}>&minus;</button>
+          <button type="button" aria-label="Decrease quantity" disabled={qty <= 1} className="grid h-11 w-11 place-items-center transition-colors hover:bg-lime disabled:text-line disabled:hover:bg-transparent" onClick={() => setQty((q) => Math.max(1, q - 1))}>
+            <Icon name="minus" size={14} />
+          </button>
           <input
             type="number"
             min={1}
+            max={maxQty}
             aria-label="Quantity"
             value={qty}
-            onChange={(e) => setQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-            className="w-12 border-x-2 border-ink bg-transparent py-2 text-center font-mono text-sm outline-none"
+            onChange={(e) => setQty(Math.min(maxQty, Math.max(1, parseInt(e.target.value, 10) || 1)))}
+            className="num h-11 w-14 border-x-2 border-ink bg-transparent text-center font-mono text-sm font-bold outline-none [appearance:textfield] focus-visible:bg-lime/40 [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
           />
-          <button type="button" aria-label="Increase quantity" className="px-3 py-2 hover:bg-lime" onClick={() => setQty((q) => q + 1)}>+</button>
+          <button type="button" aria-label="Increase quantity" disabled={qty >= maxQty} className="grid h-11 w-11 place-items-center transition-colors hover:bg-lime disabled:text-line disabled:hover:bg-transparent" onClick={() => setQty((q) => Math.min(maxQty, q + 1))}>
+            <Icon name="plus" size={14} />
+          </button>
         </div>
       </div>
 
@@ -75,9 +87,15 @@ export function AddToCart({ product }: { product: Product }) {
         type="button"
         onClick={handleAdd}
         disabled={outOfStock}
-        className="mt-6 w-full border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
+        className="mt-6 flex w-full items-center justify-center gap-2 border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:cursor-not-allowed disabled:bg-line disabled:text-muted"
       >
-        {outOfStock ? "Sold out" : added ? "Added ✓" : "Add to cart"}
+        {outOfStock ? "Sold out" : added ? (
+          <>
+            Added to cart <Icon name="check" size={18} />
+          </>
+        ) : (
+          "Add to cart"
+        )}
       </button>
       <p className="mt-3 text-center font-mono text-xs text-muted">Demo checkout, no payment is taken.</p>
     </div>

@@ -34,7 +34,7 @@ export default function TermsPage() {
 
         <div className="mt-10 space-y-8 text-muted">
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Orders and pricing</h2>
+            <h2 className="font-display text-xl text-ink">Orders and pricing</h2>
             <p className="mt-2">
               Prices are shown in South African Rand and may change. An order is a
               request to buy; it is accepted once we confirm it. We may decline or
@@ -43,7 +43,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Safe handling and eligibility</h2>
+            <h2 className="font-display text-xl text-ink">Safe handling and eligibility</h2>
             <p className="mt-2">
               Race fuels, methanol and ethanol are flammable and some are toxic. By
               ordering you confirm you are able to receive, store and handle these
@@ -56,7 +56,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Delivery</h2>
+            <h2 className="font-display text-xl text-ink">Delivery</h2>
             <p className="mt-2">
               Fuels are dispatched as dangerous goods under the transport rules that
               apply to your area. Delivery times are estimates and may be affected by
@@ -65,7 +65,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Returns</h2>
+            <h2 className="font-display text-xl text-ink">Returns</h2>
             <p className="mt-2">
               For safety reasons, opened fuel and additive containers cannot be
               returned. Contact us about damaged or incorrect deliveries and we will put
@@ -74,7 +74,7 @@ export default function TermsPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Liability</h2>
+            <h2 className="font-display text-xl text-ink">Liability</h2>
             <p className="mt-2">
               Products must be used in line with their intended application and all
               safety guidance. We are not liable for loss or damage caused by improper

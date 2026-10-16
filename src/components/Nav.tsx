@@ -33,6 +33,17 @@ export function Nav() {
     prevCount.current = count;
   }, [count]);
 
+  // Close the mobile menu on navigation (including back/forward) and on Escape.
+  useEffect(() => setOpen(false), [pathname]);
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [open]);
+
   return (
     <header className="sticky top-0 z-50 border-b-2 border-ink bg-paper/90 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -46,6 +57,7 @@ export function Nav() {
             <Link
               key={l.href}
               href={l.href}
+              aria-current={isActive(pathname, l.href) ? "page" : undefined}
               className={`kicker px-4 py-2 transition-colors ${
                 isActive(pathname, l.href)
                   ? "text-ink"
@@ -63,7 +75,8 @@ export function Nav() {
         <div className="flex items-center gap-2">
           <Link
             href="/cart/"
-            className="group relative flex items-center gap-2 border-2 border-ink bg-ink px-4 py-2 text-paper transition-colors hover:bg-lime hover:text-ink"
+            aria-label={`Cart, ${ready ? count : 0} item${(ready ? count : 0) === 1 ? "" : "s"}`}
+            className="group relative flex h-11 items-center gap-2 border-2 border-ink bg-ink px-4 text-paper transition-colors hover:bg-lime hover:text-ink"
           >
             <span className="kicker">Cart</span>
             <span className={`grid h-5 min-w-5 place-items-center bg-lime px-1 font-mono text-xs font-bold text-ink group-hover:bg-ink group-hover:text-lime ${pop ? "animate-bump" : ""}`}>
@@ -72,8 +85,9 @@ export function Nav() {
           </Link>
           <button
             type="button"
-            className="border-2 border-ink p-2 md:hidden"
-            aria-label="Toggle menu"
+            className="grid h-11 w-11 place-items-center border-2 border-ink md:hidden"
+            aria-label={open ? "Close menu" : "Open menu"}
+            aria-controls="mobile-nav"
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
           >
@@ -85,12 +99,13 @@ export function Nav() {
       </div>
 
       {open && (
-        <nav className="border-t-2 border-ink md:hidden" aria-label="Mobile">
+        <nav id="mobile-nav" className="border-t-2 border-ink md:hidden" aria-label="Mobile">
           <div className="mx-auto flex max-w-7xl flex-col px-4 py-1">
             {[{ href: "/", label: "Home" }, ...links].map((l) => (
               <Link
                 key={l.href}
                 href={l.href}
+                aria-current={isActive(pathname, l.href) ? "page" : undefined}
                 onClick={() => setOpen(false)}
                 className={`kicker border-b border-line py-4 ${
                   isActive(pathname, l.href) ? "text-ink" : "text-muted"

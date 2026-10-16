@@ -35,7 +35,7 @@ export default function PrivacyPage() {
 
         <div className="mt-10 space-y-8 text-muted">
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">What we collect</h2>
+            <h2 className="font-display text-xl text-ink">What we collect</h2>
             <p className="mt-2">
               When you place an order or contact us, we collect the details you
               provide: your name, email address, phone number and delivery address.
@@ -45,7 +45,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">How we use it</h2>
+            <h2 className="font-display text-xl text-ink">How we use it</h2>
             <p className="mt-2">
               We use your information to process and deliver orders, to respond to
               enquiries, and to meet the record-keeping and transport requirements that
@@ -55,7 +55,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Cookies and local storage</h2>
+            <h2 className="font-display text-xl text-ink">Cookies and local storage</h2>
             <p className="mt-2">
               This site uses your browser&apos;s local storage to remember the contents
               of your cart between visits. It does not use advertising or tracking
@@ -64,7 +64,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Retention and your rights</h2>
+            <h2 className="font-display text-xl text-ink">Retention and your rights</h2>
             <p className="mt-2">
               We keep order records only as long as needed for the order and for legal
               and tax obligations. You can ask us to access, correct or delete the
@@ -73,7 +73,7 @@ export default function PrivacyPage() {
           </section>
 
           <section>
-            <h2 className="font-display text-xl font-bold text-ink">Contact</h2>
+            <h2 className="font-display text-xl text-ink">Contact</h2>
             <p className="mt-2">
               For any privacy question, email{" "}
               <a href={`mailto:${SITE.email}`} className="text-flare hover:underline">

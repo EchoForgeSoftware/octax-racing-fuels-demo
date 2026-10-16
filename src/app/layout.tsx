@@ -66,7 +66,8 @@ export default function RootLayout({
         <Providers>
           <DemoBanner />
           <Nav />
-          <main className="flex-1">{children}</main>
+          {/* Bottom gap before the footer, dropped when a page ends on a full-bleed band. */}
+          <main className="flex-1 pb-24 has-[[data-flush-footer]]:pb-0">{children}</main>
           <Footer />
           <BackToTop />
           <CartToast />

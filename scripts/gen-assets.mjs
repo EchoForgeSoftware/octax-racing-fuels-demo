@@ -13,7 +13,7 @@ mkdirSync(ogDir, { recursive: true });
 const PAPER = "#f2efe6";
 const INK = "#191817";
 const LIME = "#c6f24e";
-const FLARE = "#e8451f";
+const FLARE = "#d52200"; // matches --color-flare
 
 const iconSvg = (size) => `
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="${size}" height="${size}">

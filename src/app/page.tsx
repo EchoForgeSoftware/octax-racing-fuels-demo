@@ -69,7 +69,7 @@ export default function HomePage() {
                   <p className="mt-2 max-w-lg text-sm text-muted group-hover:text-paper/70">{c.blurb}</p>
                 </div>
                 <span className="font-mono text-xs uppercase tracking-wider text-muted group-hover:text-lime">
-                  {productsInCategory(c.slug).length} items<span className="ml-3 inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
+                  {productsInCategory(c.slug).length} item{productsInCategory(c.slug).length === 1 ? "" : "s"}<span className="ml-3 inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
                 </span>
               </Link>
             </Reveal>
@@ -108,7 +108,7 @@ export default function HomePage() {
       </section>
 
       {/* CTA band */}
-      <section className="relative overflow-hidden border-y-2 border-ink bg-lime">
+      <section data-flush-footer className="relative overflow-hidden border-t-2 border-ink bg-lime">
         <div className="mx-auto max-w-7xl px-4 py-20 text-center sm:px-6">
           <Reveal self>
             <h2 className="mx-auto max-w-3xl font-display text-[clamp(2rem,7vw,5rem)] text-ink">Not sure which fuel your build needs?</h2>

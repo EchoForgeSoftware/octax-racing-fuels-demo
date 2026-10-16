@@ -3,7 +3,7 @@ import type { Product } from "@/lib/products";
 const PAPER = "#f2efe6";
 const INK = "#191817";
 const LIME = "#c6f24e";
-const FLARE = "#e8451f";
+const FLARE = "#d52200"; // matches --color-flare
 const COBALT = "#3b5bdb";
 
 const categoryColor: Record<string, string> = {
@@ -39,21 +39,20 @@ export function ProductArt({ product, className }: { product: Product; className
       {/* diagonal color block */}
       <path d="M0 0 H400 V250 L0 330 Z" fill={color} />
       {/* hazard band */}
-      <g clipPath="url(#band)">
-        <rect x="0" y="330" width="400" height="34" fill={INK} />
-      </g>
-      <clipPath id="band"><rect x="0" y="330" width="400" height="34" /></clipPath>
+      <rect x="0" y="330" width="400" height="34" fill={INK} />
       {Array.from({ length: 22 }).map((_, i) => (
         <rect key={i} x={i * 24 - 20} y="330" width="8" height="34" transform="skewX(-24)" fill={LIME} />
       ))}
 
-      <text x="28" y="70" fontFamily="Arial, sans-serif" fontSize="18" fontWeight="700" letterSpacing="3" fill={onColor}>
+      {/* Brand faces come from next/font via CSS variables, so the art matches the page type. */}
+      <text x="28" y="70" style={{ fontFamily: "var(--font-mono), monospace" }} fontSize="18" fontWeight="700" letterSpacing="3" fill={onColor}>
         OCTAX
       </text>
-      <text x="24" y="215" fontFamily="Arial Black, Arial, sans-serif" fontSize={badgeFontSize(label)} fontWeight="900" fill={onColor}>
+      <text x="22" y="215" style={{ fontFamily: "var(--font-display), sans-serif" }} fontSize={badgeFontSize(label)} fill={onColor}>
         {label}
       </text>
-      <text x="28" y="300" fontFamily="Arial, sans-serif" fontSize="16" fontWeight="700" letterSpacing="2" fill={INK}>
+      {/* Spec label sits inside the colour block (above the diagonal) so it always reads in onColor. */}
+      <text x="28" y="258" style={{ fontFamily: "var(--font-mono), monospace" }} fontSize="15" fontWeight="700" letterSpacing="2" fill={onColor}>
         {(product.specs[0]?.label ?? "").toUpperCase()}
       </text>
     </svg>

@@ -119,7 +119,8 @@ export function Hero() {
             Batch-tested fuel for the grid
           </p>
 
-          <h1 className="mt-5 font-display text-[clamp(2.7rem,10vw,7.5rem)] leading-[0.86] [perspective:900px]">
+          {/* Sized so the widest line ("fuel for the", ~8.2em) fits its column at every width. */}
+          <h1 className="mt-5 font-display text-[clamp(2.1rem,10.5vw,6rem)] leading-[0.86] [perspective:900px] lg:text-[clamp(4rem,6.6vw,5.4rem)]">
             <span data-line className="block">High-octane</span>
             <span data-line className="block">fuel for the</span>
             <span data-line className="block">

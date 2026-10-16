@@ -8,7 +8,7 @@ All products, prices and stock are sample data.
 
 - Next.js (App Router) with static export (`output: "export"`)
 - TypeScript, Tailwind CSS v4
-- Framer Motion for the animated hero and scroll reveals
+- GSAP (with ScrollTrigger) for the animated hero, page transitions and scroll reveals
 - Deployed as static files to GitHub Pages
 
 ## Run and build

@@ -5,7 +5,7 @@ import { useState, type FormEvent } from "react";
 type Errors = Partial<Record<"name" | "email" | "message", string>>;
 
 const inputClass =
-  "mt-1.5 w-full border-2 border-ink bg-panel px-3 py-2.5 text-sm outline-none focus:bg-lime/20";
+  "mt-1.5 w-full border-2 border-ink bg-panel px-3 py-2.5 text-base outline-none transition-colors focus:bg-lime/20 aria-[invalid=true]:border-flare";
 const labelClass = "kicker text-ink-soft";
 
 export function ContactForm() {
@@ -30,10 +30,13 @@ export function ContactForm() {
     const data = new FormData(e.currentTarget);
     const next = validate(data);
     setErrors(next);
-    if (Object.keys(next).length === 0) {
-      setSent(true);
-      e.currentTarget.reset();
+    const first = (["name", "email", "message"] as const).find((k) => next[k]);
+    if (first) {
+      e.currentTarget.querySelector<HTMLElement>(`[name="${first}"]`)?.focus();
+      return;
     }
+    setSent(true);
+    e.currentTarget.reset();
   }
 
   if (sent) {

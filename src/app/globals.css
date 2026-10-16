@@ -12,7 +12,8 @@
 
   --color-lime: oklch(0.88 0.205 128);
   --color-lime-deep: oklch(0.8 0.2 128);
-  --color-flare: oklch(0.64 0.221 33);
+  /* Deepened from L 0.64 so paper-on-flare buttons and flare text on paper pass WCAG AA (4.5:1). */
+  --color-flare: oklch(0.56 0.215 33);
   --color-cobalt: oklch(0.52 0.19 258);
 
   --font-display: var(--font-display), "Archivo Black", system-ui, sans-serif;
@@ -49,7 +50,27 @@ h1, h2, h3, h4 {
   letter-spacing: -0.01em;
   line-height: 0.95;
   text-transform: uppercase;
+  text-wrap: balance;
 }
+
+p { text-wrap: pretty; }
+
+input, textarea, select { caret-color: var(--color-flare); }
+
+/* Prices, quantities and stock counts line up column to column. */
+.num { font-variant-numeric: tabular-nums; }
+
+/* Scrollbar in livery colours rather than the OS default. */
+html { scrollbar-color: var(--color-ink) var(--color-paper-2); }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--color-paper-2); }
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink);
+  border: 3px solid var(--color-paper-2);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--color-flare); }
+
+a { text-underline-offset: 0.2em; }
 
 :focus-visible {
   outline: 3px solid var(--color-flare);
