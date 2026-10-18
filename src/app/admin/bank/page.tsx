@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AdminShell } from "@/components/admin/AdminShell";
 import { BankAdmin } from "@/components/admin/Bank";
 import { buildMetadata } from "@/lib/metadata";
 
@@ -12,8 +11,8 @@ export const metadata: Metadata = buildMetadata({
 
 export default function AdminBankPage() {
   return (
-    <AdminShell>
+    <>
       <BankAdmin />
-    </AdminShell>
+    </>
   );
 }

@@ -55,6 +55,9 @@ export const uid = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0,
 
 type LoadReply = { admin: Admin; data: BackofficeData | null; needsSetup: boolean };
 
+/** Live: this browser tab's last copy of the staff member's records, for an instant start. */
+const LIVE_CACHE_KEY = "octa-backoffice-live-v1";
+
 /**
  * Back-office state. Every change runs through the shared actions
  * (lib/backoffice/actions.ts): in the demo on this browser's sample records;
@@ -112,10 +115,25 @@ export function BackofficeProvider({ children }: { children: ReactNode }) {
   const userId = auth.user?.id ?? null;
   useEffect(() => {
     if (mode !== "live" || !auth.ready) return;
-    if (!userId) { setAdmin(null); replace(null); setLiveIssue(null); return; }
+    if (!userId) {
+      setAdmin(null); replace(null); setLiveIssue(null);
+      try { sessionStorage.removeItem(LIVE_CACHE_KEY); } catch { /* nothing cached */ }
+      return;
+    }
     setLiveIssue(null);
+    // Show this tab's last copy straight away; the server's answer replaces it a moment later.
+    try {
+      const cached = JSON.parse(sessionStorage.getItem(LIVE_CACHE_KEY) ?? "null") as { userId: string; admin: Admin; data: BackofficeData } | null;
+      if (cached?.userId === userId && cached.data) { setAdmin(cached.admin); replace(cached.data); }
+    } catch { /* no usable copy */ }
     void loadLive();
   }, [mode, auth.ready, userId, loadLive, replace]);
+
+  // Keep this tab's copy current (cleared on sign-out and when the tab closes).
+  useEffect(() => {
+    if (mode !== "live" || !userId || !admin || !data) return;
+    try { sessionStorage.setItem(LIVE_CACHE_KEY, JSON.stringify({ userId, admin, data })); } catch { /* too large or blocked: load from the server */ }
+  }, [mode, userId, admin, data]);
 
   // Pick up other staff members' changes when coming back to the tab, and every few minutes.
   useEffect(() => {
@@ -190,7 +208,10 @@ export function BackofficeProvider({ children }: { children: ReactNode }) {
         return error;
       },
       signOut() {
-        if (mode === "live") { void auth.signOut(); setAdmin(null); replace(null); return; }
+        if (mode === "live") {
+          try { sessionStorage.removeItem(LIVE_CACHE_KEY); } catch { /* nothing cached */ }
+          void auth.signOut(); setAdmin(null); replace(null); return;
+        }
         try { sessionStorage.removeItem(ADMIN_SESSION_KEY); } catch { /* memory only */ }
         setAdmin(null);
       },

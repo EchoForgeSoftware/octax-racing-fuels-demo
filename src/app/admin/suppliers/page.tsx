@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AdminShell } from "@/components/admin/AdminShell";
 import { SuppliersAdmin } from "@/components/admin/Suppliers";
 import { buildMetadata } from "@/lib/metadata";
 
@@ -12,8 +11,8 @@ export const metadata: Metadata = buildMetadata({
 
 export default function AdminSuppliersPage() {
   return (
-    <AdminShell>
+    <>
       <SuppliersAdmin />
-    </AdminShell>
+    </>
   );
 }

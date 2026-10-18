@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { AdminShell } from "@/components/admin/AdminShell";
 import { RepsAdmin } from "@/components/admin/Reps";
 import { buildMetadata } from "@/lib/metadata";
 
@@ -12,8 +11,8 @@ export const metadata: Metadata = buildMetadata({
 
 export default function AdminRepsPage() {
   return (
-    <AdminShell>
+    <>
       <RepsAdmin />
-    </AdminShell>
+    </>
   );
 }
