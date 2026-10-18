@@ -161,7 +161,8 @@ test("supplier invoice files are stored apart and opened only by main admins and
 
 test("the shop gets public catalogue fields and only the signed-in customer's own prices",async()=>{
   const visitor=(await call(null,{op:"public"})).body;
-  assert.equal(visitor.ready,true);assert.equal(visitor.client,null);
+  assert.equal(visitor.ready,true);assert.equal(visitor.client,null);assert.equal(visitor.staff,false);
+  assert.equal((await call("zuan",{op:"public"})).body.staff,true);assert.equal((await call("rep",{op:"public"})).body.staff,true);assert.equal((await call("customer",{op:"public"})).body.staff,false);
   assert.ok(visitor.catalogue.every(i=>i.cost===null&&i.agent===null&&i.bulk===null&&(!i.costing||i.costing.lines.length===0)));
   const buyer=(await call("customer",{op:"public"})).body;
   assert.equal(buyer.client.id,"c-a");assert.equal(buyer.client.prices["OCTA-X-25"],999);assert.equal(buyer.client.notes,"");

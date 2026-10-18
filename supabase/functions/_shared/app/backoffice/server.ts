@@ -139,8 +139,11 @@ export async function handle(body: unknown, user: AuthUser | null, store: Store,
   const req = (body ?? {}) as { op?: string; name?: string; args?: unknown; ids?: unknown; data?: unknown; invoiceId?: unknown };
   try {
     if (req.op === "public") {
-      const loaded = await store.load(user ? ["settings", "catalogue", "clients"] : ["settings", "catalogue"]);
-      return { status: 200, body: publicView(toData(loaded), user) };
+      const loaded = await store.load(user ? ["settings", "catalogue", "clients", "reps"] : ["settings", "catalogue"]);
+      const data = toData(loaded);
+      // Staff see a "Back office" button on the website.
+      const staff = user ? !!await whoIs(user, store, data) : false;
+      return { status: 200, body: { ...publicView(data, user), staff } };
     }
     if (!user) return { status: 401, body: { error: "Sign in to use the back office." } };
 

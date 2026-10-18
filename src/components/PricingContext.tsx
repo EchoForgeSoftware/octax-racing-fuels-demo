@@ -5,7 +5,7 @@ import { useAuth } from "./AuthContext";
 import { accountsEnabled } from "@/lib/supabase";
 import { INDEXABLE } from "@/lib/site";
 import { allowCustomerDemo } from "@/lib/customerDemo";
-import { loadBackoffice, onBackofficeChange } from "@/lib/backoffice/local";
+import { ADMIN_SESSION_KEY, loadBackoffice, onBackofficeChange } from "@/lib/backoffice/local";
 import { priceFor } from "@/lib/backoffice/calc";
 import { courierRates } from "@/lib/courierRates";
 import { accountEmails } from "@/lib/backoffice/customerForm";
@@ -31,6 +31,8 @@ type Pricing = {
   courierFee: number;
   /** Purity received for a website product, when switched on in its costing. */
   purity: (slug: string) => number | null;
+  /** The signed-in user is back-office staff (shows the Back office button). */
+  staff: boolean;
 };
 
 const fallback: Pricing = {
@@ -43,13 +45,14 @@ const fallback: Pricing = {
   extras: [],
   courierFee: courierRates.fee,
   purity: () => null,
+  staff: false,
 };
 
 const Ctx = createContext<Pricing>(fallback);
 
 /** What the shop needs from the back office: no costs, and only this customer's own prices. */
 type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null };
-type PublicReply = { ready: false } | ({ ready: true } & Source);
+type PublicReply = ({ ready: false } | ({ ready: true } & Source)) & { staff?: boolean };
 
 /**
  * Prices on the shop. In demo mode they come from the back-office demo store,
@@ -61,12 +64,14 @@ type PublicReply = { ready: false } | ({ ready: true } & Source);
 export function PricingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [source, setSource] = useState<Source | null>(null);
+  const [staff, setStaff] = useState(false);
   const email = user?.email?.toLowerCase() ?? null;
 
   useEffect(() => {
     if (allowCustomerDemo(process.env.NEXT_PUBLIC_CUSTOMER_DEMO, window.location.hostname, accountsEnabled, INDEXABLE, process.env.NEXT_PUBLIC_DEMO_HOSTS)) {
       const read = () => {
         const data = loadBackoffice();
+        try { setStaff(!!sessionStorage.getItem(ADMIN_SESSION_KEY)); } catch { setStaff(false); }
         // The website login email, or any authorised buyer on the account (Customer Information Form).
         const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
         setSource({ catalogue: data.catalogue, courierFee: data.settings.courierFee ?? null, client });
@@ -77,13 +82,17 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     if (!accountsEnabled) return;
     let active = true;
     callBackoffice<PublicReply>({ op: "public" })
-      .then((reply) => { if (active) setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client } : null); })
-      .catch(() => { if (active) setSource(null); });
+      .then((reply) => {
+        if (!active) return;
+        setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client } : null);
+        setStaff(reply.staff === true);
+      })
+      .catch(() => { if (active) { setSource(null); setStaff(false); } });
     return () => { active = false; };
   }, [email]);
 
   const value = useMemo<Pricing>(() => {
-    if (!source) return fallback;
+    if (!source) return { ...fallback, staff };
     const data = source;
     const bySku = new Map(data.catalogue.map((i) => [i.sku, i]));
     const client = data.client;
@@ -104,12 +113,13 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       item: (sku) => bySku.get(sku) ?? null,
       extras: data.catalogue.filter((i) => i.custom && i.active && !i.comingSoon),
       courierFee: data.courierFee ?? courierRates.fee,
+      staff,
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;
       },
     };
-  }, [source]);
+  }, [source, staff]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -78,9 +78,9 @@ test("payment history displays recorded amount, method, reference, date and orde
 
 test("Customer navigation is available only in the signed-in header; guests retain Sign in",()=>{
   for(const signedIn of [false,true]){
-    const {Nav}=load("../src/components/Nav.tsx",{"next/link":({children,...props})=>createElement("a",props,children),"next/navigation":{usePathname:()=>"/account/"},"./AuthContext":{useAuth:()=>({user:signedIn?{id:"customer"}:null})},"./CartContext":{useCart:()=>({count:0,ready:true})},"./brand/Wordmark":{OctaLogo:()=>createElement("span",null,"OCTA")},"./Icon":{Icon:()=>null},"@/lib/navigation":navigation});
+    const {Nav}=load("../src/components/Nav.tsx",{"next/link":({children,...props})=>createElement("a",props,children),"next/navigation":{usePathname:()=>"/account/"},"./AuthContext":{useAuth:()=>({user:signedIn?{id:"customer"}:null})},"./CartContext":{useCart:()=>({count:0,ready:true})},"./PricingContext":{usePricing:()=>({staff:signedIn})},"./brand/Wordmark":{OctaLogo:()=>createElement("span",null,"OCTA")},"./Icon":{Icon:()=>null},"@/lib/navigation":navigation});
     const html=renderToStaticMarkup(createElement(Nav));
-    if(signedIn){assert.match(html,/>Customer</);assert.match(html,/aria-current="page"/);assert.ok(!html.includes('href="/account/login/"'));}
-    else{assert.ok(!html.includes('href="/account/"'));assert.match(html,/>Sign in</);}
+    if(signedIn){assert.match(html,/>Customer</);assert.ok(html.includes('href="/admin/"'),"staff get the Back office button");assert.match(html,/aria-current="page"/);assert.ok(!html.includes('href="/account/login/"'));}
+    else{assert.ok(!html.includes('href="/account/"'));assert.ok(!html.includes('href="/admin/"'));assert.match(html,/>Sign in</);}
   }
 });

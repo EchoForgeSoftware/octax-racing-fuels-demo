@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { useCart } from "./CartContext";
 import { OctaLogo } from "./brand/Wordmark";
 import { useAuth } from "./AuthContext";
+import { usePricing } from "./PricingContext";
 import { Icon } from "./Icon";
 import { navigationLinks } from "@/lib/navigation";
 
@@ -17,6 +18,7 @@ export function Nav() {
   const pathname = usePathname();
   const { count, ready } = useCart();
   const { user } = useAuth();
+  const { staff } = usePricing();
   const accountLabel = user ? "Customer dashboard" : "Sign in";
   const links = navigationLinks(Boolean(user));
   const [open, setOpen] = useState(false);
@@ -72,6 +74,16 @@ export function Nav() {
         </nav>
 
         <div className="flex items-center gap-2">
+          {staff && (
+            <Link
+              href="/admin/"
+              aria-label="Back office"
+              className="flex h-11 items-center gap-2 border-2 border-ink bg-lime px-3 transition-colors hover:bg-ink hover:text-lime"
+            >
+              <Icon name="user" size={18} strokeWidth={2.5} />
+              <span className="kicker hidden sm:inline">Back office</span>
+            </Link>
+          )}
           <Link
             href={user ? "/account/" : "/account/login/"}
             aria-label={accountLabel}
