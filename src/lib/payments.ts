@@ -2,6 +2,11 @@ import { accountsEnabled, getSupabase } from "./supabase";
 import type { CustomerDetails, PlacedOrder } from "./order";
 
 export const ozowEnabled = accountsEnabled && process.env.NEXT_PUBLIC_OZOW_ENABLED === "true";
+/**
+ * Online ordering stays closed until the business can see and act on orders
+ * (live back office or order emails). Accounts can be live before that.
+ */
+export const orderingEnabled = accountsEnabled && process.env.NEXT_PUBLIC_ORDERING_ENABLED === "true";
 export type PaymentStatus = "pending" | "paid" | "failed";
 
 async function callPayment(body: Record<string, unknown>) {

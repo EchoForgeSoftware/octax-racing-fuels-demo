@@ -19,7 +19,7 @@ import { useAuth } from "./AuthContext";
 import { normaliseVat, vatError } from "@/lib/vat";
 import { BankDetails } from "./BankDetails";
 import { hasBankDetails, LEGAL } from "@/lib/site";
-import { createOzowPayment, ozowEnabled } from "@/lib/payments";
+import { orderingEnabled, createOzowPayment, ozowEnabled } from "@/lib/payments";
 import { BotCheck, useBotCheck } from "./BotCheck";
 
 const inputClass =
@@ -57,7 +57,7 @@ export function CheckoutView() {
   const [accountContact, setAccountContact] = useState<Contact>({ name: "", email: "", phone: "", company: "", vat: "" });
   const [accountProfile, setAccountProfile] = useState<CustomerProfile>(() => emptyProfile("company"));
   const [demoResult, setDemoResult] = useState<{ number: string; client: string; saved: boolean } | null>(null);
-  const canSubmit = enabled && !demo && (paymentMethod === "eft" || ozowEnabled);
+  const canSubmit = orderingEnabled && !demo && (paymentMethod === "eft" || ozowEnabled);
   const submitting = useRef(false);
   const pendingOrder = useRef<{ signature: string; order: PlacedOrder } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -348,7 +348,7 @@ export function CheckoutView() {
               is dispatched once the payment reflects.
             </p>
           </div>
-          {(!enabled || demo) && (
+          {(!orderingEnabled || demo) && (
             <p role="status" className="mt-4 border-2 border-dashed border-ink p-4 text-sm text-ink-soft">
               Online ordering is being set up. You can browse the bank details below, but please wait until ordering opens before making a payment.
             </p>
@@ -401,7 +401,7 @@ export function CheckoutView() {
           disabled={processing || (!demo && (!canSubmit || (paymentMethod === "ozow" && bot.pending)))}
           className="mt-6 flex w-full items-center justify-center gap-2 border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:cursor-wait disabled:opacity-50"
         >
-          {demo ? "Place sample order (demo, no payment)" : paymentMethod === "ozow" ? (canSubmit ? "Pay with Ozow" : "Ozow coming soon") : (enabled ? "Place EFT order" : "Ordering opens soon")}
+          {demo ? "Place sample order (demo, no payment)" : paymentMethod === "ozow" ? (canSubmit ? "Pay with Ozow" : "Ozow coming soon") : (orderingEnabled ? "Place EFT order" : "Ordering opens soon")}
           <Icon name="arrow" size={16} />
         </button>
         <p className="mt-3 text-center text-xs text-muted">{paymentMethod === "ozow" ? "You’ll continue to Ozow to complete payment." : "Use your order reference when making the transfer."}</p>
