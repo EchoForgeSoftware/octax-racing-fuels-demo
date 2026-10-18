@@ -22,7 +22,9 @@ export function contentPolicy(html, supabaseUrl = "", captcha = Boolean(process.
     connections.push(url.origin, url.origin.replace(/^https:/, "wss:"));
   }
   if (captcha) connections.push("https://challenges.cloudflare.com");
-  return ["default-src 'self'", `script-src 'self' ${[...new Set(hashes)].join(" ")}${captcha ? " https://challenges.cloudflare.com" : ""}`,
+  // Cloudflare Web Analytics (free, cookie-less visitor stats) is injected by Cloudflare on the live domain.
+  connections.push("https://cloudflareinsights.com");
+  return ["default-src 'self'", `script-src 'self' ${[...new Set(hashes)].join(" ")}${captcha ? " https://challenges.cloudflare.com" : ""} https://static.cloudflareinsights.com`,
     "script-src-attr 'none'", "style-src 'self' 'unsafe-inline'", "img-src 'self' data: blob:", "font-src 'self'",
     `connect-src ${connections.join(" ")}`, "object-src 'none'", "base-uri 'none'", captcha ? "frame-src https://challenges.cloudflare.com" : "frame-src 'none'", "form-action 'self'"].join("; ");
 }
