@@ -16,7 +16,7 @@ export const SITE_URL = `${ORIGIN}${BASE_PATH}`;
 // Flip to true at production handoff so robots and per-page meta allow indexing.
 export const INDEXABLE = process.env.NEXT_PUBLIC_SITE_INDEXABLE === "true" && process.env.VERCEL_ENV !== "preview" && process.env.VERCEL_ENV !== "development";
 
-export const LEGAL = { version: "2026-10-16", reviewed: process.env.NEXT_PUBLIC_POLICIES_REVIEWED === "true" };
+export const LEGAL = { version: "2026-10-18", reviewed: process.env.NEXT_PUBLIC_POLICIES_REVIEWED === "true" };
 
 export const SITE = {
   name: "OCTA Performance",

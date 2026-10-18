@@ -7,6 +7,7 @@ import { INDEXABLE } from "@/lib/site";
 import { allowCustomerDemo } from "@/lib/customerDemo";
 import { loadBackoffice, onBackofficeChange } from "@/lib/backoffice/local";
 import { priceFor } from "@/lib/backoffice/calc";
+import { courierRates } from "@/lib/courierRates";
 import { accountEmails } from "@/lib/backoffice/customerForm";
 import type { BackofficeData, CatalogueItem, Client } from "@/lib/backoffice/types";
 
@@ -25,6 +26,10 @@ type Pricing = {
   item: (sku: string) => CatalogueItem | null;
   /** Products added in the back office (merch, detailing) that are live on the website. */
   extras: CatalogueItem[];
+  /** Courier charge per pack, set in the back office. */
+  courierFee: number;
+  /** Purity received for a website product, when switched on in its costing. */
+  purity: (slug: string) => number | null;
 };
 
 const fallback: Pricing = {
@@ -35,6 +40,8 @@ const fallback: Pricing = {
   client: null,
   item: () => null,
   extras: [],
+  courierFee: courierRates.fee,
+  purity: () => null,
 };
 
 const Ctx = createContext<Pricing>(fallback);
@@ -77,6 +84,11 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       client,
       item: (sku) => bySku.get(sku) ?? null,
       extras: data.catalogue.filter((i) => i.custom && i.active && !i.comingSoon),
+      courierFee: data.settings.courierFee ?? courierRates.fee,
+      purity: (slug) => {
+        const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
+        return c?.purity ?? null;
+      },
     };
   }, [data, user]);
 

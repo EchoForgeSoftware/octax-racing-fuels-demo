@@ -63,7 +63,7 @@ const guide = [
   },
   {
     h: "OCTA-M Methanol",
-    p: "Methanol in its purest form for methanol-burning performance engines. Methanol is toxic as well as flammable: handle it with eye protection, gloves and a respirator, and keep it away from open flame.",
+    p: "99.9% methanol for methanol-burning performance engines. Methanol is toxic as well as flammable: handle it with eye protection, gloves and a respirator, and keep it away from open flame.",
     href: "/shop/octa-m-methanol/",
     cta: "Shop OCTA-M",
   },

@@ -1,5 +1,5 @@
 {
-  "termsVersion": "2026-10-16",
+  "termsVersion": "2026-10-18",
   "items": [
     {
       "sku": "OCTA-X-25",
@@ -18,14 +18,14 @@
     {
       "sku": "OCTA-M-25",
       "slug": "octa-m-methanol",
-      "name": "OCTA-M Methanol 100%",
+      "name": "OCTA-M Methanol 99.9%",
       "size": "25L",
       "price": 600
     },
     {
       "sku": "OCTA-M-210",
       "slug": "octa-m-methanol",
-      "name": "OCTA-M Methanol 100%",
+      "name": "OCTA-M Methanol 99.9%",
       "size": "210L plastic drum",
       "price": 5500
     },
@@ -65,7 +65,7 @@
       "25": 10,
       "0.5": 12
     },
-    "localRadiusKm": 35,
+    "localRadiusKm": 30,
     "localTowns": [
       "alberton",
       "bapsfontein",
@@ -75,7 +75,6 @@
       "brakpan",
       "centurion",
       "daveyton",
-      "delmas",
       "duduza",
       "edenvale",
       "etwatwa",

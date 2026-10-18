@@ -13,7 +13,39 @@ const GROUP_LABEL = { fuel: "Race fuel", track: "Track prep", merch: "Merch", de
  */
 export function ComingSoon() {
   const pricing = usePricing();
+  // Products added in the back office (e.g. hoodies), one card per product with all its sizes.
+  const newIn = [...new Map(pricing.extras.map((i) => [i.productName, pricing.extras.filter((x) => x.productName === i.productName)])).values()];
   return (
+    <>
+    {newIn.length > 0 && (
+      <section className="mt-20" aria-labelledby="new-in">
+        <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-4">
+          <div>
+            <p className="kicker text-flare">Just landed</p>
+            <h2 id="new-in" className="mt-2 font-display text-[clamp(1.8rem,5vw,3rem)]">New in</h2>
+          </div>
+          <Link href="/contact/" className="kicker border-b-2 border-ink pb-1 hover:text-flare">Order these &rarr;</Link>
+        </div>
+        <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {newIn.map((items) => {
+            const first = items[0];
+            const prices = items.map((i) => i.retail).filter((v): v is number => v !== null);
+            return (
+              <li key={first.productName} className="flex flex-col border-2 border-ink bg-panel p-5">
+                <p className="font-mono text-[0.68rem] font-bold uppercase tracking-wider text-muted">{first.category === "merch" ? "Merch" : first.category === "detailing" ? "Detailing" : "OCTA"}</p>
+                <h3 className="mt-1 font-display text-2xl leading-none">{first.productName}</h3>
+                {first.short && <p className="mt-3 text-sm text-ink-soft">{first.short}</p>}
+                <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Sizes">
+                  {items.map((i) => <li key={i.sku} className="border border-ink px-2 py-0.5 font-mono text-[0.68rem] uppercase">{i.size}</li>)}
+                </ul>
+                <p className="num mt-auto pt-4 font-display text-xl">{prices.length ? `${prices.length < items.length || new Set(prices).size > 1 ? "From " : ""}${formatPrice(Math.min(...prices))}` : "Price on request"}</p>
+                <Link href="/contact/" className="mt-3 flex items-center justify-center border-2 border-ink bg-ink px-4 py-2.5 font-display text-sm uppercase text-paper hover:bg-lime hover:text-ink">Order now</Link>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )}
     <section className="mt-20" aria-labelledby="coming-soon">
       <div className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-ink pb-4">
         <div>
@@ -57,17 +89,8 @@ export function ComingSoon() {
             </li>
           );
         })}
-        {pricing.extras.map((item) => (
-          <li key={item.sku} className="flex flex-col border-2 border-ink bg-panel p-5">
-            <p className="font-mono text-[0.68rem] font-bold uppercase tracking-wider text-muted">{item.category === "merch" ? "Merch" : "OCTA"}</p>
-            <h3 className="mt-1 font-display text-2xl leading-none">{item.productName}</h3>
-            <p className="mt-1 font-mono text-xs uppercase">{item.size}</p>
-            {item.short && <p className="mt-3 text-sm text-ink-soft">{item.short}</p>}
-            <p className="num mt-auto pt-4 text-sm font-bold">{item.retail === null ? "Price on request" : formatPrice(item.retail)}</p>
-            <Link href="/contact/" className="mt-2 font-mono text-xs uppercase tracking-wider underline hover:text-flare">Order via quote</Link>
-          </li>
-        ))}
       </ul>
     </section>
+    </>
   );
 }

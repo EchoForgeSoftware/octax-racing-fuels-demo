@@ -59,12 +59,13 @@ export function DocumentEditor() {
   // Keep courier in step with the lines while automatic.
   useEffect(() => {
     if (!doc || !autoCourier) return;
-    if (doc.delivery && doc.delivery.method !== "courier") { if (doc.courier !== 0) setDoc({ ...doc, courier: 0 }); return; }
+    // Collected orders carry no delivery charge; local and courier deliveries use the courier rates (adjust by hand if agreed).
+    if (doc.delivery?.method === "collect") { if (doc.courier !== 0) setDoc({ ...doc, courier: 0 }); return; }
     const lines = doc.lines.flatMap((l) => {
       const item = data?.catalogue.find((i) => i.sku === l.sku);
       return item ? [{ size: item.size, qty: l.qty }] : [];
     });
-    const fee = cartCourier(lines).fee;
+    const fee = cartCourier(lines, null, data?.settings.courierFee).fee;
     if (fee !== doc.courier) setDoc({ ...doc, courier: fee });
   }, [doc, autoCourier, data]);
 

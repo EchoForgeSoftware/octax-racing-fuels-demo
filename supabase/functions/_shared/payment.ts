@@ -50,8 +50,8 @@ export function quoteCart(input: unknown, catalogue: Catalogue, city?: unknown) 
     if (drum || qty < threshold) courierCents += Math.round(catalogue.courier.fee * 100) * qty;
     return { ...product, price: product.price, qty };
   });
-  // Free own delivery inside the local area (35 km around Benoni, Brakpan, Boksburg, Kempton Park).
-  if (localTown(city, catalogue.courier.localTowns)) courierCents = 0;
+  // Local-area orders (30 km) pay the standard courier rate; any cheaper local delivery is confirmed by the business.
+  void city;
   const total = (subtotalCents + courierCents) / 100;
   if (total > 9_999_999 || total <= 0) throw new CheckoutError("Please contact us to arrange this order.");
   return { items, subtotal: subtotalCents / 100, courier: courierCents / 100, total };

@@ -1,5 +1,7 @@
 import { formatPrice } from "@/lib/format";
 import { cartCourier } from "@/lib/courier";
+import { courierRates } from "@/lib/courierRates";
+import { usePricing } from "./PricingContext";
 import type { CartItem } from "./CartContext";
 
 /** Subtotal, courier and total rows shared by the cart and checkout summaries. */
@@ -10,9 +12,10 @@ export function OrderTotals({ items, subtotal, label = "Subtotal", city }: {
   /** Delivery town, when known: inside the local area delivery is free. */
   city?: string;
 }) {
-  const { fee, quoted, local } = cartCourier(items, city);
+  const { courierFee } = usePricing();
+  const { fee, quoted, local } = cartCourier(items, city, courierFee);
   const total = subtotal + fee;
-  const courierText = local ? "Free OCTA delivery" : fee > 0 ? formatPrice(fee) : quoted ? "Quoted separately" : "Free";
+  const courierText = fee > 0 ? formatPrice(fee) : quoted ? "Quoted separately" : "Free";
 
   return (
     <>
@@ -26,7 +29,7 @@ export function OrderTotals({ items, subtotal, label = "Subtotal", city }: {
           <dd className={fee > 0 ? "font-bold" : "text-right text-muted"}>{courierText}</dd>
         </div>
         {local && (
-          <p className="text-right text-xs text-muted">We deliver free within 35 km of Benoni, Brakpan, Boksburg and Kempton Park.</p>
+          <p className="text-right text-xs text-muted">You are inside our {courierRates.localRadiusKm} km local area: we can arrange local delivery and will confirm its cost with you.</p>
         )}
         {quoted && fee > 0 && (
           <p className="text-right text-xs text-muted">Some items: courier quoted separately</p>

@@ -19,12 +19,13 @@ export const metadata: Metadata = {
   },
 };
 
-const ticker = ["Fuel the addiction", "OCTA-X Ethanol 96%", "OCTA-M Methanol 100%", "OCTA-BOOST", "UN 1170 · UN 1230", "Batch-numbered"];
+const ticker = ["Fuel the addiction", "OCTA-X Ethanol 96%", "OCTA-M Methanol 99.9%", "OCTA-BOOST", "UN 1170 · UN 1230", "Fresh by batch"];
 
 const props = [
-  { n: "01", h: "Batch-numbered", b: "Every pack has a manufacture date and batch number written on its label, so each one can be traced." },
-  { n: "02", h: "Three products", b: "OCTA-X ethanol 96% and OCTA-M methanol for alcohol builds, and OCTA-BOOST to lift 95 octane pump fuel." },
-  { n: "03", h: "To your workshop", b: "Order online and have OCTA dispatched to your workshop or track inside a 24 to 48 hour window." },
+  { n: "01", h: "Fresh by batch", b: "Every pack is marked with a manufacture date and batch number so we can guarantee freshness and consistent quality. No old stock leaves despatch." },
+  { n: "02", h: "Performance-grade purity", b: "OCTA-X is 96% ethanol and OCTA-M is 99.9% methanol. What goes in the can is what your engine expects." },
+  { n: "03", h: "Ready-to-use sizes", b: "OCTA-X and OCTA-M in 25 L and 210 L, OCTA-BOOST in 5 L, OCTA-SHOT and OCTA-TORQUE in 500 mL: buy exactly what your build or workshop needs." },
+  { n: "04", h: "Workshop delivery", b: "Order online and we dispatch to your workshop. Courier delivery is typically 24 to 48 hours after dispatch." },
 ];
 
 export default function HomePage() {
@@ -96,7 +97,7 @@ export default function HomePage() {
 
       {/* Value props */}
       <section className="mx-auto max-w-7xl px-4 py-20 sm:px-6">
-        <div className="grid gap-px border-2 border-ink bg-ink md:grid-cols-3">
+        <div className="grid gap-px border-2 border-ink bg-ink sm:grid-cols-2 lg:grid-cols-4">
           {props.map((p) => (
             <Reveal key={p.n} self className="bg-paper p-8">
               <span className="text-outline font-display text-6xl">{p.n}</span>

@@ -1,3 +1,4 @@
+import type { Costing } from "./costing";
 import type { CustomerProfile } from "./customerForm";
 // Back-office data: the admin catalogue (prices, costs, descriptions), clients
 // and their pricing, quotes, invoices and payments. The same shapes back the
@@ -34,6 +35,8 @@ export type CatalogueItem = {
   custom: boolean;
   /** Announced on the shop as "coming soon"; untick once it has a price and data sheet. */
   comingSoon: boolean;
+  /** Costing table (cost lines ex VAT, purity); its total can set `cost`. */
+  costing?: Costing;
 };
 
 export type Client = {
@@ -174,6 +177,8 @@ export type BusinessSettings = {
   paymentTermsDays: number;
   quoteValidDays: number;
   invoiceFooter: string;
+  /** Courier charge per pack (R); free-delivery thresholds stay as per the policy. */
+  courierFee?: number;
   next: { quote: number; invoice: number };
 };
 

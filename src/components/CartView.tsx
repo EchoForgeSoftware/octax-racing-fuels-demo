@@ -8,8 +8,10 @@ import { ProductShot } from "./pack/ProductShot";
 import { Icon } from "./Icon";
 import { OrderTotals } from "./OrderTotals";
 import { courierNote } from "@/lib/courier";
+import { usePricing } from "./PricingContext";
 
 export function CartView() {
+  const { courierFee } = usePricing();
   const { items, count, setQty, remove, subtotal, ready } = useCart();
 
   if (!ready) {
@@ -64,7 +66,7 @@ export function CartView() {
                   {i.size} &middot; {formatPrice(i.price)} each
                 </p>
                 <p className="num mt-1 font-mono text-xs uppercase tracking-wider text-ink-soft">
-                  {courierNote(i.size, i.qty)}
+                  {courierNote(i.size, i.qty, courierFee)}
                 </p>
               </div>
 

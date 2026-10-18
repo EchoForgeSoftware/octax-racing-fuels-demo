@@ -20,7 +20,7 @@ await db.exec(payments);
 const customerId = "11111111-1111-4111-8111-111111111111";
 await db.query("insert into auth.users(id,raw_user_meta_data) values($1,'{}')", [customerId]);
 
-const order = { ref: "OCTA-123456ABCDEF", user_id: customerId, customer: { name: "Test Customer" }, items: [{ sku: "test", qty: 1 }], subtotal: 760, courier: 200, total: 960, terms_version: "2026-10-16" };
+const order = { ref: "OCTA-123456ABCDEF", user_id: customerId, customer: { name: "Test Customer" }, items: [{ sku: "test", qty: 1 }], subtotal: 760, courier: 200, total: 960, terms_version: "2026-10-18" };
 const request = { siteCode: "TEST-SITE-001", amount: { currency: "ZAR", value: 960 }, merchantReference: order.ref, expireAt: "2030-01-01T00:00:00Z" };
 async function reserve(input = order, hash = "capability-hash", fingerprint = "request-hash") {
   return (await db.query("select public.reserve_ozow_order($1,$2,$3,$4,$5) as payment", [input, { ...request, merchantReference: input.ref }, hash, fingerprint, "production"])).rows[0].payment;
@@ -49,7 +49,7 @@ test("guests cannot read payment tokens or forge an Ozow order", async () => {
   await assert.rejects(() => asRole("anon", () => db.query("select * from public.ozow_payments")), /permission denied/i);
   await assert.rejects(() => asRole("anon", () => db.query("select public.reserve_ozow_order($1,$2,'fake','fake','production')", [order, request])), /permission denied/i);
   await assert.rejects(() => asRole("anon", () => db.query(`insert into public.orders(ref,customer,items,subtotal,courier,total,payment_method,terms_version)
-    values('OCTA-AAAAAAAAAAAA','{}','[]',1,0,1,'ozow','2026-10-16')`)), /row-level security/i);
+    values('OCTA-AAAAAAAAAAAA','{}','[]',1,0,1,'ozow','2026-10-18')`)), /row-level security/i);
 });
 
 test("customer access policies expose only the account's own orders", async () => {
@@ -98,27 +98,27 @@ test("new orders require current terms and the server stamps acceptance time", a
   await assert.rejects(() => asRole("anon", () => db.query(`insert into public.orders(ref,customer,items,subtotal,courier,total)
     values('OCTA-BBBBBBBBBBBB','{}','[]',1,0,1)`)), /terms acknowledgement/i);
   await asRole("anon", () => db.query(`insert into public.orders(ref,customer,items,subtotal,courier,total,terms_version,terms_accepted_at)
-    values('OCTA-BBBBBBBBBBBB','{}','[]',1,0,1,'2026-10-16','2099-01-01')`));
+    values('OCTA-BBBBBBBBBBBB','{}','[]',1,0,1,'2026-10-18','2099-01-01')`));
   const record = (await db.query("select terms_version,terms_accepted_at from public.orders where ref='OCTA-BBBBBBBBBBBB'")).rows[0];
-  assert.equal(record.terms_version, "2026-10-16");
+  assert.equal(record.terms_version, "2026-10-18");
   assert.notEqual(new Date(record.terms_accepted_at).getUTCFullYear(), 2099);
 });
 
 test("customer payment confirmation cannot be forged in a browser insert",async()=>{
   await asRole("anon",()=>db.query(`insert into public.orders(ref,customer,items,subtotal,courier,total,terms_version,payment_confirmed_at,payment_confirmed_amount,payment_reference)
-    values('OCTA-CCCCCCCCCCCC','{}','[]',1,0,1,'2026-10-16',now(),999,'forged')`));
+    values('OCTA-CCCCCCCCCCCC','{}','[]',1,0,1,'2026-10-18',now(),999,'forged')`));
   const row=(await db.query("select payment_confirmed_at,payment_confirmed_amount,payment_reference from orders where ref='OCTA-CCCCCCCCCCCC'")).rows[0];
   assert.equal(row.payment_confirmed_at,null);assert.equal(row.payment_confirmed_amount,null);assert.equal(row.payment_reference,null);
 });
 
 test("confirmed EFT records retain their original amount and time through dispatch",async()=>{
-  await db.query(`insert into public.orders(ref,user_id,customer,items,subtotal,courier,total,terms_version) values('OCTA-DDDDDDDDDDDD',$1,'{}','[]',100,20,120,'2026-10-16')`,[customerId]);
+  await db.query(`insert into public.orders(ref,user_id,customer,items,subtotal,courier,total,terms_version) values('OCTA-DDDDDDDDDDDD',$1,'{}','[]',100,20,120,'2026-10-18')`,[customerId]);
   await db.query("update orders set status='paid' where ref='OCTA-DDDDDDDDDDDD'");
   const first=(await db.query("select payment_confirmed_at,payment_confirmed_amount,payment_reference from orders where ref='OCTA-DDDDDDDDDDDD'")).rows[0];
   assert.ok(first.payment_confirmed_at);assert.equal(Number(first.payment_confirmed_amount),120);assert.equal(first.payment_reference,"OCTA-DDDDDDDDDDDD");
   await db.query("update orders set status='dispatched',total=130,payment_confirmed_amount=999,payment_confirmed_at='2099-01-01' where ref='OCTA-DDDDDDDDDDDD'");
   assert.deepEqual((await db.query("select payment_confirmed_at,payment_confirmed_amount,payment_reference from orders where ref='OCTA-DDDDDDDDDDDD'")).rows[0],first);
-  await db.query("insert into orders(ref,customer,items,subtotal,courier,total,terms_version) values('OCTA-000000000000','{}','[]',0,0,0,'2026-10-16')");
+  await db.query("insert into orders(ref,customer,items,subtotal,courier,total,terms_version) values('OCTA-000000000000','{}','[]',0,0,0,'2026-10-18')");
   await assert.rejects(()=>db.query("update orders set status='paid' where ref='OCTA-000000000000'"),/positive order total/i);
 });
 
@@ -137,7 +137,7 @@ test("payment confirmations are visible only to the owning customer and never ba
     assert.equal((await asRole("authenticated",()=>db.query("select payment_confirmed_amount from orders where ref='OCTA-DDDDDDDDDDDD'"))).rows.length,expected);
   }
   assert.equal((await asRole("anon",()=>db.query("select payment_confirmed_amount from orders"))).rows.length,0);
-  await db.query("insert into orders(ref,customer,items,subtotal,courier,total,status,terms_version) values('OCTA-FFFFFFFFFFFF','{}','[]',10,0,10,'paid','2026-10-16')");
+  await db.query("insert into orders(ref,customer,items,subtotal,courier,total,status,terms_version) values('OCTA-FFFFFFFFFFFF','{}','[]',10,0,10,'paid','2026-10-18')");
   await db.exec(schema);await db.exec(payments);
   assert.equal((await db.query("select payment_confirmed_at from orders where ref='OCTA-FFFFFFFFFFFF'")).rows[0].payment_confirmed_at,null);
 });

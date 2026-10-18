@@ -22,7 +22,7 @@ const content = `# ${SITE.name}
 
 ## Products
 - [OCTA-X Ethanol 96%](${u("/shop/octa-x-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
-- [OCTA-M Methanol 100%](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
+- [OCTA-M Methanol 99.9%](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
 - [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 5L per 30L/25L/20L/15L base fuel. UN 1170, Class 3.
 - [OCTA-SHOT](${u("/shop/octa-shot/")}): Fuel octane booster, 500ml.
 - [OCTA-TORQUE](${u("/shop/octa-torque/")}): Diesel improver, 500ml.

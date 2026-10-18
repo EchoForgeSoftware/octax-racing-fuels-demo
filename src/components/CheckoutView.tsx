@@ -12,6 +12,7 @@ import { cartCourier, courierNote, localTown } from "@/lib/courier";
 import { CustomerInfoForm, type Contact } from "./CustomerInfoForm";
 import { emptyProfile, profileErrors, type CustomerProfile } from "@/lib/backoffice/customerForm";
 import { recordDemoWebsiteOrder } from "@/lib/backoffice/local";
+import { usePricing } from "./PricingContext";
 import { todaySA } from "@/lib/backoffice/calc";
 import { buildOrder, newOrderRef, persistOrder, readOrder, saveOrder, type CustomerDetails, type PlacedOrder } from "@/lib/order";
 import { useAuth } from "./AuthContext";
@@ -41,12 +42,13 @@ export function CheckoutView() {
   const bot = useBotCheck();
   const { items, subtotal, clear, ready } = useCart();
   const { user, profile, saveProfile, enabled, ready: authReady, demo } = useAuth();
+  const { courierFee } = usePricing();
   const router = useRouter();
   const [errors, setErrors] = useState<Errors>({});
   const [processing, setProcessing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"ozow" | "eft">("ozow");
-  // Typed delivery town; inside the local area delivery is free (the server applies the same rule).
+  // Typed delivery town; inside the local area we can arrange local delivery (cost confirmed with the customer).
   const [typedCity, setTypedCity] = useState<string | null>(null);
   // Order on a personal name or company details; companies are saved as customers straight away.
   const [orderAs, setOrderAs] = useState<"personal" | "company">(profile?.company ? "company" : "personal");
@@ -132,7 +134,7 @@ export function CheckoutView() {
     if (data.get("accept_terms") !== "on") return setErrors({ accept_terms: requiredMessages.accept_terms });
     const result = recordDemoWebsiteOrder({
       ref: newOrderRef(), items: items.map((i) => ({ sku: i.sku, name: i.name, size: i.size, price: i.price, qty: i.qty })),
-      courier: cartCourier(items, get("city")).fee, paymentMethod, orderAs,
+      courier: cartCourier(items, get("city"), courierFee).fee, paymentMethod, orderAs,
       customer: { name: get("fullname"), email: get("email"), phone: get("phone"), company: orderAs === "company" ? get("company") : "", vat: orderAs === "company" ? normaliseVat(get("vat")) : "", address: get("address"), city: get("city"), registration: get("registration") },
       saveCustomer: data.get("save_customer") === "on",
       profile: openAccount ? accountProfile : undefined,
@@ -370,7 +372,7 @@ export function CheckoutView() {
                 <span className="font-mono font-bold text-ink">{i.qty}&times;</span> {i.name}{" "}
                 <span className="font-mono text-xs uppercase text-muted">{i.size}</span>
                 <span className="mt-0.5 block font-mono text-[0.68rem] uppercase tracking-wider text-muted">
-                  {local ? "Free OCTA delivery" : courierNote(i.size, i.qty)}
+                  {courierNote(i.size, i.qty, courierFee)}
                 </span>
               </span>
               <span className="whitespace-nowrap font-bold">
