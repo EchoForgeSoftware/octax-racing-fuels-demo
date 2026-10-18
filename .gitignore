@@ -58,3 +58,4 @@ yarn-error.log*
 # Generated artwork, brand packs and preview images (rebuilt by scripts/assemble-brand-pack.py and friends)
 /output/
 /tmp/
+supabase/.temp/

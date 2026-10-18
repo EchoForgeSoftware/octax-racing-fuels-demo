@@ -16,6 +16,16 @@ function env(name: string) {
   return value;
 }
 
+/** The role a JWT claims, unverified. Only used to skip verification for the public anon key, which grants nothing. */
+function claimedRole(token: string): string | null {
+  try {
+    const payload = token.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(payload.padEnd(payload.length + (4 - payload.length % 4) % 4, "="))).role ?? null;
+  } catch {
+    return null;
+  }
+}
+
 Deno.serve(async (request: Request) => {
   const origin = request.headers.get("origin") ?? "";
   const headers: Record<string, string> = { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Origin" };
@@ -35,10 +45,11 @@ Deno.serve(async (request: Request) => {
     const body = JSON.parse(raw);
     const db = createClient(env("SUPABASE_URL"), env("SUPABASE_SERVICE_ROLE_KEY"), { auth: { persistSession: false, autoRefreshToken: false } });
 
-    // The public anon key can arrive for visitors; a real session token is always verified.
+    // Visitors send the public anon key (role "anon"): they get the shop's public view only.
+    // Anything else is treated as a session token and always verified with Supabase Auth.
     const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "") ?? "";
     let user = null;
-    if (bearer && bearer !== Deno.env.get("SUPABASE_ANON_KEY")) {
+    if (bearer && bearer !== Deno.env.get("SUPABASE_ANON_KEY") && claimedRole(bearer) !== "anon") {
       const { data, error } = await db.auth.getUser(bearer);
       if (error || !data.user) return reply({ error: "Your session expired. Sign in again." }, 401);
       user = { id: data.user.id, email: data.user.email ?? null, emailConfirmed: !!data.user.email_confirmed_at };
