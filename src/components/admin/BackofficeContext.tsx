@@ -31,7 +31,7 @@ type BackofficeState = Actions & {
   /** Demo sign-in (sample passwords). */
   signIn: (email: string, password: string) => string | null;
   /** Live sign-in with the staff member's own account. */
-  liveSignIn: (email: string, password: string) => Promise<string | null>;
+  liveSignIn: (email: string, password: string, captchaToken?: string) => Promise<string | null>;
   signOut: () => void;
   /** Live: someone is signed in to the website, but the records aren't showing yet (or can't). */
   authEmail: string | null;
@@ -203,8 +203,8 @@ export function BackofficeProvider({ children }: { children: ReactNode }) {
         setAdmin(match);
         return null;
       },
-      async liveSignIn(email, password) {
-        const { error } = await auth.signIn(email.trim(), password);
+      async liveSignIn(email, password, captchaToken) {
+        const { error } = await auth.signIn(email.trim(), password, captchaToken);
         return error;
       },
       signOut() {

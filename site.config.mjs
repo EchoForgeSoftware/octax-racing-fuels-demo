@@ -26,16 +26,18 @@ export const SITE = {
     "OCTA Performance supplies OCTA-X ethanol 96%, OCTA-M methanol, OCTA-BOOST and OCTA-SHOT octane boosters and OCTA-TORQUE diesel improver, with online ordering and delivery.",
   // Company that owns the OCTA brand, as printed on the product labels.
   legalName: "ZRG-X (PTY) LTD",
-  // Mailboxes on octa-boost.com (2026-10-16). Phone and address follow.
+  // Mailboxes on octa-boost.com (2026-10-16); phone, address and privacy contact from the owners (2026-10-18).
   email: process.env.NEXT_PUBLIC_SUPPORT_EMAIL || "info@octa-boost.com",
   salesEmail: "sales@octa-boost.com",
   accountsEmail: "accounts@octa-boost.com",
-  phoneDisplay: process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+27 00 000 0000",
-  phoneHref: (process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+270000000000").replace(/[^+\d]/g, ""),
+  phoneDisplay: process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+27 64 507 3615",
+  phoneHref: (process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+27 64 507 3615").replace(/[^+\d]/g, ""),
   registrationNumber: process.env.NEXT_PUBLIC_COMPANY_REGISTRATION || "2026/667453/07",
-  businessAddress: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || "",
+  businessAddress: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || "Corner 13th Avenue and Paul Smit Street, Ravenswood, Boksburg, Gauteng, 1459",
+  /** The same address in parts, for search engines (schema.org PostalAddress). */
+  address: { street: "Corner 13th Avenue and Paul Smit Street", suburb: "Ravenswood", locality: "Boksburg", region: "Gauteng", postalCode: "1459", country: "ZA" },
   privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "info@octa-boost.com",
-  privacyOfficer: process.env.NEXT_PUBLIC_PRIVACY_CONTACT || "",
+  privacyOfficer: process.env.NEXT_PUBLIC_PRIVACY_CONTACT || "Zuan Grobbelaar (Director)",
   currency: "ZAR",
   currencySymbol: "R",
   locale: "en_ZA",

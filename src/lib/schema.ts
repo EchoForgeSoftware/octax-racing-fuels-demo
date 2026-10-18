@@ -14,6 +14,11 @@ export function organizationSchema() {
     ...(hasContactEmail ? { email: SITE.email } : {}),
     ...(hasContactPhone ? { telephone: SITE.phoneHref } : {}),
     ...(SITE.registrationNumber ? { identifier: SITE.registrationNumber } : {}),
+    ...(SITE.businessAddress ? { address: {
+      "@type": "PostalAddress", streetAddress: SITE.address.street, addressLocality: `${SITE.address.suburb}, ${SITE.address.locality}`,
+      addressRegion: SITE.address.region, postalCode: SITE.address.postalCode, addressCountry: SITE.address.country,
+    } } : {}),
+    areaServed: "ZA",
     description: SITE.description,
     sameAs: [],
   };

@@ -14,8 +14,12 @@ export function launchProblems(config) {
   if (!config.site.privacyOfficer.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(config.site.privacyEmail) || /\.(example|test|invalid)$/i.test(config.site.privacyEmail)) issues.push("Publish the real privacy contact and email.");
   if (!config.reviewed) issues.push("Have the policies reviewed and confirm NEXT_PUBLIC_POLICIES_REVIEWED=true.");
   if (!config.bankDetails) issues.push("Complete and verify the EFT bank details.");
-  if (config.accountsEnabled && !config.captchaConfigured) issues.push("Configure the Turnstile site key, Supabase CAPTCHA secret and payment CAPTCHA secret, then test them.");
   return issues;
+}
+
+/** Strongly recommended, but not blocking: sign-ups are email-confirmed and rate-limited by Supabase. */
+export function launchRecommendations(config) {
+  return config.accountsEnabled && !config.captchaConfigured ? ["Configure the Turnstile site key, Supabase CAPTCHA secret and payment CAPTCHA secret, then test them."] : [];
 }
 
 export function customerDemoProblems(env) {
@@ -30,10 +34,12 @@ export function customerDemoProblems(env) {
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const demoIssues = customerDemoProblems(process.env);
   if (demoIssues.length) { console.error(demoIssues.join("\n")); process.exit(1); }
-  const issues = launchProblems({ origin: ORIGIN, basePath: BASE_PATH, site: SITE, contactEmail: hasContactEmail,
+  const config = { origin: ORIGIN, basePath: BASE_PATH, site: SITE, contactEmail: hasContactEmail,
     contactPhone: hasContactPhone, reviewed: LEGAL.reviewed, bankDetails: hasBankDetails,
     accountsEnabled: Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY),
-    captchaConfigured: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) });
+    captchaConfigured: Boolean(process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY) };
+  const issues = launchProblems(config);
+  for (const tip of launchRecommendations(config)) console.log(`Recommended: ${tip}`);
   if (issues.length) {
     console.log(`Launch requirements still outstanding:\n${issues.map((issue) => `- ${issue}`).join("\n")}`);
     if (INDEXABLE || process.argv.includes("--strict")) process.exitCode = 1;

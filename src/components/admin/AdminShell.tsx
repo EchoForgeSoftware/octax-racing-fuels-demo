@@ -6,6 +6,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from "react";
 import { BackofficeProvider, useBackoffice } from "./BackofficeContext";
 import { OctaLogo } from "../brand/Wordmark";
 import { Button, Field, Input } from "./ui";
+import { BotCheck, useBotCheck } from "../BotCheck";
 import { DEMO_ADMIN_PASSWORD } from "@/lib/backoffice/local";
 import { ROLE_LABEL, STAFF, areaForPath, canView, homeFor, type Area } from "@/lib/backoffice/roles";
 
@@ -117,11 +118,14 @@ function LiveLogin() {
   const { liveSignIn } = useBackoffice();
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const bot = useBotCheck();
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    if (bot.pending || busy) return;
     const d = new FormData(e.currentTarget);
     setBusy(true);
-    setError(await liveSignIn(String(d.get("email") ?? ""), String(d.get("password") ?? "")));
+    setError(await liveSignIn(String(d.get("email") ?? ""), String(d.get("password") ?? ""), bot.token || undefined));
+    bot.reset();
     setBusy(false);
   }
   return (
@@ -134,7 +138,8 @@ function LiveLogin() {
           {error && <p role="alert" className="border-2 border-flare p-3 text-sm">{error}</p>}
           <Field label="Email"><Input name="email" type="email" autoComplete="username" required /></Field>
           <Field label="Password"><Input name="password" type="password" autoComplete="current-password" required /></Field>
-          <Button type="submit" tone="primary" className="w-full" disabled={busy}>{busy ? "Signing in…" : "Sign in"}</Button>
+          <BotCheck key={bot.attempt} action="staff_login" onToken={bot.setToken} />
+          <Button type="submit" tone="primary" className="w-full" disabled={busy || bot.pending}>{busy ? "Signing in…" : "Sign in"}</Button>
         </form>
         <div className="mt-5 border-t border-line pt-4 text-sm text-ink-soft">
           <p><strong>First time?</strong> Create your account on the <Link href="/account/" className="underline">Sign in page</Link> with your OCTA email, confirm it from the email we send, then come back here.</p>
