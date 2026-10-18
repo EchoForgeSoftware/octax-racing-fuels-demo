@@ -62,11 +62,12 @@ def dots(c, x, top, cols=11, rows=7, color=LIME):
             if (col + row) % 2 == 0:
                 c.circle(x + col * 7, top - row * 7, max(.35, 1.8 - col * .11), fill=1, stroke=0)
 
-def table(c, sheet, top, compact=False):
+def table(c, sheet, top, compact=False, spec=False):
     cols = sheet['columns']
     widths = ([211, 65, 145, CW-421] if sheet['slug'] == 'octa-torque' else
+              [175, 62, 115, CW-352] if cols[0] == 'Property' else
               [120, 145, CW-265] if len(cols) == 3 else [120, 145, (CW-265)/2, (CW-265)/2])
-    size = 9.2 if compact else 11
+    size = 9.6 if spec else 9.2 if compact else 11
     style = ParagraphStyle('cell', fontName='Body', fontSize=size, leading=size + 2.8, textColor=INK)
     head = ParagraphStyle('head', fontName='Bold', fontSize=8.2, leading=11, textColor=PAPER)
     cells = [[Paragraph(escape(s), head) for s in cols]]
@@ -75,8 +76,8 @@ def table(c, sheet, top, compact=False):
     t.setStyle(TableStyle([
         ('BACKGROUND', (0,0), (-1,0), INK), ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
         ('LEFTPADDING', (0,0), (-1,-1), 10), ('RIGHTPADDING', (0,0), (-1,-1), 8),
-        ('TOPPADDING', (0,0), (-1,-1), 4 if compact else 10),
-        ('BOTTOMPADDING', (0,0), (-1,-1), 4 if compact else 10),
+        ('TOPPADDING', (0,0), (-1,-1), 5 if spec else 4 if compact else 10),
+        ('BOTTOMPADDING', (0,0), (-1,-1), 5 if spec else 4 if compact else 10),
         ('ROWBACKGROUNDS', (0,1), (-1,-1), [WHITE, PAPER]),
         ('LINEBELOW', (0,1), (-1,-1), .35, LINE),
         ('BOX', (0,0), (-1,-1), .8, INK)
@@ -111,7 +112,8 @@ def footer(c, sheet, page=1):
     c.restoreState()
     label(c, 'ZRG-X (PTY) LTD / OCTA PERFORMANCE', M+117, 68, INK)
     c.setFont('Body', 7.4); c.setFillColor(MUTED)
-    c.drawString(M+117,54,'Reg. 2026/667453/07  |  Brand edition: 16 October 2026')
+    edition = {'2026-10-16': '16 October 2026', '2026-10-17': '17 October 2026'}[sheet['edition']]
+    c.drawString(M+117,54,f'Reg. 2026/667453/07  |  Brand edition: {edition}')
     c.drawString(M+117,42,'Technical information. Not a Safety Data Sheet (SDS).')
     c.setFont('Body',7.3); c.drawString(M,22,'Consult the current SDS before handling. Follow the approved product instructions.')
     c.setFont('Bold',7.3); c.drawRightString(W-M,22,f"{page:02d} / {sheet['pages']:02d}")
@@ -147,15 +149,20 @@ def create(sheet):
         top=paragraph(c,sheet['description'],M,top,CW-170,11,16)-15
         # Reuse the actual website product artwork; no supplier assets are used.
         c.drawImage(str(ROOT/f"public/products/{sheet['slug']}.png"),W-M-145,top-100,width=145,height=145,mask='auto')
-        label(c,'Benefits',M,top)
-        top-=15
-        for benefit in sheet['benefits']:
-            top=bullet(c,benefit,M,top,CW-170,10,14)
-        top=min(top-17,H-428)
+        image_bottom=top-100
+        # Specification-only sheets (OCTA-X, OCTA-M) have no benefits list in the source.
+        if sheet['benefits']:
+            label(c,'Benefits',M,top)
+            top-=15
+            for benefit in sheet['benefits']:
+                top=bullet(c,benefit,M,top,CW-170,10,14)
+        # Specification sheets start their (longer) table just below the product picture.
+        spec=not sheet['benefits']
+        top=min(top-17,image_bottom-17) if spec else min(top-17,H-428)
         top=section(c,'02',sheet['tableTitle'],top)
-        top=table(c,sheet,top)-17
+        top=table(c,sheet,top,compact=spec,spec=spec)-17
         for note in sheet['notes']:
-            top=paragraph(c,note,M,top,CW,8.6,12,MUTED)-8
+            top=paragraph(c,note,M,top,CW,8.2 if spec else 8.6,11.4 if spec else 12,MUTED)-(6 if spec else 8)
     if top < 101:
         raise RuntimeError(f"Content overlaps footer: {sheet['slug']} ({top})")
     footer(c,sheet,sheet['pages'])
@@ -165,7 +172,7 @@ def create(sheet):
     assert len(reader.pages)==sheet['pages'], target
     text='\n'.join(page.extract_text() for page in reader.pages)
     assert sheet['name'] in text and 'ZRG-X (PTY) LTD' in text
-    assert not re.search(r'AMTEC|AOB\s*235|C6\s+OCTANE|Racing Fuels.*Lubricants',text,re.I)
+    assert not re.search(r'AMTEC|SASOL|AOB\s*235|C6\s+OCTANE|Racing Fuels.*Lubricants',text,re.I)
     assert reader.metadata.author=='ZRG-X (PTY) LTD / OCTA Performance'
     assert not reader.attachments
     for row in sheet['rows']:

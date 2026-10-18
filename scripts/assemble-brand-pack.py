@@ -33,14 +33,14 @@ for p in reader.pages:
     images=list(p.images)
     assert images and images[0].image.size==(6000,3750)
 writer=PdfWriter()
-for slug in ['octa-boost','octa-shot','octa-torque']:
+for slug in ['octa-x-ethanol','octa-m-methanol','octa-boost','octa-shot','octa-torque']:
     source=ROOT/f'public/data-sheets/{slug}-technical-data-sheet.pdf'
-    writer.append(str(source),outline_item=slug.upper())
+    writer.append(str(source),outline_item=slug.upper().replace('-ETHANOL','').replace('-METHANOL',''))
     shutil.copyfile(source,PACK/'data-sheets'/source.name)
 writer.add_metadata({'/Title':'OCTA Performance | Available technical data sheets','/Author':'ZRG-X (PTY) LTD / OCTA Performance'})
 data=PDF/'octa-all-available-data-sheets.pdf'
 with data.open('wb') as stream:writer.write(stream)
-assert len(PdfReader(data).pages)==4
+assert len(PdfReader(data).pages)==6
 for source in [labels,data]:
     shutil.copyfile(source,PACK/source.name)
     doc=pdfium.PdfDocument(str(source))
@@ -49,9 +49,9 @@ for source in [labels,data]:
 readme='''OCTA PERFORMANCE / ZRG-X (PTY) LTD
 
 CONTENTS
-- octa-all-available-data-sheets.pdf: BOOST, SHOT and TORQUE (4 pages).
+- octa-all-available-data-sheets.pdf: OCTA-X, OCTA-M, BOOST, SHOT and TORQUE (6 pages).
 - octa-landscape-labels.pdf: all 5 landscape label masters (5 pages).
-- data-sheets/: the 3 individual technical PDFs.
+- data-sheets/: the 5 individual technical PDFs.
 - labels/: 6000 x 3750 PNGs (600 dpi metadata) and editable SVG artwork.
 - product-images/: 4000 x 4000 PNG illustrations of all 8 catalogue packs,
   including the 210L ethanol and methanol drums. These are illustrations,
@@ -76,11 +76,12 @@ The source label wording has been retained; it has not received legal or
 chemical-safety certification through this artwork export.
 
 DATA SHEETS
-These are technical data sheets, not SDS documents. Only the three supplied
-product sheets are available. ETHANOL.pdf and METHANOL.pdf are still needed
-for the OCTA-X and OCTA-M technical sheets. No missing chemical data or test
-certification has been invented. BOOST's supplied dosage table replaces the
-old website ratios as confirmed by the user on 16 October 2026.
+These are technical data sheets, not SDS documents. All five products now have
+a sheet: OCTA-X (from ETHANOL.pdf) and OCTA-M (from METHANOL.pdf) were added on
+17 October 2026. No missing chemical data or test certification has been
+invented. BOOST's supplied dosage table replaces the old website ratios as
+confirmed by the user on 16 October 2026. Current SDS documents are still
+required before handling or supplying the chemicals.
 '''
 (PACK/'READ-ME.txt').write_text(readme,encoding='utf-8')
 archive=ROOT/'output/OCTA-brand-pack.zip'
@@ -91,4 +92,4 @@ with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
     assert len([name for name in z.namelist() if name.startswith('labels/') and name.endswith('.png')])==5
     assert len([name for name in z.namelist() if name.startswith('product-images/') and name.endswith('.png')])==8
-print(f'Verified 5 landscape label pages, 4 technical-data pages, 5 high-res labels, 8 product images. ZIP: {archive.stat().st_size:,} bytes')
+print(f'Verified 5 landscape label pages, 6 technical-data pages, 5 high-res labels, 8 product images. ZIP: {archive.stat().st_size:,} bytes')

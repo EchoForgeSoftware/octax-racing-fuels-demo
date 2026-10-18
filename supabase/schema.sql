@@ -112,7 +112,7 @@ create trigger stamp_payment_confirmation before insert or update on public.orde
 alter table public.orders add column if not exists terms_version text;
 alter table public.orders add column if not exists terms_accepted_at timestamptz;
 create or replace function public.current_terms_version() returns text
-  language sql immutable set search_path = '' as $$ select '2026-10-16'::text $$;
+  language sql immutable set search_path = '' as $$ select '2026-10-18'::text $$;
 create or replace function public.stamp_order_terms() returns trigger
   language plpgsql set search_path = '' as $$
 begin

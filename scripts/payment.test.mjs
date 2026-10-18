@@ -126,10 +126,8 @@ test("only matching amount, currency, reference, merchant and live environment c
   assert.equal(verifiedOutcome(event({ Status: "Error" }), expected).status, "failed");
 });
 
-test("delivery inside the 35 km local area is free on the server too; other towns pay courier", () => {
-  const local = quoteCart([{ sku: pack.sku, qty: 2 }], catalogue, "Benoni, Gauteng");
-  assert.equal(local.courier, 0);
-  assert.equal(local.total, pack.price * 2);
-  for (const city of ["Durban", "", undefined, "Benonix"]) assert.equal(quoteCart([{ sku: pack.sku, qty: 2 }], catalogue, city).courier, 400);
+test("local-area orders (30 km) pay the standard courier rate on the server; local delivery cost is confirmed separately", () => {
+  for (const city of ["Benoni, Gauteng", "Durban", "", undefined]) assert.equal(quoteCart([{ sku: pack.sku, qty: 2 }], catalogue, city).courier, 400);
+  assert.equal(catalogue.courier.localRadiusKm, 30);
   assert.ok(catalogue.courier.localTowns.includes("kempton park"));
 });

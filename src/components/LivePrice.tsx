@@ -26,3 +26,10 @@ export function LiveDescription({ slug, fallback }: { slug: string; fallback: st
   const text = usePricing().text(slug);
   return <>{text?.description || fallback}</>;
 }
+
+/** Purity of the current stock, when set in the back-office costing. */
+export function LivePurity({ slug }: { slug: string }) {
+  const purity = usePricing().purity(slug);
+  if (purity === null) return null;
+  return <p className="mt-3 inline-block border-2 border-ink bg-lime px-2 py-1 font-mono text-xs font-bold uppercase tracking-wider">Current stock purity: {purity}%</p>;
+}

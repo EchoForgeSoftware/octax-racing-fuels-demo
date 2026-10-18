@@ -42,8 +42,8 @@ export function AddToCart({
   const quote = unit === null;
   // The price shown follows the quantity, so the customer sees the line total as they change it.
   const total = (unit ?? 0) * qty;
-  const courier = courierFor(variant.size, qty);
-  const hint = freeDeliveryHint(variant.size, qty);
+  const courier = courierFor(variant.size, qty, pricing.courierFee);
+  const hint = freeDeliveryHint(variant.size, qty, pricing.courierFee);
 
   function handleAdd() {
     if (unit === null) return;
@@ -72,7 +72,7 @@ export function AddToCart({
             </span>
             <div className="num mt-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-t border-line pt-3 text-sm">
               <span className={courier.kind === "free" ? "font-bold text-ink" : "text-ink-soft"}>
-                {courierNote(variant.size, qty)}
+                {courierNote(variant.size, qty, pricing.courierFee)}
               </span>
               {hint && <span className="font-mono text-[0.68rem] uppercase tracking-wider text-flare">{hint}</span>}
             </div>

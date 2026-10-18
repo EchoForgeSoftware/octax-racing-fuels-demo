@@ -1,8 +1,8 @@
 // Shared by storefront totals, the back office and the generated server payment
 // catalogue. Self-contained (no imports): the catalogue script loads it directly.
 
-/** Own-delivery area: 35 km around the East Rand base towns. */
-const RADIUS_KM = 35;
+/** Local delivery area: 30 km around the East Rand base towns (delivery & returns policy, 18 Oct 2026). */
+const RADIUS_KM = 30;
 const CENTRES: [number, number][] = [
   [-26.1885, 28.3208], // Benoni
   [-26.2367, 28.3694], // Brakpan

@@ -133,9 +133,8 @@ export function Hero() {
           </h1>
 
           <p data-sub className="mt-7 max-w-xl text-lg text-ink-soft">
-            OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster for
-            performance use. Every pack carries a batch number for traceability. Order
-            online, delivered to your workshop.
+            OCTA-X 96% ethanol, OCTA-M 99.9% methanol and OCTA-BOOST for serious
+            performance builds. Every pack is batch-dated for freshness and consistency.
           </p>
 
           <div className="mt-9 flex flex-wrap items-center gap-4">

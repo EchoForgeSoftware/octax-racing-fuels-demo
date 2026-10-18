@@ -118,6 +118,10 @@ export function LoginForm() {
         New here?{" "}
         <Link href="/account/register/" className="font-bold text-ink underline hover:text-flare">Create an account</Link>
       </p>
+      <p className="border-t border-line pt-4 text-center text-xs text-muted">
+        OCTA staff and reps:{" "}
+        <Link href="/admin/" className="font-bold text-ink underline hover:text-flare">back office sign-in</Link>
+      </p>
     </form>
   );
 }

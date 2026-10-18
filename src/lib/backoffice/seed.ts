@@ -5,6 +5,7 @@
 // login, which is the company's own sales@ account).
 import { comingSoon, products } from "../products";
 import { deliveryFor } from "../courier";
+import { courierRates } from "../courierRates";
 import { exVat, stockLevels } from "./stock";
 import { BANK, SITE } from "../site";
 import { addDays, cents, defaultsFor, formatNumber, priceFor, todaySA } from "./calc";
@@ -66,6 +67,7 @@ export function defaultSettings(): BackofficeData["settings"] {
     paymentTermsDays: 7,
     quoteValidDays: 14,
     invoiceFooter: "Thank you for your business. Fuel the addiction.",
+    courierFee: courierRates.fee,
     next: { quote: 1, invoice: 1 },
   };
 }
@@ -160,9 +162,9 @@ export function demoData(today: string): BackofficeData {
     const client = clients.find((c) => c.id === p.client)!;
     const date = addDays(today, -p.daysAgo);
     const docLines = lines(client, p.count, client.type !== "private");
-    // Own delivery (local area) and collection are free; courier rules apply elsewhere.
+    // Collection is free; local and courier deliveries use the courier rates.
     const deliveryMethod = client.cash ? "collect" : deliveryFor(client.city).method;
-    const courier = deliveryMethod === "courier" ? courierFor(docLines) : 0;
+    const courier = deliveryMethod === "collect" ? 0 : courierFor(docLines);
     const doc: Document = {
       id: `d-inv-${settings.next.invoice}`,
       kind: "invoice",
@@ -289,7 +291,7 @@ function sampleSuppliers(today: string): Pick<BackofficeData, "suppliers" | "sup
     ["s-courier", -140, "FF-3302", "courier", 3150, "Deliveries, month end", true],
     ["s-fuel", -110, "IAS-20577", "stock", 29500, "Ethanol 96%, bulk", true],
     ["s-courier", -80, "FF-3419", "courier", 2780, "Deliveries, month end", true],
-    ["s-fuel", -50, "IAS-20702", "stock", 33800, "Methanol 100% and ethanol 96%", true],
+    ["s-fuel", -50, "IAS-20702", "stock", 33800, "Methanol 99.9% and ethanol 96%", true],
     ["s-pack", -35, "DC-7920", "packaging", 4210, "5L cans and labels", false],
     ["s-courier", -20, "FF-3530", "courier", 2960, "Deliveries, month end", false],
     ["s-fuel", -9, "IAS-20815", "stock", 27500, "Ethanol 96%, bulk", false],

@@ -1,4 +1,4 @@
-import { LiveDescription } from "@/components/LivePrice";
+import { LiveDescription, LivePurity } from "@/components/LivePrice";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -79,6 +79,7 @@ export default async function ProductPage({
             {product.name}
           </h1>
           <p className="mt-5 text-ink-soft"><LiveDescription slug={product.slug} fallback={product.description} /></p>
+          <LivePurity slug={product.slug} />
         </ProductBuy>
 
         {/* Specs + applications */}

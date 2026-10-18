@@ -48,6 +48,7 @@ export function SettingsAdmin() {
             {s.vatRegistered && <Field label="VAT number"><Input inputMode="numeric" value={s.vatNumber} onChange={(e) => set({ vatNumber: e.target.value })} /></Field>}
             <Field label="Payment terms (days)"><Input type="number" min={0} value={s.paymentTermsDays} onChange={(e) => set({ paymentTermsDays: Math.max(0, Number(e.target.value)) })} /></Field>
             <Field label="Quotes valid for (days)"><Input type="number" min={1} value={s.quoteValidDays} onChange={(e) => set({ quoteValidDays: Math.max(1, Number(e.target.value)) })} /></Field>
+            <Field label="Courier fee per pack (R)" hint="Used on the shop, cart, checkout and new invoices. Free-delivery quantities stay as per the policy."><Input type="number" min={0} step="1" value={s.courierFee ?? 200} onChange={(e) => set({ courierFee: Math.max(0, Math.round(Number(e.target.value))) })} /></Field>
             <Field label="Footer line" className="sm:col-span-2"><Input value={s.invoiceFooter} onChange={(e) => set({ invoiceFooter: e.target.value })} /></Field>
           </div>
         </Panel>

@@ -3,23 +3,57 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BusinessDetails } from "@/components/BusinessDetails";
 import { buildMetadata } from "@/lib/metadata";
 import { LEGAL } from "@/lib/site";
+import { courierRates } from "@/lib/courierRates";
+import { CourierFee } from "@/components/CourierFee";
 
 export const metadata = buildMetadata({ path: "/delivery-returns/", title: "Delivery, Cancellations & Returns",
-  description: "OCTA delivery charges, dangerous-goods handling, cancellation requests and returns support." });
+  description: "OCTA local delivery and courier charges, exchanges for incorrectly supplied stock, returns and limitation of liability." });
+
+const h2 = "font-display text-xl text-ink";
 
 export default function DeliveryReturnsPage() {
   return <>
     <Breadcrumbs trail={[{ name: "Home", path: "/" }, { name: "Delivery & returns", path: "/delivery-returns/" }]} />
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <p className="kicker text-flare">Order support · version {LEGAL.version}</p>
+      <p className="kicker text-flare">ZRG-X (PTY) LTD, trading as OCTA Performance · version {LEGAL.version}</p>
       <h1 className="mt-3 font-display text-[clamp(2.2rem,7vw,4rem)]">Delivery & returns</h1>
       <div className="mt-8 space-y-8 text-ink-soft">
-        <section><h2 className="font-display text-xl text-ink">Delivery charges</h2><p className="mt-2">Standard courier is R200 per pack for 5L, 25L and 500ml packs. Delivery is free on a line of at least 10 of the same 5L or 25L product, or at least 12 of the same 500ml product. Each 210L drum carries a R200 courier charge. Other sizes require a delivery quote. Checkout shows the applicable total; confirm any quoted delivery charge before paying.</p></section>
-        <section><h2 className="font-display text-xl text-ink">Delivery arrangements</h2><p className="mt-2">We confirm availability, delivery coverage and estimated dispatch or delivery dates for your order. Dangerous-goods transport requirements may limit routes and affect timing. Provide an accurate delivery address and a contact number. Tell us promptly about delays, non-delivery, leaks, damage or an incorrect product.</p></section>
-        <section><h2 className="font-display text-xl text-ink">Cancelling an order</h2><p className="mt-2">Contact support with the order reference as soon as you want to cancel or correct an order. Tell us whether payment has been made and whether the goods have been delivered. Statutory cancellation and cooling-off rights, their time limits and any lawful exceptions apply to the particular transaction. We will explain the applicable process and any legally permitted charges before arranging a cancellation or return.</p></section>
-        <section><h2 className="font-display text-xl text-ink">Faulty, damaged or incorrect goods</h2><p className="mt-2">Keep the order reference, container label and batch information, and describe the problem. Photographs can help if they can be taken safely. Do not use a product you believe is unsafe or incorrectly supplied. Where the law entitles you to a repair, replacement, refund or other remedy, this policy does not remove that entitlement.</p></section>
-        <section><h2 className="font-display text-xl text-ink">Returning fuels safely</h2><p className="mt-2">Contact us before sending anything back. Fuels and additives may need an approved dangerous-goods carrier and suitable packaging. Do not put leaking or flammable goods into ordinary post or hand them to an unapproved courier. An opened container does not automatically remove your statutory rights; tell us its condition so we can assess the request and arrange safe handling.</p></section>
-        <section><h2 className="font-display text-xl text-ink">Refunds and complaints</h2><p className="mt-2">We assess requests under the applicable consumer law and communicate the outcome, refund method and timing. We do not ask for your banking password or OTP to process a refund. If an issue is unresolved, your right to approach a competent regulator or other dispute-resolution body remains available.</p></section>
+        <section>
+          <h2 className={h2}>Delivery</h2>
+          <h3 className="mt-4 font-bold text-ink">Local delivery</h3>
+          <p className="mt-1">Delivery can be arranged within a {courierRates.localRadiusKm} km radius of our premises. Please contact us with your full delivery address to confirm availability and cost.</p>
+          <h3 className="mt-4 font-bold text-ink">Courier delivery</h3>
+          <p className="mt-1">Orders outside the {courierRates.localRadiusKm} km radius are sent via courier.</p>
+          <p className="mt-2">Standard courier charge: <CourierFee /> per pack.</p>
+          <p className="mt-2">Free courier applies when you order:</p>
+          <ul className="mt-1 list-inside list-disc space-y-1">
+            <li>10 or more units of the same 5 L or 25 L product, or</li>
+            <li>12 or more units of the same 500 ml product.</li>
+          </ul>
+          <p className="mt-2">Delivery times are typically 24–48 hours after dispatch, subject to the courier service.</p>
+          <p className="mt-2">We are not responsible for delays caused by the courier, weather, road conditions, or incorrect delivery details provided by the customer.</p>
+        </section>
+        <section>
+          <h2 className={h2}>Returns & exchanges</h2>
+          <h3 className="mt-4 font-bold text-ink">Incorrectly supplied stock</h3>
+          <p className="mt-1">If we accidentally supply the wrong product, please keep the original invoice and contact us within 7 days of delivery.</p>
+          <p className="mt-2">We will arrange an exchange for the correct item at no extra cost. The return of the incorrect product will be for our account.</p>
+          <h3 className="mt-4 font-bold text-ink">No returns for change of mind</h3>
+          <p className="mt-1">Because these are specialised performance fuels and additives, we do not accept returns for change of mind, ordering the wrong product, or if the product does not meet your expectations after use.</p>
+        </section>
+        <section>
+          <h2 className={h2}>Limitation of liability</h2>
+          <p className="mt-2">All products are sold strictly subject to the warnings, instructions and conditions printed on the product label and packaging.</p>
+          <p className="mt-2">OCTA Performance accepts no liability for any loss, damage, engine failure, injury or other consequence arising from the use, handling, storage, mixing or application of these products. This includes, but is not limited to:</p>
+          <ul className="mt-1 list-inside list-disc space-y-1">
+            <li>Incorrect application or dosing</li>
+            <li>Contaminated fuel systems</li>
+            <li>Failure to follow the instructions on the label</li>
+            <li>Any other misuse or improper handling</li>
+          </ul>
+          <p className="mt-2">By purchasing any product from OCTA Performance, the customer acknowledges that they have read and understood the product label and accept full responsibility for the correct, safe and appropriate use of the product.</p>
+          <p className="mt-2 text-sm">Nothing in this policy excludes rights or liability that cannot lawfully be excluded under South African law, including the Consumer Protection Act.</p>
+        </section>
         <p>Read our <Link href="/terms/" className="underline">terms of sale</Link> and <Link href="/privacy/" className="underline">privacy notice</Link>, or use the <Link href="/contact/" className="underline">contact page</Link>.</p>
         <BusinessDetails />
       </div>

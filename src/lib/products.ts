@@ -64,7 +64,7 @@ export const categories: Category[] = [
   {
     slug: "methanol",
     name: "Methanol",
-    blurb: "OCTA-M: 100% methanol in its purest form for methanol-burning performance engines.",
+    blurb: "OCTA-M: 99.9% methanol for methanol-burning performance engines.",
   },
   {
     slug: "additives",
@@ -183,13 +183,13 @@ export const products: Product[] = [
   },
   {
     slug: "octa-m-methanol",
-    name: "OCTA-M Methanol 100%",
+    name: "OCTA-M Methanol 99.9%",
     category: "methanol",
-    short: "100% methanol in its purest form for performance use.",
+    short: "99.9% methanol for methanol-burning performance engines.",
     description:
-      "OCTA-M is methanol in its purest form for performance use, for methanol-burning engines. Methanol is flammable and toxic: handle it with eye protection, gloves and a respirator, keep it away from open flame, and use it only in a fuel system built for methanol. Every can carries a manufacture date and batch number for traceability.",
+      "OCTA-M is 99.9% pure methanol for methanol-burning performance engines. Methanol is flammable and toxic: handle it with eye protection, gloves and a respirator, keep it away from open flame, and use it only in a fuel system built for methanol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
-      { label: "Methanol", value: "100%" },
+      { label: "Methanol", value: "99.9%" },
       { label: "UN number", value: "UN 1230" },
       { label: "Hazard class", value: "Class 3, flammable liquid" },
       { label: "Traceability", value: "MFD date and batch on every pack" },
@@ -204,7 +204,7 @@ export const products: Product[] = [
       layout: "wide",
       mark: "M",
       title: "METHANOL",
-      highlight: "100%",
+      highlight: "99.9%",
       un: "UN 1230",
       hazardClass: "CLASS 3",
       unPlacement: "below",
@@ -218,7 +218,7 @@ export const products: Product[] = [
     slug: "octa-boost",
     name: "OCTA-BOOST Octane Booster",
     category: "additives",
-    short: "Octane booster for 95 octane pump fuel, with doses of 5L per 15-30L of base fuel.",
+    short: "Octane booster for 95 octane pump fuel. Recommended dose: 5 L treats 15–30 L of 95-octane pump fuel.",
     description:
       "OCTA-BOOST is an octane booster for performance use. Mix it only with 95 octane pump fuel. The technical sheet specifies 5L per 30L, 25L, 20L or 15L of base fuel (ratios of 1:6, 1:5, 1:4 or 1:3). Consult the full dosage table and re-check your tune whenever you change the mix.",
     specs: [

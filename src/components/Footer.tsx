@@ -10,7 +10,7 @@ const columns = [
     links: [
       { label: "All products", href: "/shop/" },
       { label: "OCTA-X Ethanol 96%", href: "/shop/octa-x-ethanol/" },
-      { label: "OCTA-M Methanol 100%", href: "/shop/octa-m-methanol/" },
+      { label: "OCTA-M Methanol 99.9%", href: "/shop/octa-m-methanol/" },
       { label: "OCTA-BOOST", href: "/shop/octa-boost/" },
       { label: "OCTA-SHOT", href: "/shop/octa-shot/" },
       { label: "OCTA-TORQUE", href: "/shop/octa-torque/" },
@@ -27,6 +27,7 @@ const columns = [
       { label: "Privacy policy", href: "/privacy/" },
       { label: "Terms of service", href: "/terms/" },
       { label: "Delivery & returns", href: "/delivery-returns/" },
+      { label: "Staff sign-in", href: "/admin/" },
     ],
   },
 ];

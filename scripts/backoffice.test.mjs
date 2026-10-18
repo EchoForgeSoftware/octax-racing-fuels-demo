@@ -91,12 +91,15 @@ test("sample FNB statement round-trips: invoice references match, the fee is fil
 
 const courier=loadTs("src/lib/courier.ts"),stock=loadTs("src/lib/backoffice/stock.ts");
 
-test("local delivery covers the four East Rand towns and their 35 km area, and the cart drops courier there",()=>{
+test("local area is 30 km around the four East Rand towns; local orders are flagged but still pay courier, at the fee set in the back office",()=>{
   for(const town of ["Benoni","brakpan","Boksburg North","Kempton Park","Germiston"]) assert.equal(courier.deliveryFor(town).method,"own");
-  for(const town of ["Durban","Cape Town","Polokwane",""]) assert.equal(courier.deliveryFor(town).method,"courier");
+  for(const town of ["Durban","Cape Town","Polokwane","Pretoria",""]) assert.equal(courier.deliveryFor(town).method,"courier");
   const lines=[{size:"25L",qty:2}];
   assert.equal(courier.cartCourier(lines).fee,400);
-  assert.equal(courier.cartCourier(lines,"Brakpan").fee,0);
+  assert.deepEqual(courier.cartCourier(lines,"Brakpan"),{fee:400,quoted:false,local:"brakpan"});
+  assert.equal(courier.cartCourier(lines,"Durban",250).fee,500,"courier fee per pack is editable");
+  assert.equal(courier.cartCourier([{size:"25L",qty:10}],null,250).fee,0,"free-delivery quantities still apply");
+  assert.match(courier.courierNote("25L",2,250),/R500\.00 \(2 × R250\.00\)/);
 });
 
 test("pending orders list undelivered live invoices only, oldest first",()=>{
@@ -178,4 +181,27 @@ test("referral, payment acknowledgement and customer form PDFs render with fille
     assert.ok(bytes.length>2000);
     assert.equal(Buffer.from(bytes.slice(0,5)).toString(),"%PDF-");
   }
+});
+
+const costing=loadTs("src/lib/backoffice/costing.ts");
+
+test("costing: purity, per-litre product price, switchable lines, other costs and VAT",()=>{
+  assert.equal(costing.litresIn("25L"),25); assert.equal(costing.litresIn("210L plastic drum"),210); assert.equal(costing.litresIn("500ml"),0.5); assert.equal(costing.litresIn("Large"),null);
+  const c=costing.defaultCosting({size:"25L",productName:"OCTA-X Ethanol 96%",category:"ethanol"});
+  assert.equal(c.purityEnabled,true); assert.equal(c.purity,96); assert.equal(c.litres,25);
+  const set=(id,exVat)=>c.lines.find(l=>l.id===id).exVat=exVat;
+  set("product",18); set("sticker",4); set("container",40); set("cap",3); set("travel",10);
+  c.lines.push({id:"o1",label:"Other cost",description:"Pallet wrap",enabled:true,exVat:2,perLitre:false,builtIn:false});
+  let t=costing.costingTotals(c);
+  assert.equal(t.exVat,18*25+4+40+3+10+2);
+  assert.equal(t.inclVat,Math.round(t.exVat*1.15*100)/100);
+  assert.equal(costing.costingCost(c,false),t.inclVat,"not VAT-registered: incl VAT is the real cost");
+  assert.equal(costing.costingCost(c,true),t.exVat);
+  c.lines.find(l=>l.id==="container").enabled=false;
+  t=costing.costingTotals(c);
+  assert.equal(t.exVat,18*25+4+3+10+2,"switched-off lines don't count");
+  const hoodie=costing.defaultCosting({size:"Large",productName:"OCTA Hoodie",category:"merch"});
+  assert.equal(hoodie.purityEnabled,false); assert.equal(hoodie.litres,null);
+  assert.deepEqual(hoodie.lines.filter(l=>l.enabled).map(l=>l.id),["product","sticker","travel"],"no container or cap for merch by default");
+  assert.equal(hoodie.lines[0].perLitre,false);
 });

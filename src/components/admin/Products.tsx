@@ -5,6 +5,8 @@ import { useBackoffice } from "./BackofficeContext";
 import { Button, Field, Input, PageTitle, Panel, Select, Textarea } from "./ui";
 import type { CatalogueCategory, CatalogueItem } from "@/lib/backoffice/types";
 import { formatPrice } from "@/lib/format";
+import { costingCost, defaultCosting, type Costing } from "@/lib/backoffice/costing";
+import { CostingTable } from "./Costing";
 
 const CATEGORY_LABEL: Record<CatalogueCategory, string> = {
   ethanol: "Ethanol", methanol: "Methanol", additives: "Fuel additives", fuel: "Race fuels (coming soon)",
@@ -83,6 +85,8 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     active: item?.active ?? true,
     comingSoon: item?.comingSoon ?? false,
   }));
+  const [costing, setCosting] = useState<Costing | null>(() => item?.costing ?? null);
+  const vatRegistered = !!data?.settings.vatRegistered;
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<typeof f>) => setF({ ...f, ...patch });
 
@@ -91,13 +95,16 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     for (const k of ["retail", "agent", "bulk", "cost"] as const) if (f[k] && !(Number(f[k]) >= 0)) return setError("Prices must be numbers of 0 or more.");
     const sku = item?.sku ?? `CUSTOM-${f.productName.replace(/[^a-z0-9]+/gi, "-").toUpperCase().slice(0, 24)}-${f.size.replace(/[^a-z0-9]+/gi, "").toUpperCase().slice(0, 8)}`;
     if (isNew && data?.catalogue.some((i) => i.sku === sku)) return setError("A product with that name and size already exists.");
+    // The costing total, when switched on, is the cost used for profit.
+    const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
     saveCatalogueItem({
       sku, slug: item?.slug ?? null, custom: item?.custom ?? true,
       productName: item?.custom === false ? item.productName : f.productName.trim(),
       size: item?.custom === false ? item.size : f.size.trim(),
       category: item?.custom === false ? item.category : f.category,
-      retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost: money(f.cost),
+      retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost,
       short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
+      ...(costing ? { costing } : {}),
     });
     onDone();
   }
@@ -117,9 +124,21 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
         <Field label="Website price (R)" hint="Leave empty for 'price on quote'."><Input type="number" min={0} step="0.01" value={f.retail} onChange={(e) => set({ retail: e.target.value })} /></Field>
         <Field label="Agent price (R)" hint="Empty = website price."><Input type="number" min={0} step="0.01" value={f.agent} onChange={(e) => set({ agent: e.target.value })} /></Field>
         <Field label="Bulk price (R)" hint="Empty = website price."><Input type="number" min={0} step="0.01" value={f.bulk} onChange={(e) => set({ bulk: e.target.value })} /></Field>
-        <Field label="Your cost (R)" hint="Used for profit only."><Input type="number" min={0} step="0.01" value={f.cost} onChange={(e) => set({ cost: e.target.value })} /></Field>
+        <Field label="Your cost (R)" hint={costing?.useAsCost ? "From the costing table below." : "Used for profit only."}>
+          <Input type="number" min={0} step="0.01" value={costing?.useAsCost ? costingCost(costing, vatRegistered) : f.cost} disabled={!!costing?.useAsCost} onChange={(e) => set({ cost: e.target.value })} />
+        </Field>
+        {costing ? (
+          <CostingTable value={costing} onChange={setCosting} vatRegistered={vatRegistered} sellPrice={money(f.retail)} />
+        ) : (
+          <div className="sm:col-span-2 lg:col-span-4">
+            <Button onClick={() => setCosting(defaultCosting({ size: f.size || item?.size || "", productName: f.productName || item?.productName || "", category: f.category }))}>
+              Open costing table
+            </Button>
+            <span className="ml-3 text-xs text-muted">Work out the cost from product price per litre, sticker, container, cap, travel fee and other costs.</span>
+          </div>
+        )}
         {(() => {
-          const cost = money(f.cost);
+          const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
           const under = (["retail", "agent", "bulk"] as const).filter((k) => cost !== null && money(f[k]) !== null && money(f[k])! < cost);
           return under.length > 0 && (
             <p role="alert" className="border-2 border-flare bg-flare/10 p-2 text-sm font-bold text-flare sm:col-span-2 lg:col-span-4">
