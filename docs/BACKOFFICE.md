@@ -30,7 +30,7 @@ Supplier invoices and FNB CSV imports are demonstrations of basic bookkeeping. U
 | danium@ | Invoices and customers, view only |
 | accounts@ | Supplier invoices, bank, customer invoices, statements and balances |
 
-The domains zrg-x.com and octa-boost.com are noted for later; the site still deploys to octa-performance.pages.dev.
+The site runs at https://octa-boost.com (registered 18 Oct 2026 on Cloudflare, owner ZRG-X (PTY) LTD, auto-renew on); octa-performance.pages.dev still serves the same deployment. zrg-x.com is noted for later.
 
 FNB statements: Online Banking → Accounts → Transaction History → choose the dates → Download → **CSV**. PDF statements are not read.
 
@@ -61,4 +61,4 @@ The foundation separates private product/document costs, notes and tier lists fr
 
 ## Preview and deployment
 
-Build the local review with the demo flag and normal local base path. To prepare Cloudflare output in PowerShell, set `NEXT_PUBLIC_SITE_ORIGIN=https://octa-performance.pages.dev`, `NEXT_PUBLIC_BASE_PATH=''`, `NEXT_PUBLIC_CUSTOMER_DEMO=true`, `NEXT_PUBLIC_DEMO_HOSTS=octa-performance.pages.dev` and `NEXT_PUBLIC_SITE_INDEXABLE=false`, then run `npm run build`. Keep Supabase values empty and Ozow/reseller switches false. Use the existing Pages project only; do not convert the project to a Worker. Deployment remains a separate step after review. No git commit is required.
+Build the local review with the demo flag and normal local base path. To prepare Cloudflare output in PowerShell, set `NEXT_PUBLIC_SITE_ORIGIN=https://octa-boost.com`, `NEXT_PUBLIC_BASE_PATH=''`, `NEXT_PUBLIC_CUSTOMER_DEMO=true`, `NEXT_PUBLIC_DEMO_HOSTS=octa-boost.com,www.octa-boost.com,octa-performance.pages.dev` and `NEXT_PUBLIC_SITE_INDEXABLE=false`, then run `npm run build`. Keep Supabase values empty and Ozow/reseller switches false. Use the existing Pages project only; do not convert the project to a Worker. Deployment remains a separate step after review. No git commit is required.
