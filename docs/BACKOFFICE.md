@@ -1,6 +1,13 @@
-# Back-office demo and launch handoff
+# Back office
 
-The current back office is a browser-only demonstration, available at `/admin/` when `NEXT_PUBLIC_CUSTOMER_DEMO=true`, indexing is off, no Supabase credentials are present and the hostname is loopback or exactly listed in `NEXT_PUBLIC_DEMO_HOSTS`. The public Cloudflare demo host can be listed as `octa-performance.pages.dev`. All sample logins are public. This is not secure storage for real business records, even though the UI follows different roles. There are no real staff accounts, payment transactions or automatic document emails.
+The back office runs in two ways from the same screens and rules:
+
+- **Live** (octa-boost.com/admin): staff sign in with their own accounts and every change is checked and saved by the `backoffice` Edge Function in Supabase. See "Live back office" below.
+- **Demo** (demo.octa-performance.pages.dev/admin): sample records in the browser, for trying things out.
+
+## Demo
+
+The demo is a browser-only demonstration, available at `/admin/` when `NEXT_PUBLIC_CUSTOMER_DEMO=true`, indexing is off, no Supabase credentials are present and the hostname is loopback or exactly listed in `NEXT_PUBLIC_DEMO_HOSTS`. The public Cloudflare demo host can be listed as `octa-performance.pages.dev`. All sample logins are public. This is not secure storage for real business records, even though the UI follows different roles. There are no real staff accounts, payment transactions or automatic document emails.
 
 ## Try it
 
@@ -51,13 +58,36 @@ FNB statements: Online Banking → Accounts → Transaction History → choose t
 - **Checkout:** order on a personal name or company details. Company orders are saved as customers; personal orders can tick "Save me as a customer". In the demo, a sample order creates an unpaid website invoice and the customer in the back office.
 - **Pro forma invoices:** Quotes → New pro forma (numbered PRO-0001, converts to an invoice like a quote).
 
-## Supabase foundation
+## Live back office
+
+**How it works.** Every change goes through `src/lib/backoffice/actions.ts`. The screen applies it to its own copy at once, then sends it to the `backoffice` Edge Function, which verifies the user's Supabase session, works out their role, loads the records, runs the same action again on the full records and saves the result in one versioned commit (`bo_store_commit`): if someone else saved in between, it starts again from their version, so invoice numbers are never reused. The browser only ever receives what its role may see (`scope.ts`), and order takers' orders are rebuilt on the server from the catalogue (their customers only, the customer's price, costs filled in, no payments or delivery sign-off carried in). Each save is recorded in `bo_audit`. A save that is refused shows a red bar and the page returns to what is saved.
+
+**Storage.** `supabase/backoffice-live.sql` adds `bo_store` (one row per record), the version counter and the staff invites. Only the service role (inside the function) can read or write them. Supplier invoice files (up to 5 MB) are stored in their own rows and fetched when opened.
+
+**Staff.** The SQL invites zuan@, zandro@ (main admins), danium@ (orders, invoices and customers) and accounts@ (Accounts). Each person creates an account on octa-boost.com → Sign in → Create an account with that address, confirms it from the email, then opens /admin. The first sign-in links the invite to that account. Reps: a main admin adds the rep in Settings → Sales reps; the rep creates an account with the same email and signs in. To remove someone: Settings (reps), or for staff in SQL `update bo_staff set active=false where user_id=...`.
+
+**First sign-in.** When the first main admin signs in, the catalogue and business details are set up from the website (`emptyData()` in `seed.ts`, including the sales@ agent client). There are no sample clients or documents.
+
+**Shop prices.** The shop asks the function for the public catalogue (no costs), the courier fee and the signed-in customer's own prices, so price changes in the back office show on the website. Online checkout (when switched on) still charges the prices in `supabase/functions/_shared/catalogue.json`; keep them in step, or connect checkout to the live catalogue, before opening ordering.
+
+**Deploy.**
+
+1. Run `supabase/backoffice-live.sql` once in the Supabase SQL Editor (after `setup-all.sql`).
+2. `npm run backoffice:function` (also runs before `npm test`) copies the shared rules into `supabase/functions/_shared/app/`.
+3. `npx supabase login` (once, in your own terminal), then `npx supabase functions deploy backoffice --project-ref tjymijnvcaogzzqhxxqp --no-verify-jwt --use-api`.
+4. Build and deploy the site as usual.
+
+The function only answers requests from https://octa-boost.com and https://www.octa-boost.com (`ORIGINS` in `supabase/functions/backoffice/index.ts`).
+
+## Supabase foundation (normalised tables)
+
+`backoffice.sql` also holds normalised `bo_*` tables with row-level security, designed earlier for a direct-from-database setup. The live back office stores its records in `bo_store` instead; these tables are kept (empty) for reference and for `bo_staff`/`bo_audit`, which the live setup uses.
 
 Run `schema.sql`, `ozow.sql`, `resellers.sql`, then `backoffice.sql` in a separate test project. `backoffice.sql` is rerunnable and seeds no users or records. Create real staff through Supabase Auth and provision `bo_staff` with verified Auth UUIDs using a trusted operator; never assign staff roles from browser metadata or arbitrary email input. Link customers by verified UUID after ownership checks. Assign a rep's staff UUID in `bo_clients.rep_user_id`.
 
 The foundation separates private product/document costs, notes and tier lists from public catalogue/customer records. Row-level security limits reps to assigned customers and customers to their own documents/prices. Browser roles have read access only where allowed and cannot modify staff, documents, payments or number sequences. Service-role credentials stay private. Do not put real data in JavaScript seed files or upload demo browser backups to the live database.
 
-**The live adapter is not implemented.** Connecting Supabase keys disables the demo and leaves staff access closed. Before live use, build trusted Edge endpoints with verified-role checks for every action, transactionally issued numbers, validated totals and costs, audit records, quote conversion, payment idempotency/overpayment guards, immutable issued invoices and credit notes, protected supplier attachments, email delivery and backup/recovery. The existing customer checkout/Ozow functions still use their current catalogue; back-office prices must be integrated into server-side quoting before live changes can affect charges. Never enable browser writes as a shortcut.
+Still to come for the live back office: credit notes and locked issued invoices, automatic email of documents, website orders landing in the back office, and checkout charging the live catalogue prices. Never enable browser writes to these tables as a shortcut; changes go through the function.
 
 ## Preview and deployment
 

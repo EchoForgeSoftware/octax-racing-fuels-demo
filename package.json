@@ -5,8 +5,8 @@
   "type": "module",
   "scripts": {
     "build": "next build",
-    "test": "node --test scripts/order.test.mjs scripts/payment.test.mjs scripts/payment-db.test.mjs scripts/payment-api.test.mjs scripts/security.test.mjs scripts/reseller.test.mjs scripts/reseller-db.test.mjs scripts/customer-history.test.mjs scripts/backoffice.test.mjs scripts/backoffice-db.test.mjs",
-    "pretest": "node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs",
+    "test": "node --test scripts/order.test.mjs scripts/payment.test.mjs scripts/payment-db.test.mjs scripts/payment-api.test.mjs scripts/security.test.mjs scripts/reseller.test.mjs scripts/reseller-db.test.mjs scripts/customer-history.test.mjs scripts/backoffice.test.mjs scripts/backoffice-db.test.mjs scripts/backoffice-live.test.mjs",
+    "pretest": "node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs && node scripts/gen-backoffice-function.mjs",
     "payment:catalogue": "node scripts/gen-payment-catalogue.mjs && node scripts/gen-invoice-template.mjs",
     "predev": "node scripts/gen-llms.mjs",
     "dev": "next dev",
@@ -15,7 +15,8 @@
     "check:export": "node scripts/check-export.mjs",
     "launch:check": "node scripts/check-launch.mjs --strict",
     "start": "next start",
-    "serve": "node scripts/preview.mjs"
+    "serve": "node scripts/preview.mjs",
+    "backoffice:function": "node scripts/gen-backoffice-function.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.118.0",

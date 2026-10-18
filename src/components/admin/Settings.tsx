@@ -10,7 +10,7 @@ import { asset } from "@/lib/site";
 import { vatError } from "@/lib/vat";
 
 export function SettingsAdmin() {
-  const { data, saveSettings, reset, mode, admin } = useBackoffice();
+  const { data, saveSettings, reset, mode, admin, today } = useBackoffice();
   const [s, setS] = useState<BusinessSettings | null>(() => (data ? structuredClone(data.settings) : null));
   const [notice, setNotice] = useState<string | null>(null);
   if (!data || !s) return null;
@@ -78,7 +78,7 @@ export function SettingsAdmin() {
           </p>
         </Panel>
         <Panel title="Templates and data">
-          <Button onClick={() => {const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));const link=document.createElement("a");link.href=url;link.download="octa-demo-backup.json";link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}}>Back up demo data</Button>
+          <Button onClick={() => {const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));const link=document.createElement("a");link.href=url;link.download=mode==="demo"?"octa-demo-backup.json":`octa-backoffice-backup-${today}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}}>{mode==="demo"?"Back up demo data":"Download a backup"}</Button>
           <p className="text-sm text-ink-soft">An Excel invoice and quote template in the same layout, for manual invoicing away from the website.</p>
           <a href={asset("/templates/octa-invoice-quote-template.xlsx")} download className="mt-3 inline-flex min-h-10 items-center border-2 border-ink bg-ink px-4 py-2 font-display text-sm uppercase text-paper hover:bg-lime hover:text-ink">
             Download Excel template
@@ -97,7 +97,7 @@ export function SettingsAdmin() {
 }
 
 function RepSettings() {
-  const { data, saveRep, today } = useBackoffice();
+  const { data, saveRep, today, mode } = useBackoffice();
   const [editing, setEditing] = useState<Rep | null>(null);
   const [error, setError] = useState("");
   if (!data) return null;
@@ -109,7 +109,7 @@ function RepSettings() {
     saveRep({ ...editing, name: editing.name.trim(), email }); setEditing(null); setError("");
   }
   return <Panel title="Sales reps" action={<Button onClick={() => setEditing({id:uid("r"), name:"", email:"", phone:"", active:true, createdAt:today})}>Add rep</Button>}>
-    <p className="mb-3 text-sm text-muted">Assign customers to reps in the client record. A rep sees only their assigned customers, quotes, invoices and sales figures. Use sample details in this demo.</p>
+    <p className="mb-3 text-sm text-muted">Assign customers to reps in the client record. A rep sees only their assigned customers, quotes, invoices and sales figures. {mode === "demo" ? "Use sample details in this demo." : "The rep signs in with this email: they create their account on the website's Sign in page, confirm it, then open the back office."}</p>
     <ul className="divide-y divide-line">{data.reps.map(r => <li key={r.id} className="flex flex-wrap items-center justify-between gap-3 py-3"><span><strong>{r.name}</strong><span className="block break-all text-sm text-muted">{r.email} · {r.active ? "Active" : "Inactive"}</span></span><Button onClick={() => {setEditing({...r});setError("");}}>Edit rep</Button></li>)}</ul>
     {editing && <div className="mt-4 space-y-3 border-t-2 border-ink pt-4">
       <Field label="Rep name"><Input maxLength={200} value={editing.name} onChange={e=>setEditing({...editing,name:e.target.value})}/></Field>

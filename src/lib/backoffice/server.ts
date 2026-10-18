@@ -1,0 +1,198 @@
+// The live back office's server side, run by the Supabase Edge Function in
+// supabase/functions/backoffice (a generated copy; see
+// scripts/gen-backoffice-function.mjs). It verifies who is asking, loads the
+// records, runs the same actions as the admin screens (actions.ts) and saves
+// the changes in one versioned commit. Browsers only ever receive the records
+// their role may see (scope.ts). Pure apart from the injected store, so it is
+// tested in Node (scripts/backoffice-live.test.mjs).
+import { ACTION_NAMES, ActionError, runAction, type ActionName, type Env } from "./actions";
+import { priceFor } from "./calc";
+import { accountEmails } from "./customerForm";
+import type { Role, User } from "./roles";
+import { scopeBackoffice } from "./scope";
+import type { BackofficeData, CatalogueItem, Client } from "./types";
+
+/** One stored record per row: collection + id. Settings are a single row. */
+export const COLLECTIONS = ["settings", "catalogue", "clients", "documents", "suppliers", "supplierInvoices", "bank", "reps", "stock", "stockCounts", "referrals"] as const;
+export type Collection = (typeof COLLECTIONS)[number] | "file";
+type ListCollection = Exclude<(typeof COLLECTIONS)[number], "settings">;
+
+export type Row = { collection: Collection; id: string; data: unknown };
+export type Loaded = { version: number; rows: Partial<Record<Collection, unknown[]>> };
+export type StaffRow = { display_name: string; role: Role; active: boolean };
+
+/** Database access, provided by the Edge Function (service role) or a test double. */
+export interface Store {
+  load(collections?: Collection[]): Promise<Loaded>;
+  /** Saves only if nothing else committed since `version`; returns false on a clash. */
+  commit(version: number, upserts: Row[], deletes: Omit<Row, "data">[], audit: { actor: string; operation: string; details: unknown }): Promise<boolean>;
+  staff(userId: string): Promise<StaffRow | null>;
+  /** First sign-in of an invited staff email (verified): becomes a staff row. */
+  claimInvite(userId: string, email: string): Promise<StaffRow | null>;
+  file(id: string): Promise<{ name: string; type: string; dataUrl: string } | null>;
+}
+
+export type AuthUser = { id: string; email: string | null; emailConfirmed: boolean };
+export type Reply = { status: number; body: unknown };
+
+const keyOf = (collection: Collection, item: Record<string, unknown>) => String(collection === "catalogue" ? item.sku : item.id);
+const LISTS = COLLECTIONS.filter((c): c is ListCollection => c !== "settings");
+const FILE_LIMIT = 7_000_000;
+
+export function toData(loaded: Loaded): BackofficeData | null {
+  const settings = loaded.rows.settings?.[0] as BackofficeData["settings"] | undefined;
+  if (!settings) return null;
+  const data = { version: 1, settings } as BackofficeData;
+  for (const c of LISTS) (data as Record<string, unknown>)[c] = loaded.rows[c] ?? [];
+  return data;
+}
+
+function toRows(d: BackofficeData): Map<string, Row> {
+  const rows = new Map<string, Row>();
+  rows.set("settings\u0000main", { collection: "settings", id: "main", data: { ...d.settings, id: "main" } });
+  for (const c of LISTS) for (const item of d[c] as unknown as Record<string, unknown>[]) {
+    const id = keyOf(c, item);
+    rows.set(`${c}\u0000${id}`, { collection: c, id, data: item });
+  }
+  return rows;
+}
+
+/** What changed between two copies of the records. */
+export function diff(before: BackofficeData | null, after: BackofficeData): { upserts: Row[]; deletes: Omit<Row, "data">[] } {
+  const a = before ? toRows(before) : new Map<string, Row>();
+  const b = toRows(after);
+  const upserts: Row[] = [];
+  for (const [key, row] of b) if (!a.has(key) || JSON.stringify(a.get(key)!.data) !== JSON.stringify(row.data)) upserts.push(row);
+  const deletes = [...a].filter(([key]) => !b.has(key)).map(([, { collection, id }]) => ({ collection, id }));
+  return { upserts, deletes };
+}
+
+/** Supplier invoice files are kept out of the everyday records and fetched when opened. */
+function moveFiles(d: BackofficeData, upserts: Row[]): Row[] {
+  const files: Row[] = [];
+  for (const inv of d.supplierInvoices) {
+    const a = inv.attachment;
+    if (!a?.dataUrl) continue;
+    if (a.dataUrl.length > FILE_LIMIT || !/^data:[\w.+/-]+;base64,/.test(a.dataUrl)) throw new ActionError("Attach a PDF or photo under 5 MB.");
+    files.push({ collection: "file", id: inv.id, data: { name: a.name, type: a.type, dataUrl: a.dataUrl } });
+    inv.attachment = { ...a, dataUrl: null, stored: true };
+  }
+  for (const f of files) {
+    const row = upserts.find((r) => r.collection === "supplierInvoices" && r.id === f.id);
+    if (row) row.data = d.supplierInvoices.find((x) => x.id === f.id);
+  }
+  return files;
+}
+
+/** Staff role for a verified user: a staff row, a claimed invite, or an active rep's email. */
+async function whoIs(user: AuthUser, store: Store, data: BackofficeData | null): Promise<User | null> {
+  const base = { id: user.id, email: user.email ?? "", demoEmail: "" };
+  let staff = await store.staff(user.id);
+  if (!staff && user.email && user.emailConfirmed) staff = await store.claimInvite(user.id, user.email.toLowerCase());
+  if (staff && staff.role !== "rep") return staff.active ? { ...base, name: staff.display_name, role: staff.role } : null;
+  if (staff && !staff.active) return null;
+  const email = user.email?.toLowerCase();
+  const rep = email && user.emailConfirmed ? data?.reps.find((r) => r.active && r.email.toLowerCase() === email) : undefined;
+  return rep ? { ...base, name: rep.name, role: "rep", repId: rep.id } : null;
+}
+
+/** What a browser may receive back from an action. */
+function scopedResult(result: unknown, scoped: BackofficeData): unknown {
+  if (!result || typeof result !== "object") return result ?? null;
+  const r = result as { id?: string; lines?: unknown; type?: unknown };
+  if (r.lines) return scoped.documents.find((x) => x.id === r.id) ?? null;
+  if (r.type && "tier" in r) return scoped.clients.find((x) => x.id === r.id) ?? null;
+  return result;
+}
+
+/** Ids made by the browser for its own copy, reused so both sides agree (e.g. a converted invoice's id). */
+function envFor(today: string, ids: unknown, fallback: (prefix: string) => string): Env {
+  const queue = Array.isArray(ids) ? ids.filter((x): x is string => typeof x === "string" && /^[a-z]{1,3}-[0-9a-f]{8}$/.test(x)).slice(0, 2000) : [];
+  return { today, uid: (prefix) => { const i = queue.findIndex((x) => x.startsWith(`${prefix}-`)); return i >= 0 ? queue.splice(i, 1)[0] : fallback(prefix); } };
+}
+
+/** The shop's view: public catalogue fields, the courier fee and the signed-in customer's own prices. */
+function publicView(data: BackofficeData | null, user: AuthUser | null) {
+  if (!data) return { ready: false };
+  const catalogue: CatalogueItem[] = data.catalogue.map((i) => ({
+    ...i, cost: null, agent: null, bulk: null,
+    costing: i.costing ? { purityEnabled: i.costing.purityEnabled, purity: i.costing.purity, litres: null, lines: [], useAsCost: false } : undefined,
+  }));
+  const email = user?.emailConfirmed ? user.email?.toLowerCase() : null;
+  const found = email ? data.clients.find((c) => accountEmails(c).includes(email)) : undefined;
+  const client: Client | null = found ? {
+    id: found.id, type: found.type, name: found.name, company: found.company, email: "", phone: "", vat: "", address: "", city: "", notes: "",
+    tier: found.tier, linkedEmail: "", createdAt: "",
+    prices: Object.fromEntries(data.catalogue.flatMap((i) => { const p = priceFor(i, found); return p ? [[i.sku, p]] : []; })),
+  } : null;
+  return { ready: true, catalogue, courierFee: data.settings.courierFee ?? null, client };
+}
+
+function validStart(d: unknown): d is BackofficeData {
+  const x = d as BackofficeData;
+  return !!x && typeof x === "object" && x.version === 1 && !!x.settings && typeof x.settings === "object"
+    && LISTS.every((c) => Array.isArray(x[c])) && x.catalogue.length > 0 && x.documents.length === 0;
+}
+
+export async function handle(body: unknown, user: AuthUser | null, store: Store, today: string, makeId: (prefix: string) => string): Promise<Reply> {
+  const req = (body ?? {}) as { op?: string; name?: string; args?: unknown; ids?: unknown; data?: unknown; invoiceId?: unknown };
+  try {
+    if (req.op === "public") {
+      const loaded = await store.load(user ? ["settings", "catalogue", "clients"] : ["settings", "catalogue"]);
+      return { status: 200, body: publicView(toData(loaded), user) };
+    }
+    if (!user) return { status: 401, body: { error: "Sign in to use the back office." } };
+
+    if (req.op === "load" || req.op === "init") {
+      const loaded = await store.load();
+      let data = toData(loaded);
+      const admin = await whoIs(user, store, data);
+      if (!admin) return { status: 403, body: { error: "This account isn't set up for the back office." } };
+      if (req.op === "init") {
+        if (admin.role !== "main") return { status: 403, body: { error: "A main admin sets up the back office." } };
+        if (data) return { status: 409, body: { error: "The back office is already set up." } };
+        if (!validStart(req.data)) return { status: 400, body: { error: "The starting records aren't valid." } };
+        const start = req.data;
+        const { upserts } = diff(null, start);
+        if (!await store.commit(loaded.version, upserts, [], { actor: user.id, operation: "init", details: { rows: upserts.length } })) return { status: 409, body: { error: "Someone else is setting up the back office. Reload." } };
+        data = start;
+      }
+      return { status: 200, body: { admin, data: data ? scopeBackoffice(data, admin) : null, needsSetup: !data } };
+    }
+
+    if (req.op === "file") {
+      const admin = await whoIs(user, store, toData(await store.load(["reps"])) ?? null);
+      if (admin?.role !== "main" && admin?.role !== "accounts") return { status: 403, body: { error: "This isn't part of your access." } };
+      const file = typeof req.invoiceId === "string" ? await store.file(req.invoiceId) : null;
+      return file ? { status: 200, body: file } : { status: 404, body: { error: "That file isn't stored." } };
+    }
+
+    if (req.op === "act") {
+      const name = req.name as ActionName;
+      if (!(ACTION_NAMES as readonly string[]).includes(name) || !Array.isArray(req.args)) return { status: 400, body: { error: "Unknown back-office action." } };
+      // Optimistic concurrency: if someone else saved in between, start again from their version.
+      for (let attempt = 0; attempt < 5; attempt++) {
+        const loaded = await store.load();
+        const before = toData(loaded);
+        if (!before) return { status: 409, body: { error: "The back office isn't set up yet. A main admin signs in first." } };
+        const admin = await whoIs(user, store, before);
+        if (!admin) return { status: 403, body: { error: "This account isn't set up for the back office." } };
+        const after = structuredClone(before);
+        const result = runAction(after, admin, name, structuredClone(req.args) as never, envFor(today, req.ids, makeId));
+        const { upserts, deletes } = diff(before, after);
+        const files = moveFiles(after, upserts);
+        const removedFiles = deletes.filter((r) => r.collection === "supplierInvoices").map((r) => ({ collection: "file" as const, id: r.id }));
+        const ok = !upserts.length && !deletes.length ? true
+          : await store.commit(loaded.version, [...upserts, ...files], [...deletes, ...removedFiles], { actor: user.id, operation: name, details: { by: admin.name, rows: upserts.length + deletes.length } });
+        if (!ok) continue;
+        const scoped = scopeBackoffice(after, admin)!;
+        return { status: 200, body: { data: scoped, result: scopedResult(result, scoped) } };
+      }
+      return { status: 409, body: { error: "Others are saving at the same moment. Try again." } };
+    }
+    return { status: 400, body: { error: "Unknown request." } };
+  } catch (error) {
+    if (error instanceof ActionError) return { status: 400, body: { error: error.message } };
+    return { status: 500, body: { error: "The back office couldn't save that. Try again." } };
+  }
+}

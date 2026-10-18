@@ -9,3 +9,7 @@ verify_jwt = false
 [functions.ozow-webhook]
 # Ozow authenticates with Svix signatures, not a Supabase JWT.
 verify_jwt = false
+
+[functions.backoffice]
+# Staff tokens are verified inside the function; the shop also reads public prices.
+verify_jwt = false

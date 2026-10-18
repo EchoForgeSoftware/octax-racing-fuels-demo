@@ -197,7 +197,13 @@ export type Supplier = {
 
 export type ExpenseCategory = "stock" | "packaging" | "courier" | "marketing" | "rent" | "other";
 
-export type Attachment = { name: string; type: string; size: number; /** Demo only: the file itself, as a data URL. */ dataUrl: string | null };
+export type Attachment = {
+  name: string; type: string; size: number;
+  /** The file itself, as a data URL: kept in the demo; live, only until the server stores it. */
+  dataUrl: string | null;
+  /** Live: the file is stored on the server and opened on request. */
+  stored?: boolean;
+};
 
 export type SupplierInvoice = {
   id: string;

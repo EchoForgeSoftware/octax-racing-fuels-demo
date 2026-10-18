@@ -9,7 +9,8 @@ import { loadBackoffice, onBackofficeChange } from "@/lib/backoffice/local";
 import { priceFor } from "@/lib/backoffice/calc";
 import { courierRates } from "@/lib/courierRates";
 import { accountEmails } from "@/lib/backoffice/customerForm";
-import type { BackofficeData, CatalogueItem, Client } from "@/lib/backoffice/types";
+import { callBackoffice } from "@/lib/backoffice/api";
+import type { CatalogueItem, Client } from "@/lib/backoffice/types";
 
 type Pricing = {
   /** Price this visitor pays for a SKU; `fallback` is the built-in website price. null = on quotation. */
@@ -46,28 +47,46 @@ const fallback: Pricing = {
 
 const Ctx = createContext<Pricing>(fallback);
 
+/** What the shop needs from the back office: no costs, and only this customer's own prices. */
+type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null };
+type PublicReply = { ready: false } | ({ ready: true } & Source);
+
 /**
  * Prices on the shop. In demo mode they come from the back-office demo store,
- * so admin price changes and a customer's agreed prices show immediately. In
- * the live setup they will come from the business database; until then the
- * built-in price list is used.
+ * so admin price changes and a customer's agreed prices show immediately.
+ * Live, they come from the back-office server (public catalogue, plus the
+ * signed-in customer's own prices); until it answers, or if the back office
+ * isn't set up yet, the built-in price list is used.
  */
 export function PricingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
-  const [data, setData] = useState<BackofficeData | null>(null);
+  const [source, setSource] = useState<Source | null>(null);
+  const email = user?.email?.toLowerCase() ?? null;
 
   useEffect(() => {
-    if (!allowCustomerDemo(process.env.NEXT_PUBLIC_CUSTOMER_DEMO, window.location.hostname, accountsEnabled, INDEXABLE, process.env.NEXT_PUBLIC_DEMO_HOSTS)) return;
-    setData(loadBackoffice());
-    return onBackofficeChange(() => setData(loadBackoffice()));
-  }, []);
+    if (allowCustomerDemo(process.env.NEXT_PUBLIC_CUSTOMER_DEMO, window.location.hostname, accountsEnabled, INDEXABLE, process.env.NEXT_PUBLIC_DEMO_HOSTS)) {
+      const read = () => {
+        const data = loadBackoffice();
+        // The website login email, or any authorised buyer on the account (Customer Information Form).
+        const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
+        setSource({ catalogue: data.catalogue, courierFee: data.settings.courierFee ?? null, client });
+      };
+      read();
+      return onBackofficeChange(read);
+    }
+    if (!accountsEnabled) return;
+    let active = true;
+    callBackoffice<PublicReply>({ op: "public" })
+      .then((reply) => { if (active) setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client } : null); })
+      .catch(() => { if (active) setSource(null); });
+    return () => { active = false; };
+  }, [email]);
 
   const value = useMemo<Pricing>(() => {
-    if (!data) return fallback;
+    if (!source) return fallback;
+    const data = source;
     const bySku = new Map(data.catalogue.map((i) => [i.sku, i]));
-    const email = user?.email?.toLowerCase();
-    // The website login email, or any authorised buyer on the account (Customer Information Form).
-    const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
+    const client = data.client;
     return {
       price: (sku, f) => {
         const item = bySku.get(sku);
@@ -84,13 +103,13 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       client,
       item: (sku) => bySku.get(sku) ?? null,
       extras: data.catalogue.filter((i) => i.custom && i.active && !i.comingSoon),
-      courierFee: data.settings.courierFee ?? courierRates.fee,
+      courierFee: data.courierFee ?? courierRates.fee,
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;
       },
     };
-  }, [data, user]);
+  }, [source]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

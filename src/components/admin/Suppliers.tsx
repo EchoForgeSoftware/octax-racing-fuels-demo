@@ -15,7 +15,8 @@ export const EXPENSE_LABEL: Record<ExpenseCategory, string> = {
 };
 const METHODS: Payment["method"][] = ["eft", "cash", "card", "other"];
 /** The demo keeps files in this browser's storage, which only holds a few MB in total. */
-const DEMO_FILE_LIMIT = 900 * 1024;
+/** Files kept with a supplier invoice: small in the browser demo; live, stored on the server. */
+const FILE_LIMIT = { demo: 900 * 1024, live: 5 * 1024 * 1024 };
 
 export function SuppliersAdmin() {
   const { data, today } = useBackoffice();
@@ -159,10 +160,10 @@ function SupplierForm({ supplier, onDone }: { supplier: Supplier | null; onDone:
   );
 }
 
-function readFile(file: File): Promise<Attachment> {
+function readFile(file: File, limit: number): Promise<Attachment> {
   return new Promise((resolve) => {
     const base = { name: file.name.slice(0, 120), type: file.type || "application/octet-stream", size: file.size };
-    if (file.size > DEMO_FILE_LIMIT) return resolve({ ...base, dataUrl: null });
+    if (file.size > limit) return resolve({ ...base, dataUrl: null });
     const reader = new FileReader();
     reader.onload = () => resolve({ ...base, dataUrl: typeof reader.result === "string" ? reader.result : null });
     reader.onerror = () => resolve({ ...base, dataUrl: null });
@@ -173,6 +174,7 @@ function readFile(file: File): Promise<Attachment> {
 function InvoiceForm({ onDone }: { onDone: () => void }) {
   const bo = useBackoffice();
   const { data, today } = bo;
+  const live = bo.mode === "live";
   const [f, setF] = useState({ supplierId: data?.suppliers[0]?.id ?? "", number: "", date: today, dueDate: addDays(today, 30), category: "stock" as ExpenseCategory, amount: "", description: "" });
   const [file, setFile] = useState<Attachment | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -185,6 +187,7 @@ function InvoiceForm({ onDone }: { onDone: () => void }) {
     if (!f.number.trim()) return setError("Enter the supplier's invoice number.");
     if (!(amount > 0)) return setError("Enter the invoice amount.");
     if (data?.supplierInvoices.some((i) => i.supplierId === f.supplierId && i.number.trim().toUpperCase() === f.number.trim().toUpperCase())) return setError("That invoice number is already loaded for this supplier.");
+    if (live && file && !file.dataUrl) return setError("That file is too large. Attach a PDF or photo under 5 MB.");
     bo.saveSupplierInvoice({ id: uid("si"), supplierId: f.supplierId, number: f.number.trim(), date: f.date, dueDate: f.dueDate, category: f.category, amount, description: f.description.trim(), attachment: file, payments: [], createdAt: today });
     onDone();
   }
@@ -209,8 +212,8 @@ function InvoiceForm({ onDone }: { onDone: () => void }) {
           </Select>
         </Field>
         <Field label="What it's for" className="sm:col-span-2"><Input value={f.description} onChange={(e) => set({ description: e.target.value })} placeholder="e.g. Ethanol 96%, 4 x 210L" /></Field>
-        <Field label="Invoice file (PDF or photo)" className="sm:col-span-2" hint={file && !file.dataUrl ? "Demo keeps files under 900 KB only; the name is saved. The live system stores any size." : "Optional."}>
-          <Input type="file" accept="application/pdf,image/*" onChange={async (e) => { const fl = e.target.files?.[0]; setFile(fl ? await readFile(fl) : null); }} />
+        <Field label="Invoice file (PDF or photo)" className="sm:col-span-2" hint={file && !file.dataUrl ? (live ? "Files up to 5 MB." : "Demo keeps files under 900 KB only; the name is saved.") : "Optional."}>
+          <Input type="file" accept="application/pdf,image/*" onChange={async (e) => { const fl = e.target.files?.[0]; setFile(fl ? await readFile(fl, live ? FILE_LIMIT.live : FILE_LIMIT.demo) : null); }} />
         </Field>
       </div>
       <div className="mt-3 flex justify-end gap-2">
@@ -231,6 +234,22 @@ function InvoiceRow({ invoice, onBookIn }: { invoice: SupplierInvoice; onBookIn:
   const [method, setMethod] = useState<Payment["method"]>("eft");
   const supplier = data!.suppliers.find((s) => s.id === invoice.supplierId);
   const status = supplierStatus(invoice, today);
+  const [fileError, setFileError] = useState<string | null>(null);
+
+  /** Download the attached file (live: fetched from the server when opened). */
+  async function openFile() {
+    setFileError(null);
+    try {
+      const url = await bo.openFile(invoice.id);
+      if (!url) return setFileError("That file isn't stored.");
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = invoice.attachment?.name ?? "supplier-invoice";
+      link.click();
+    } catch (e) {
+      setFileError(e instanceof Error ? e.message : "The file couldn't be opened.");
+    }
+  }
 
   return (
     <li className="border-2 border-ink bg-panel">
@@ -251,10 +270,11 @@ function InvoiceRow({ invoice, onBookIn }: { invoice: SupplierInvoice; onBookIn:
           <div className="space-y-2 text-sm">
             <p>Due {shortDate(invoice.dueDate)} · loaded {shortDate(invoice.createdAt)}{invoice.createdBy ? ` by ${invoice.createdBy}` : ""}</p>
             {invoice.attachment ? (
-              invoice.attachment.dataUrl
-                ? <a href={invoice.attachment.dataUrl} download={invoice.attachment.name} className="inline-block border-b-2 border-ink font-mono text-xs uppercase tracking-wider hover:text-flare">Open {invoice.attachment.name}</a>
+              invoice.attachment.dataUrl || invoice.attachment.stored
+                ? <button type="button" onClick={() => void openFile()} className="inline-block border-b-2 border-ink font-mono text-xs uppercase tracking-wider hover:text-flare">Open {invoice.attachment.name}</button>
                 : <p className="text-muted">File: {invoice.attachment.name} (not kept in the demo)</p>
             ) : <p className="text-muted">No file attached.</p>}
+            {fileError && <p role="alert" className="text-flare">{fileError}</p>}
             <h3 className="pt-2 font-mono text-xs font-bold uppercase tracking-wider">Payments</h3>
             {invoice.payments.length === 0 ? <p className="text-ink-soft">None yet.</p> : (
               <ul className="num divide-y divide-line">
