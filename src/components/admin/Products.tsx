@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBackoffice } from "./BackofficeContext";
 import { Button, Field, Input, PageTitle, Panel, Select, Textarea } from "./ui";
 import type { CatalogueCategory, CatalogueItem, PackDesign } from "@/lib/backoffice/types";
@@ -89,6 +89,21 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
   }));
   const [costing, setCosting] = useState<Costing | null>(() => item?.costing ?? null);
   const [pack, setPack] = useState<PackDesign | null>(() => item?.pack ?? null);
+  // A new picture follows the product name, size and category until someone edits a label field.
+  // Choosing a container or colour keeps that choice and still follows the name.
+  const [packFollowsName, setPackFollowsName] = useState(false);
+  const [pinned, setPinned] = useState<Partial<Pick<PackDesign, "container" | "colour">>>({});
+  useEffect(() => {
+    if (!packFollowsName) return;
+    setPack({ ...defaultPack({ productName: f.productName, size: f.size, category: f.category }), ...pinned });
+  }, [packFollowsName, pinned, f.productName, f.size, f.category]);
+  function editPack(next: PackDesign) {
+    const changed = (Object.keys(next) as (keyof PackDesign)[]).filter((k) => JSON.stringify(next[k]) !== JSON.stringify(pack?.[k]));
+    if (packFollowsName && changed.every((k) => k === "container" || k === "colour")) {
+      setPinned((p) => ({ ...p, ...Object.fromEntries(changed.map((k) => [k, next[k]])) }));
+    } else setPackFollowsName(false);
+    setPack(next);
+  }
   const vatRegistered = !!data?.settings.vatRegistered;
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<typeof f>) => setF({ ...f, ...patch });
@@ -154,9 +169,9 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
           <>
             <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2 lg:col-span-4">
               <h3 className="font-display text-lg">Product picture and label</h3>
-              <button type="button" onClick={() => setPack(null)} className="font-mono text-xs uppercase tracking-wider text-muted underline hover:text-flare">Remove picture</button>
+              <button type="button" onClick={() => { setPack(null); setPackFollowsName(false); setPinned({}); }} className="font-mono text-xs uppercase tracking-wider text-muted underline hover:text-flare">Remove picture</button>
             </div>
-            <PackEditor item={{ sku: item?.sku ?? "NEW", productName: f.productName.trim() || "New product", size: f.size, short: f.short }} value={pack} onChange={setPack} />
+            <PackEditor item={{ sku: item?.sku ?? "NEW", productName: f.productName.trim() || "New product", size: f.size, short: f.short }} value={pack} onChange={editPack} />
           </>
         ) : (
           <div className="sm:col-span-2 lg:col-span-4">
@@ -165,6 +180,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
               const sibling = data?.catalogue.find((i) => i.pack && i.productName.trim().toLowerCase() === f.productName.trim().toLowerCase());
               const start = defaultPack({ productName: f.productName, size: f.size, category: f.category });
               setPack(sibling?.pack ? { ...sibling.pack, container: start.container } : start);
+              setPackFollowsName(!sibling?.pack);
             }}>Make a product picture</Button>
             <span className="ml-3 text-xs text-muted">Choose a 25 L can, 210 L drum, 5 L jug or 500 ml bottle and type the label words. It shows on the shop and gives you a print label.</span>
           </div>
