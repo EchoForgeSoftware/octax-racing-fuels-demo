@@ -2,16 +2,30 @@
   "termsVersion": "2026-10-18",
   "items": [
     {
+      "sku": "OCTA-X95-25",
+      "slug": "octa-x-95-ethanol",
+      "name": "OCTA-X Ethanol 95%",
+      "size": "25L",
+      "price": null
+    },
+    {
+      "sku": "OCTA-X95-210",
+      "slug": "octa-x-95-ethanol",
+      "name": "OCTA-X Ethanol 95%",
+      "size": "210L plastic drum",
+      "price": null
+    },
+    {
       "sku": "OCTA-X-25",
       "slug": "octa-x-ethanol",
-      "name": "OCTA-X Ethanol 96%",
+      "name": "OCTA-X Plus Ethanol 96%",
       "size": "25L",
       "price": 760
     },
     {
       "sku": "OCTA-X-210",
       "slug": "octa-x-ethanol",
-      "name": "OCTA-X Ethanol 96%",
+      "name": "OCTA-X Plus Ethanol 96%",
       "size": "210L plastic drum",
       "price": 6160
     },

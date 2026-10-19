@@ -133,7 +133,7 @@ export function Hero() {
           </h1>
 
           <p data-sub className="mt-7 max-w-xl text-lg text-ink-soft">
-            OCTA-X 96% ethanol, OCTA-M 99.9% methanol and OCTA-BOOST for serious
+            OCTA-X Plus 96% and OCTA-X 95% ethanol, OCTA-M 99.9% methanol and OCTA-BOOST for serious
             performance builds. Every pack is batch-dated for freshness and consistency.
           </p>
 

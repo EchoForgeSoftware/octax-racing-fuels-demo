@@ -205,3 +205,13 @@ test("costing: purity, per-litre product price, switchable lines, other costs an
   assert.deepEqual(hoodie.lines.filter(l=>l.enabled).map(l=>l.id),["product","sticker","travel"],"no container or cap for merch by default");
   assert.equal(hoodie.lines[0].perLitre,false);
 });
+
+test("the back office picks up new and renamed website products without touching prices or costs",()=>{
+  const data=seed.emptyData();
+  const old=data.catalogue.map(i=>i.sku==="OCTA-X-25"?{...i,productName:"OCTA-X Ethanol 96%",short:"old",retail:999,cost:500}:i).filter(i=>!i.sku.startsWith("OCTA-X95"));
+  const changes=seed.catalogueChanges(old);
+  const plus=changes.find(i=>i.sku==="OCTA-X-25");
+  assert.equal(plus.productName,"OCTA-X Plus Ethanol 96%");assert.equal(plus.retail,999);assert.equal(plus.cost,500);assert.notEqual(plus.short,"old");
+  assert.deepEqual(changes.filter(i=>i.sku.startsWith("OCTA-X95")).map(i=>i.sku).sort(),["OCTA-X95-210","OCTA-X95-25"]);
+  assert.equal(seed.catalogueChanges(data.catalogue).length,0,"an up-to-date catalogue needs nothing");
+});

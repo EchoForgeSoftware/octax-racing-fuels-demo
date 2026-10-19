@@ -27,6 +27,8 @@ export type ProductLabel = {
   /** Product name printed large, with an optional lime highlight (e.g. "96%"). */
   title: string;
   highlight?: string;
+  /** Grade tag printed beside the UN lines (e.g. "PLUS"). */
+  badge?: string;
   /** Left off where the product's dangerous-goods data has not been supplied yet. */
   un?: string;
   hazardClass?: string;
@@ -59,7 +61,7 @@ export const categories: Category[] = [
   {
     slug: "ethanol",
     name: "Ethanol",
-    blurb: "OCTA-X: 96% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
+    blurb: "OCTA-X 95% and OCTA-X Plus 96% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
   },
   {
     slug: "methanol",
@@ -147,14 +149,50 @@ export const comingSoon: UpcomingProduct[] = [
 
 const PPE: Pictogram[] = ["flame", "goggles", "gloves", "respirator"];
 
+const ETHANOL_DISCLAIMER = (name: string) =>
+  `${name} IS ETHANOL FOR PERFORMANCE USE. USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM ITS USE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.`;
+
 export const products: Product[] = [
   {
-    slug: "octa-x-ethanol",
-    name: "OCTA-X Ethanol 96%",
+    // Standard grade, added 2026-10-19. Prices are set in the back office (on quotation until then).
+    slug: "octa-x-95-ethanol",
+    name: "OCTA-X Ethanol 95%",
     category: "ethanol",
-    short: "96% ethanol in its purest form for performance use.",
+    short: "95% ethanol for performance use.",
     description:
-      "OCTA-X is ethanol in its purest form for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
+      "OCTA-X is 95% ethanol for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. For the highest purity, choose OCTA-X Plus (96%). Every can carries a manufacture date and batch number for traceability.",
+    specs: [
+      { label: "Ethanol", value: "95%" },
+      { label: "UN number", value: "UN 1170" },
+      { label: "Hazard class", value: "Class 3, flammable liquid" },
+      { label: "Traceability", value: "MFD date and batch on every pack" },
+    ],
+    applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
+    variants: [
+      { size: "25L", sku: "OCTA-X95-25", price: null },
+      { size: "210L plastic drum", sku: "OCTA-X95-210", price: null },
+    ],
+    label: {
+      layout: "wide",
+      mark: "X",
+      title: "ETHANOL",
+      highlight: "95%",
+      un: "UN 1170",
+      hazardClass: "CLASS 3",
+      unPlacement: "above",
+      chain: true,
+      pictograms: PPE,
+      disclaimer: ETHANOL_DISCLAIMER("OCTA-X"),
+    },
+  },
+  {
+    // The original OCTA-X packs and SKUs, renamed OCTA-X Plus on 2026-10-19.
+    slug: "octa-x-ethanol",
+    name: "OCTA-X Plus Ethanol 96%",
+    category: "ethanol",
+    short: "96% ethanol, our purest grade, for performance use.",
+    description:
+      "OCTA-X Plus is 96% ethanol, our purest grade, for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
       { label: "Ethanol", value: "96%" },
       { label: "UN number", value: "UN 1170" },
@@ -172,13 +210,13 @@ export const products: Product[] = [
       mark: "X",
       title: "ETHANOL",
       highlight: "96%",
+      badge: "PLUS",
       un: "UN 1170",
       hazardClass: "CLASS 3",
       unPlacement: "above",
       chain: true,
       pictograms: PPE,
-      disclaimer:
-        "OCTA-X IS ETHANOL IN ITS PUREST FORM FOR PERFORMANCE USE. USE AT OWN RISK. TO THE MAXIMUM EXTENT PERMITTED BY LAW, OCTA, ZRG-X (PTY) LTD AND THEIR DIRECTORS AND OWNERS ARE NOT LIABLE FOR LOSS, INJURY OR DAMAGE ARISING FROM ITS USE, OTHER THAN LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED.",
+      disclaimer: ETHANOL_DISCLAIMER("OCTA-X PLUS"),
     },
   },
   {

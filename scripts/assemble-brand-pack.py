@@ -27,20 +27,23 @@ for item in manifest:
     c.showPage()
 c.save()
 reader=PdfReader(labels)
-assert len(reader.pages)==5 and all(float(p.mediabox.width)>float(p.mediabox.height) for p in reader.pages)
+assert len(reader.pages)==len(manifest) and all(float(p.mediabox.width)>float(p.mediabox.height) for p in reader.pages)
 assert not reader.attachments
 for p in reader.pages:
     images=list(p.images)
     assert images and images[0].image.size==(6000,3750)
 writer=PdfWriter()
-for slug in ['octa-x-ethanol','octa-m-methanol','octa-boost','octa-shot','octa-torque']:
-    source=ROOT/f'public/data-sheets/{slug}-technical-data-sheet.pdf'
-    writer.append(str(source),outline_item=slug.upper().replace('-ETHANOL','').replace('-METHANOL',''))
+sheets=[]
+for item in manifest:
+    source=ROOT/f"public/data-sheets/{item['slug']}-technical-data-sheet.pdf"
+    if not source.exists():continue  # e.g. OCTA-X 95%: no data sheet supplied yet
+    sheets.append(source)
+    writer.append(str(source),outline_item=item['name'])
     shutil.copyfile(source,PACK/'data-sheets'/source.name)
 writer.add_metadata({'/Title':'OCTA Performance | Available technical data sheets','/Author':'ZRG-X (PTY) LTD / OCTA Performance'})
 data=PDF/'octa-all-available-data-sheets.pdf'
 with data.open('wb') as stream:writer.write(stream)
-assert len(PdfReader(data).pages)==6
+assert len(PdfReader(data).pages)==sum(len(PdfReader(x).pages) for x in sheets)
 for source in [labels,data]:
     shutil.copyfile(source,PACK/source.name)
     doc=pdfium.PdfDocument(str(source))
@@ -49,11 +52,12 @@ for source in [labels,data]:
 readme='''OCTA PERFORMANCE / ZRG-X (PTY) LTD
 
 CONTENTS
-- octa-all-available-data-sheets.pdf: OCTA-X, OCTA-M, BOOST, SHOT and TORQUE (6 pages).
-- octa-landscape-labels.pdf: all 5 landscape label masters (5 pages).
-- data-sheets/: the 5 individual technical PDFs.
+- octa-all-available-data-sheets.pdf: OCTA-X Plus, OCTA-M, BOOST, SHOT and TORQUE (6 pages).
+- octa-landscape-labels.pdf: all 6 landscape label masters, one per page
+  (OCTA-X 95%, OCTA-X Plus 96%, OCTA-M, BOOST, SHOT, TORQUE).
+- data-sheets/: the individual technical PDFs. OCTA-X 95% has none yet.
 - labels/: 6000 x 3750 PNGs (600 dpi metadata) and editable SVG artwork.
-- product-images/: 4000 x 4000 PNG illustrations of all 8 catalogue packs,
+- product-images/: 4000 x 4000 PNG illustrations of all 10 catalogue packs,
   including the 210L ethanol and methanol drums. These are illustrations,
   not product photographs. Mockups retain the website's portrait labels;
   separate landscape masters are included for the printer to apply/resize.
@@ -68,8 +72,9 @@ the full 6000px raster artwork; they are not vector PDF masters. Colours are
 sRGB, not printer-specific CMYK. No final dimensions, bleed or cut lines have
 been invented. Choose suitable stock/adhesive for the container and chemicals.
 
-The supplier-contact field and traceability/net-content boxes are blank.
-Complete the supplier contact details and obtain approval of the safety,
+Every label carries OCTA's contact line: +27 64 507 3615,
+info@octa-boost.com and octa-boost.com. The traceability and net-content
+boxes are left blank to fill in per pack. Obtain approval of the safety,
 hazard and transport information against the current product SDS before
 production. These artwork masters do not establish GHS/SDS compliance.
 The source label wording has been retained; it has not received legal or
@@ -90,6 +95,6 @@ with zipfile.ZipFile(archive,'w',zipfile.ZIP_DEFLATED,compresslevel=6) as z:
         if path.is_file():z.write(path,path.relative_to(PACK))
 with zipfile.ZipFile(archive) as z:
     assert z.testzip() is None
-    assert len([name for name in z.namelist() if name.startswith('labels/') and name.endswith('.png')])==5
-    assert len([name for name in z.namelist() if name.startswith('product-images/') and name.endswith('.png')])==8
-print(f'Verified 5 landscape label pages, 6 technical-data pages, 5 high-res labels, 8 product images. ZIP: {archive.stat().st_size:,} bytes')
+    assert len([name for name in z.namelist() if name.startswith('labels/') and name.endswith('.png')])==len(manifest)
+    assert len([name for name in z.namelist() if name.startswith('product-images/') and name.endswith('.png')])==sum(len(i['variants']) for i in manifest)
+print(f'Verified {len(manifest)} landscape labels, {len(sheets)} data sheets, {sum(len(i["variants"]) for i in manifest)} product images. ZIP: {archive.stat().st_size:,} bytes')

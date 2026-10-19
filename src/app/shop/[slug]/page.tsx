@@ -64,7 +64,8 @@ export default async function ProductPage({
 
   return (
     <>
-      <JsonLd data={[breadcrumbSchema(trail), productSchema(product)]} />
+      {/* Product rich results need a price: products on quotation publish breadcrumbs only. */}
+      <JsonLd data={product.variants.some((v) => v.price !== null) ? [breadcrumbSchema(trail), productSchema(product)] : [breadcrumbSchema(trail)]} />
       <Breadcrumbs trail={trail} />
 
       <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6">

@@ -12,18 +12,18 @@ export const metadata: Metadata = {
     path: "/",
     title: "Ethanol, Methanol & Octane Booster",
     description:
-      "OCTA Performance: OCTA-X ethanol 96%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
+      "OCTA Performance: OCTA-X ethanol 95% and OCTA-X Plus 96%, OCTA-M methanol and OCTA-BOOST octane booster for performance use, with online ordering and delivery.",
   }),
   title: {
     absolute: "OCTA Performance | Fuel the Addiction",
   },
 };
 
-const ticker = ["Fuel the addiction", "OCTA-X Ethanol 96%", "OCTA-M Methanol 99.9%", "OCTA-BOOST", "UN 1170 · UN 1230", "Fresh by batch"];
+const ticker = ["Fuel the addiction", "OCTA-X Plus Ethanol 96%", "OCTA-X Ethanol 95%", "OCTA-M Methanol 99.9%", "OCTA-BOOST", "UN 1170 · UN 1230", "Fresh by batch"];
 
 const props = [
   { n: "01", h: "Fresh by batch", b: "Every pack is marked with a manufacture date and batch number so we can guarantee freshness and consistent quality. No old stock leaves despatch." },
-  { n: "02", h: "Performance-grade purity", b: "OCTA-X is 96% ethanol and OCTA-M is 99.9% methanol. What goes in the can is what your engine expects." },
+  { n: "02", h: "Performance-grade purity", b: "OCTA-X is 95% ethanol, OCTA-X Plus is 96% and OCTA-M is 99.9% methanol. What goes in the can is what your engine expects." },
   { n: "03", h: "Ready-to-use sizes", b: "OCTA-X and OCTA-M in 25 L and 210 L, OCTA-BOOST in 5 L, OCTA-SHOT and OCTA-TORQUE in 500 mL: buy exactly what your build or workshop needs." },
   { n: "04", h: "Workshop delivery", b: "Order online and we dispatch to your workshop. Courier delivery is typically 24 to 48 hours after dispatch." },
 ];

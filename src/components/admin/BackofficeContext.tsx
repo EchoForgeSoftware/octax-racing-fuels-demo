@@ -177,6 +177,16 @@ export function BackofficeProvider({ children }: { children: ReactNode }) {
     return result;
   }, [admin, mode, today, replace, send]);
 
+  // A main admin's back office picks up new or renamed website products once per visit.
+  const catalogueSynced = useRef(false);
+  useEffect(() => {
+    if (catalogueSynced.current || admin?.role !== "main" || !data || (mode !== "demo" && mode !== "live")) return;
+    catalogueSynced.current = true;
+    void import("@/lib/backoffice/seed").then(({ catalogueChanges }) => {
+      for (const item of catalogueChanges(dataRef.current?.catalogue ?? [])) act("saveCatalogueItem", [item]);
+    });
+  }, [admin, data, mode, act]);
+
   // Reps see only their own customers and those customers' documents (live, the server already did this).
   const visible = useMemo(() => data ? scopeBackoffice(data, admin) : null, [data, admin]);
 

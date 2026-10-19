@@ -81,7 +81,7 @@ function sheet(wb, kind) {
     row.getCell(4).value = { formula: `IF(OR(B${r}="",C${r}=""),"",B${r}*C${r})` };
     row.getCell(4).numFmt = money;
   }
-  ws.getCell(`A${head + 1}`).value = "e.g. OCTA-X Ethanol 96% - 25L plastic drum";
+  ws.getCell(`A${head + 1}`).value = "e.g. OCTA-X Plus Ethanol 96% - 25L";
   ws.getCell(`A${head + 1}`).font = { italic: true, color: { argb: "FF9A958C" } };
 
   const last = head + LINES;

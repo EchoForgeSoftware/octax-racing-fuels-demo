@@ -2,6 +2,12 @@ import type { Product } from "@/lib/products";
 import { wrap } from "@/lib/pack";
 import { LABEL_LIME, OctaLetters, Performance, WordmarkWithMark, wordmarkWidth } from "./Wordmark";
 import { PictogramRow } from "./Pictograms";
+import { SITE } from "@/lib/site";
+
+/** OCTA's phone, mailbox and website, printed on every label. */
+export function labelContact(): string {
+  return `${SITE.phoneDisplay} · ${SITE.email.toUpperCase()} · OCTA-BOOST.COM`;
+}
 
 // Vector rebuild of the supplied OCTA product labels. OCTA-X and OCTA-M share
 // the 2:3 layout (they differ in where the UN line sits and in the pictogram
@@ -118,6 +124,15 @@ function Disclaimer({ text, y, x, maxChars, size, center }: {
   );
 }
 
+/** Contact line in bold, centred, on every label. */
+function Contact({ x, y, size }: { x: number; y: number; size: number }) {
+  return (
+    <text x={x} y={y} textAnchor="middle" style={cond(800)} fontSize={size} fill={INK}>
+      {labelContact()}
+    </text>
+  );
+}
+
 function Tagline({ y, x, width, size }: { y: number; x: number; width: number; size: number }) {
   return (
     <text x={x} y={y} textLength={width} lengthAdjust="spacingAndGlyphs" style={cond(800, true)} fontSize={size} fill={INK}>
@@ -169,15 +184,23 @@ function AlcoholLabel({ product }: { product: Product }) {
 
       {above ? (
         <>
+          {l.badge && (
+            <g>
+              <rect x={248} y={258} width={116} height={42} fill={LABEL_LIME} stroke={INK} strokeWidth="2.5" />
+              <text x={306} y={292} textAnchor="middle" style={cond(800, true)} fontSize="36" fill={INK}>{l.badge}</text>
+            </g>
+          )}
           <PictogramRow items={l.pictograms} x={30} y={368} width={340} size={58} />
-          <Disclaimer text={l.disclaimer} x={52} y={454} maxChars={62} size={11.2} />
-          <MfdBatch y={522} w={W} />
+          <Disclaimer text={l.disclaimer} x={52} y={450} maxChars={62} size={11.2} />
+          <MfdBatch y={512} w={W} />
+          <Contact x={W / 2} y={568} size={12} />
         </>
       ) : (
         <>
           <PictogramRow items={l.pictograms} x={26} y={342} width={348} size={54} />
           <MfdBatch y={414} w={W} />
-          <Disclaimer text={l.disclaimer} x={W / 2} y={486} maxChars={70} size={10.4} center />
+          <Disclaimer text={l.disclaimer} x={W / 2} y={480} maxChars={70} size={10.4} center />
+          <Contact x={W / 2} y={568} size={12} />
         </>
       )}
     </g>
@@ -248,9 +271,10 @@ function BoostLabel({ product }: { product: Product }) {
         </text>
       )}
 
-      <PictogramRow items={l.pictograms} x={30} y={448} width={300} size={54} />
-      <Disclaimer text={l.disclaimer} x={W / 2} y={528} maxChars={56} size={10.4} center />
-      <MfdBatch y={590} w={W} />
+      <PictogramRow items={l.pictograms} x={30} y={444} width={300} size={54} />
+      <Disclaimer text={l.disclaimer} x={W / 2} y={518} maxChars={56} size={10.4} center />
+      <MfdBatch y={578} w={W} />
+      <Contact x={W / 2} y={630} size={11} />
     </g>
   );
 }

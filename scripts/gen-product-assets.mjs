@@ -1,3 +1,4 @@
+import * as siteConfig from "../site.config.mjs";
 import { readFileSync, writeFileSync, existsSync, mkdirSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join, resolve } from "node:path";
@@ -18,6 +19,7 @@ function load(path) {
     module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022, jsx: ts.JsxEmit.ReactJSX, esModuleInterop: true,
   } }).outputText;
   runInNewContext(code, { exports, require: (name) => {
+    if (name.endsWith("site.config.mjs")) return siteConfig;
     if (!name.startsWith(".") && !name.startsWith("@/")) return nativeRequire(name);
     const stem = name.startsWith("@/") ? join(root, "src", name.slice(2)) : resolve(dirname(path), name);
     const file = [stem, stem + ".ts", stem + ".tsx"].find(existsSync);

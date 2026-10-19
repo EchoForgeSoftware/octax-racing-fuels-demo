@@ -56,7 +56,7 @@ function faqSchema() {
 
 const guide = [
   {
-    h: "OCTA-X Ethanol 96%",
+    h: "OCTA-X Plus Ethanol 96%",
     p: "Ethanol in its purest form for performance use. Ethanol carries its own oxygen and cools the intake charge as it evaporates, which suits ethanol-fuelled and flex-fuel builds with an alcohol-rated fuel system.",
     href: "/shop/octa-x-ethanol/",
     cta: "Shop OCTA-X",

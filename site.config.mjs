@@ -23,7 +23,7 @@ export const SITE = {
   shortName: "OCTA",
   tagline: "Fuel the addiction",
   description:
-    "OCTA Performance supplies OCTA-X ethanol 96%, OCTA-M methanol, OCTA-BOOST and OCTA-SHOT octane boosters and OCTA-TORQUE diesel improver, with online ordering and delivery.",
+    "OCTA Performance supplies OCTA-X ethanol 95% and OCTA-X Plus 96%, OCTA-M methanol, OCTA-BOOST and OCTA-SHOT octane boosters and OCTA-TORQUE diesel improver, with online ordering and delivery.",
   // Company that owns the OCTA brand, as printed on the product labels.
   legalName: "ZRG-X (PTY) LTD",
   // Mailboxes on octa-boost.com (2026-10-16); phone, address and privacy contact from the owners (2026-10-18).
@@ -33,11 +33,13 @@ export const SITE = {
   phoneDisplay: process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+27 64 507 3615",
   phoneHref: (process.env.NEXT_PUBLIC_SUPPORT_PHONE || "+27 64 507 3615").replace(/[^+\d]/g, ""),
   registrationNumber: process.env.NEXT_PUBLIC_COMPANY_REGISTRATION || "2026/667453/07",
-  businessAddress: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || "Corner 13th Avenue and Paul Smit Street, Ravenswood, Boksburg, Gauteng, 1459",
+  // Town and postal code only: the premises are private (owner, 2026-10-19).
+  businessAddress: process.env.NEXT_PUBLIC_BUSINESS_ADDRESS || "Boksburg, Gauteng, 1459",
   /** The same address in parts, for search engines (schema.org PostalAddress). */
-  address: { street: "Corner 13th Avenue and Paul Smit Street", suburb: "Ravenswood", locality: "Boksburg", region: "Gauteng", postalCode: "1459", country: "ZA" },
+  address: { locality: "Boksburg", region: "Gauteng", postalCode: "1459", country: "ZA" },
   privacyEmail: process.env.NEXT_PUBLIC_PRIVACY_EMAIL || "info@octa-boost.com",
-  privacyOfficer: process.env.NEXT_PUBLIC_PRIVACY_CONTACT || "Zuan Grobbelaar (Director)",
+  // Privacy queries go to the business line and mailbox, not a named person.
+  privacyOfficer: process.env.NEXT_PUBLIC_PRIVACY_CONTACT || "+27 64 507 3615",
   currency: "ZAR",
   currencySymbol: "R",
   locale: "en_ZA",

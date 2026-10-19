@@ -2,9 +2,10 @@ import type { Product } from "@/lib/products";
 import { wrap } from "@/lib/pack";
 import { WordmarkWithMark, wordmarkWidth, Halftone } from "./Wordmark";
 import { PictogramRow } from "./Pictograms";
+import { labelContact } from "./BrandLabel";
 
 // Landscape artwork master, independent of a final physical label size.
-// Supplier contacts and approved SDS details must be completed before production.
+// Approved SDS details must be completed before production.
 export function LandscapeLabel({product,ownerLogo}:{product:Product;ownerLogo:string}){
   const l=product.label;
   const title=l.highlight?`${l.title} ${l.highlight}`:l.title;
@@ -19,6 +20,7 @@ export function LandscapeLabel({product,ownerLogo}:{product:Product;ownerLogo:st
     <g transform={`translate(62 87) scale(${markScale})`}><WordmarkWithMark mark={l.mark}/></g>
     <text x="62" y="328" fontFamily="Arial" fontSize="39" fontWeight="bold" fontStyle="italic" fill="var(--color-ink)">FUEL THE ADDICTION</text>
     <Halftone x={1040} y={90} cols={12} rows={16} step={13} color="var(--color-lime)"/>
+    {l.badge&&<g><rect x="690" y="150" width="250" height="96" fill="var(--color-lime)" stroke="var(--color-ink)" strokeWidth="4"/><text x="815" y="226" textAnchor="middle" fontFamily="Arial" fontSize="76" fontWeight="bold" fontStyle="italic" fill="var(--color-ink)">{l.badge}</text></g>}
     <image href={ownerLogo} x="1225" y="100" width="290" height="117" preserveAspectRatio="xMidYMid meet" style={{mixBlendMode:"multiply"}}/>
     <text x="1530" y="266" textAnchor="end" fontFamily="Arial" fontSize="20" fontWeight="bold" fill="var(--color-ink)">ZRG-X (PTY) LTD</text>
     <text x="1530" y="294" textAnchor="end" fontFamily="Arial" fontSize="16" fill="var(--color-ink)">REG. 2026/667453/07</text>
@@ -35,6 +37,6 @@ export function LandscapeLabel({product,ownerLogo}:{product:Product;ownerLogo:st
     <g fontFamily="Arial" fill="var(--color-ink)"><text x="65" y="749" fontSize="20" fontWeight="bold">NET CONTENTS</text><rect x="255" y="718" width="220" height="44" fill="none" stroke="var(--color-ink)" strokeWidth="2"/><text x="514" y="749" fontSize="20" fontWeight="bold">MFD</text><rect x="575" y="718" width="214" height="44" fill="none" stroke="var(--color-ink)" strokeWidth="2"/><text x="822" y="749" fontSize="20" fontWeight="bold">BATCH</text><rect x="910" y="718" width="182" height="44" fill="none" stroke="var(--color-ink)" strokeWidth="2"/></g>
     <path d="M62 790H1538" stroke="var(--color-ink)" strokeWidth="3"/>
     {wrap(l.disclaimer,126,4).map((line,i)=><text key={i} x="65" y={823+i*25} fontFamily="Arial" fontSize="17" fill="var(--color-ink)">{line}</text>)}
-    <text x="65" y="931" fontFamily="Arial" fontSize="18" fill="var(--color-ink)">SUPPLIER CONTACT: __________________________________________________________________________________</text>
+    <text x="65" y="933" fontFamily="Arial" fontSize="24" fontWeight="bold" fill="var(--color-ink)">CONTACT: {labelContact()}</text>
   </svg>;
 }

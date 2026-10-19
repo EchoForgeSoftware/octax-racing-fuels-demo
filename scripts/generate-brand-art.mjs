@@ -1,3 +1,4 @@
+import * as siteConfig from "../site.config.mjs";
 // High-resolution packaging artwork. PDFs are assembled separately with Python.
 import {readFileSync,writeFileSync,mkdirSync,existsSync} from "node:fs";
 import {createRequire} from "node:module";
@@ -10,7 +11,7 @@ import sharp from "sharp";
 import ts from "typescript";
 const root=fileURLToPath(new URL("../",import.meta.url));
 const nativeRequire=createRequire(import.meta.url);const cache=new Map();
-function load(path){if(cache.has(path))return cache.get(path);const exports={};cache.set(path,exports);const code=ts.transpileModule(readFileSync(path,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;runInNewContext(code,{exports,require:(name)=>{if(!name.startsWith(".")&&!name.startsWith("@/"))return nativeRequire(name);const stem=name.startsWith("@/")?join(root,"src",name.slice(2)):resolve(dirname(path),name);const file=[stem,stem+".ts",stem+".tsx"].find(existsSync);if(!file)throw new Error(name);return load(file);}},{filename:path});return exports;}
+function load(path){if(cache.has(path))return cache.get(path);const exports={};cache.set(path,exports);const code=ts.transpileModule(readFileSync(path,"utf8"),{compilerOptions:{module:ts.ModuleKind.CommonJS,target:ts.ScriptTarget.ES2022,jsx:ts.JsxEmit.ReactJSX,esModuleInterop:true}}).outputText;runInNewContext(code,{exports,require:(name)=>{if(name.endsWith("site.config.mjs"))return siteConfig;if(!name.startsWith(".")&&!name.startsWith("@/"))return nativeRequire(name);const stem=name.startsWith("@/")?join(root,"src",name.slice(2)):resolve(dirname(path),name);const file=[stem,stem+".ts",stem+".tsx"].find(existsSync);if(!file)throw new Error(name);return load(file);}},{filename:path});return exports;}
 const {products}=load(join(root,"src/lib/products.ts"));
 const {LandscapeLabel}=load(join(root,"src/components/brand/LandscapeLabel.tsx"));
 const {ProductShot}=load(join(root,"src/components/pack/ProductShot.tsx"));

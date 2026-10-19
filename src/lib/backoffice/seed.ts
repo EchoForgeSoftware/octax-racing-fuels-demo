@@ -307,6 +307,26 @@ function sampleSuppliers(today: string): Pick<BackofficeData, "suppliers" | "sup
   return { suppliers, supplierInvoices };
 }
 
+/**
+ * Website products the back office catalogue is missing or has under an old
+ * name (e.g. OCTA-X renamed OCTA-X Plus, OCTA-X 95% added). Prices, costs and
+ * stock are never touched; a renamed product also takes the website's new text.
+ */
+export function catalogueChanges(current: CatalogueItem[]): CatalogueItem[] {
+  const changes: CatalogueItem[] = [];
+  for (const site of baseCatalogue(false)) {
+    const have = current.find((i) => i.sku === site.sku);
+    if (!have) { changes.push(site); continue; }
+    if (have.custom) continue;
+    const renamed = have.productName !== site.productName;
+    if (renamed || have.size !== site.size || have.slug !== site.slug || have.category !== site.category) {
+      changes.push({ ...have, productName: site.productName, size: site.size, slug: site.slug, category: site.category,
+        ...(renamed ? { short: site.short, description: site.description } : {}) });
+    }
+  }
+  return changes;
+}
+
 /** Empty starting point for a real business (no sample clients or documents). */
 export function emptyData(): BackofficeData {
   return { version: 1, settings: defaultSettings(), catalogue: baseCatalogue(false), clients: [salesClient(todaySA())], documents: [], suppliers: [], supplierInvoices: [], bank: [], reps: [], stock: [], stockCounts: [], referrals: [] };

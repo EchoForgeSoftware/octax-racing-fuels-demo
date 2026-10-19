@@ -13,6 +13,15 @@ export function LivePrice({ product }: { product: Product }) {
     return p === null ? [] : [p];
   });
   const price = prices.length ? Math.min(...prices) : fromPrice(product);
+  // No price yet anywhere (e.g. a new product before the back office prices it).
+  if (!Number.isFinite(price)) {
+    return (
+      <>
+        <span className="kicker text-muted">Price</span>
+        <div className="num font-display text-2xl">On request</div>
+      </>
+    );
+  }
   return (
     <>
       <span className="kicker text-muted">{pricing.client ? "Your price from" : "From"}</span>
