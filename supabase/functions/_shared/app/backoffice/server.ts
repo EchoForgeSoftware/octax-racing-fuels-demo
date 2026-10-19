@@ -11,6 +11,7 @@ import { priceFor } from "./calc.ts";
 import { accountEmails } from "./customerForm.ts";
 import type { Role, User } from "./roles.ts";
 import { scopeBackoffice } from "./scope.ts";
+import { isSoldOut, stockLevels } from "./stock.ts";
 import type { BackofficeData, CatalogueItem, Client } from "./types.ts";
 
 /** One stored record per row: collection + id. Settings are a single row. */
@@ -113,10 +114,11 @@ function envFor(today: string, ids: unknown, fallback: (prefix: string) => strin
 }
 
 /** The shop's view: public catalogue fields, the courier fee and the signed-in customer's own prices. */
-function publicView(data: BackofficeData | null, user: AuthUser | null) {
+function publicView(data: BackofficeData | null, user: AuthUser | null, today: string) {
   if (!data) return { ready: false };
+  const levels = data.catalogue.some((i) => i.stock === "auto") ? stockLevels(data, today) : [];
   const catalogue: CatalogueItem[] = data.catalogue.map((i) => ({
-    ...i, cost: null, agent: null, bulk: null,
+    ...i, cost: null, agent: null, bulk: null, soldOut: isSoldOut(i, levels),
     costing: i.costing ? { purityEnabled: i.costing.purityEnabled, purity: i.costing.purity, litres: null, lines: [], useAsCost: false } : undefined,
   }));
   const email = user?.emailConfirmed ? user.email?.toLowerCase() : null;
@@ -139,11 +141,16 @@ export async function handle(body: unknown, user: AuthUser | null, store: Store,
   const req = (body ?? {}) as { op?: string; name?: string; args?: unknown; ids?: unknown; data?: unknown; invoiceId?: unknown };
   try {
     if (req.op === "public") {
-      const loaded = await store.load(user ? ["settings", "catalogue", "clients", "reps"] : ["settings", "catalogue"]);
+      let loaded = await store.load(user ? ["settings", "catalogue", "clients", "reps"] : ["settings", "catalogue"]);
+      // Automatic stock status needs the stock records and invoices too.
+      if ((loaded.rows.catalogue as CatalogueItem[] | undefined)?.some((i) => i.stock === "auto")) {
+        const more = await store.load(["stock", "stockCounts", "documents"]);
+        loaded = { version: loaded.version, rows: { ...loaded.rows, ...more.rows } };
+      }
       const data = toData(loaded);
       // Staff see a "Back office" button on the website.
       const staff = user ? !!await whoIs(user, store, data) : false;
-      return { status: 200, body: { ...publicView(data, user), staff } };
+      return { status: 200, body: { ...publicView(data, user, today), staff } };
     }
     if (!user) return { status: 401, body: { error: "Sign in to use the back office." } };
 

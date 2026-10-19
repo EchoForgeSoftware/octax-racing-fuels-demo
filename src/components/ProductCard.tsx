@@ -1,14 +1,19 @@
+"use client";
+
 import Link from "next/link";
 import type { Product } from "@/lib/products";
 import { getCategory } from "@/lib/products";
 import { LivePrice } from "./LivePrice";
 import { volumeLabel } from "@/lib/pack";
 import { ProductShot } from "./pack/ProductShot";
+import { usePricing } from "./PricingContext";
 
 export function ProductCard({ product }: { product: Product }) {
   const category = getCategory(product.category);
   // Pack sizes in place of a stock badge: no stock is held on hand.
   const sizes = product.variants.map((v) => volumeLabel(v.size)).join(" · ");
+  const pricing = usePricing();
+  const out = product.variants.filter((v) => pricing.soldOut(v.sku)).length;
 
   return (
     <Link
@@ -20,6 +25,11 @@ export function ProductCard({ product }: { product: Product }) {
         <span className="absolute left-0 top-0 bg-ink px-2.5 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-wider text-lime">
           {category?.name}
         </span>
+        {out > 0 && (
+          <span className="absolute right-0 top-0 bg-flare px-2.5 py-1 font-mono text-[0.62rem] font-bold uppercase tracking-wider text-paper">
+            {out === product.variants.length ? "Out of stock" : "Some sizes out of stock"}
+          </span>
+        )}
       </div>
 
       <div className="flex flex-1 flex-col p-4">

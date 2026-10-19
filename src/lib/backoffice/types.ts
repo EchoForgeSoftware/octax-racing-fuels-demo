@@ -39,6 +39,10 @@ export type CatalogueItem = {
   costing?: Costing;
   /** Products added in the back office: the pack picture and label, drawn like the OCTA range. */
   pack?: PackDesign;
+  /** Website stock status: always in stock (default), out of stock, or automatic from Stock control. */
+  stock?: "in" | "out" | "auto";
+  /** Worked out for the shop (never stored): true when the website shows it as out of stock. */
+  soldOut?: boolean;
 };
 
 /** A container from the OCTA range with a label made from these words. */

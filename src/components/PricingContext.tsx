@@ -6,7 +6,8 @@ import { accountsEnabled } from "@/lib/supabase";
 import { INDEXABLE } from "@/lib/site";
 import { allowCustomerDemo } from "@/lib/customerDemo";
 import { ADMIN_SESSION_KEY, loadBackoffice, onBackofficeChange } from "@/lib/backoffice/local";
-import { priceFor } from "@/lib/backoffice/calc";
+import { priceFor, todaySA } from "@/lib/backoffice/calc";
+import { isSoldOut, stockLevels } from "@/lib/backoffice/stock";
 import { courierRates } from "@/lib/courierRates";
 import { accountEmails } from "@/lib/backoffice/customerForm";
 import { callBackoffice } from "@/lib/backoffice/api";
@@ -33,6 +34,8 @@ type Pricing = {
   purity: (slug: string) => number | null;
   /** The signed-in user is back-office staff (shows the Back office button). */
   staff: boolean;
+  /** Shown as out of stock on the website (set in the back office, or automatic from Stock control). */
+  soldOut: (sku: string) => boolean;
 };
 
 const fallback: Pricing = {
@@ -46,6 +49,7 @@ const fallback: Pricing = {
   courierFee: courierRates.fee,
   purity: () => null,
   staff: false,
+  soldOut: () => false,
 };
 
 const Ctx = createContext<Pricing>(fallback);
@@ -74,7 +78,8 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         try { setStaff(!!sessionStorage.getItem(ADMIN_SESSION_KEY)); } catch { setStaff(false); }
         // The website login email, or any authorised buyer on the account (Customer Information Form).
         const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
-        setSource({ catalogue: data.catalogue, courierFee: data.settings.courierFee ?? null, client });
+        const levels = stockLevels(data, todaySA());
+        setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client });
       };
       read();
       return onBackofficeChange(read);
@@ -114,6 +119,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       extras: data.catalogue.filter((i) => i.custom && i.active && !i.comingSoon),
       courierFee: data.courierFee ?? courierRates.fee,
       staff,
+      soldOut: (sku) => bySku.get(sku)?.soldOut === true,
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;

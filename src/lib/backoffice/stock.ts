@@ -3,7 +3,7 @@
 // running total to drift. Sales use the oldest batch first (earliest expiry,
 // then earliest book-in), which is also the order staff should pick stock in.
 import { cents } from "./calc";
-import type { BackofficeData, StockBatch } from "./types";
+import type { BackofficeData, CatalogueItem, StockBatch } from "./types";
 
 export const VAT_RATE = 0.15;
 /** Batches older than this (days since book-in) are flagged as old stock. */
@@ -53,6 +53,13 @@ function pickOrder(a: StockBatch, b: StockBatch) {
   const ea = a.expiryDate ?? "9999-12-31";
   const eb = b.expiryDate ?? "9999-12-31";
   return ea.localeCompare(eb) || a.date.localeCompare(b.date) || a.id.localeCompare(b.id);
+}
+
+/** Whether the website shows this product as out of stock. */
+export function isSoldOut(item: Pick<CatalogueItem, "sku" | "stock">, levels: Pick<StockLevel, "sku" | "onHand">[]): boolean {
+  if (item.stock === "out") return true;
+  if (item.stock !== "auto") return false;
+  return (levels.find((l) => l.sku === item.sku)?.onHand ?? 0) <= 0;
 }
 
 export function stockLevels(data: Pick<BackofficeData, "stock" | "stockCounts" | "documents" | "settings">, today: string): StockLevel[] {

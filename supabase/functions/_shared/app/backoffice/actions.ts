@@ -40,6 +40,8 @@ export type Actions = {
   removePayment: (docId: string, paymentId: string) => void;
   setCancelled: (docId: string, cancelled: boolean) => void;
   saveCatalogueItem: (item: CatalogueItem) => void;
+  /** Delete a product added in the back office that was never invoiced or booked into stock. */
+  removeCatalogueItem: (sku: string) => void;
   saveSettings: (settings: BusinessSettings) => void;
   saveRep: (rep: Rep) => void;
   patchClient: (id: string, patch: Partial<Client>) => void;
@@ -55,7 +57,7 @@ export type Actions = {
 export type ActionName = keyof Actions;
 export const ACTION_NAMES = [
   "saveClient", "saveDocument", "bookInStock", "removeStockBatch", "saveStockCount", "saveRepDetails", "saveReferral", "saveCustomerProfile",
-  "setReferralPaid", "saveDelivery", "convertQuote", "recordPayment", "removePayment", "setCancelled", "saveCatalogueItem", "saveSettings",
+  "setReferralPaid", "saveDelivery", "convertQuote", "recordPayment", "removePayment", "setCancelled", "saveCatalogueItem", "removeCatalogueItem", "saveSettings",
   "saveRep", "patchClient", "saveSupplier", "saveSupplierInvoice", "removeSupplierInvoice", "paySupplierInvoice", "removeSupplierPayment",
   "importBank", "allocateTxn", "unallocateTxn",
 ] as const satisfies readonly ActionName[];
@@ -296,7 +298,18 @@ const handlers: Handlers = {
   saveCatalogueItem(d, admin, _env, item) {
     requireAccess(admin, "products");
     if (typeof item.sku !== "string" || !/^[\w.-]{1,60}$/.test(item.sku)) throw new ActionError("Use letters, numbers and dashes for the SKU.");
-    upsert(d.catalogue, (x) => x.sku, item);
+    const { soldOut: _shown, ...stored } = item;
+    upsert(d.catalogue, (x) => x.sku, { ...stored, ...(["in", "out", "auto"].includes(stored.stock as string) ? {} : { stock: undefined }) });
+  },
+  removeCatalogueItem(d, admin, _env, sku) {
+    requireAccess(admin, "products");
+    const item = d.catalogue.find((x) => x.sku === sku);
+    if (!item) return;
+    if (!item.custom) throw new ActionError("Website products can't be deleted. Untick \"Show on the website\" to hide it.");
+    const used = d.documents.some((doc) => doc.lines.some((l) => l.sku === sku)) || d.stock.some((b) => b.sku === sku) || d.stockCounts.some((c) => c.sku === sku);
+    if (used) throw new ActionError(`${item.productName} (${item.size}) is on invoices, quotes or stock records, so it stays for your records. Untick "Show on the website" to hide it.`);
+    d.catalogue = d.catalogue.filter((x) => x.sku !== sku);
+    for (const c of d.clients) if (c.prices[sku] !== undefined) delete c.prices[sku];
   },
   saveSettings(d, admin, _env, settings) {
     requireAccess(admin, "settings");

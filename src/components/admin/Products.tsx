@@ -6,6 +6,7 @@ import { Button, Field, Input, PageTitle, Panel, Select, Textarea } from "./ui";
 import type { CatalogueCategory, CatalogueItem, PackDesign } from "@/lib/backoffice/types";
 import { cleanPack, defaultPack } from "@/lib/packDesign";
 import { PackEditor } from "./PackEditor";
+import { isSoldOut, stockLevels } from "@/lib/backoffice/stock";
 import { formatPrice } from "@/lib/format";
 import { costingCost, defaultCosting, type Costing } from "@/lib/backoffice/costing";
 import { CostingTable } from "./Costing";
@@ -48,6 +49,8 @@ export function ProductsAdmin() {
 
 function ProductRow({ item }: { item: CatalogueItem }) {
   const [open, setOpen] = useState(false);
+  const { data, today } = useBackoffice();
+  const soldOut = !!data && isSoldOut(item, item.stock === "auto" ? stockLevels(data, today) : []);
   const m = margin(item.retail, item.cost);
   return (
     <li className={`border-2 border-ink bg-panel ${item.active ? "" : "opacity-70"}`}>
@@ -58,6 +61,7 @@ function ProductRow({ item }: { item: CatalogueItem }) {
           {!item.active && <span className="ml-2 bg-line px-1.5 py-0.5 font-mono text-[0.65rem] uppercase">Hidden</span>}
           {item.custom && <span className="ml-2 bg-lime px-1.5 py-0.5 font-mono text-[0.65rem] uppercase">Added here</span>}
           {item.comingSoon && <span className="ml-2 bg-ink px-1.5 py-0.5 font-mono text-[0.65rem] uppercase text-lime">Coming soon</span>}
+          {soldOut && <span className="ml-2 bg-flare px-1.5 py-0.5 font-mono text-[0.65rem] uppercase text-paper">Out of stock</span>}
         </span>
         {[["Website", item.retail], ["Agent", item.agent], ["Bulk", item.bulk], ["Cost", item.cost]].map(([k, v]) => (
           <span key={k as string} className="num flex justify-between gap-2 text-sm sm:block sm:text-right">
@@ -72,7 +76,7 @@ function ProductRow({ item }: { item: CatalogueItem }) {
 }
 
 function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () => void }) {
-  const { saveCatalogueItem, data } = useBackoffice();
+  const { saveCatalogueItem, removeCatalogueItem, data, today } = useBackoffice();
   const isNew = !item;
   const [f, setF] = useState(() => ({
     productName: item?.productName ?? "",
@@ -86,7 +90,9 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     description: item?.description ?? "",
     active: item?.active ?? true,
     comingSoon: item?.comingSoon ?? false,
+    stock: item?.stock ?? ("in" as NonNullable<CatalogueItem["stock"]>),
   }));
+  const onHand = item && data ? stockLevels(data, today).find((l) => l.sku === item.sku)?.onHand ?? 0 : null;
   const [costing, setCosting] = useState<Costing | null>(() => item?.costing ?? null);
   const [pack, setPack] = useState<PackDesign | null>(() => item?.pack ?? null);
   // A new picture follows the product name, size and category until someone edits a label field.
@@ -124,6 +130,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
       short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
       ...(costing ? { costing } : {}),
       ...(pack ? { pack: cleanPack(pack) } : {}),
+      ...(f.stock !== "in" ? { stock: f.stock } : {}),
     });
     onDone();
   }
@@ -185,6 +192,16 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
             <span className="ml-3 text-xs text-muted">Choose a 25 L can, 210 L drum, 5 L jug or 500 ml bottle and type the label words. It shows on the shop and gives you a print label.</span>
           </div>
         ))}
+        <Field label="Stock on the website" className="sm:col-span-2" hint={
+          f.stock === "auto" ? `Shows "Out of stock" when Stock control reaches 0. Now: ${onHand ?? 0} on hand.`
+          : f.stock === "out" ? "The shop shows Out of stock and nobody can add it to the cart."
+          : "Always shown as available."}>
+          <Select value={f.stock} onChange={(e) => set({ stock: e.target.value as typeof f.stock })}>
+            <option value="in">In stock</option>
+            <option value="out">Out of stock</option>
+            <option value="auto">Automatic, from Stock control</option>
+          </Select>
+        </Field>
         <Field label="Short description" className="sm:col-span-2 lg:col-span-4"><Input value={f.short} onChange={(e) => set({ short: e.target.value })} maxLength={160} /></Field>
         <Field label="Full description" className="sm:col-span-2 lg:col-span-4"><Textarea rows={4} value={f.description} onChange={(e) => set({ description: e.target.value })} /></Field>
       </div>
@@ -200,6 +217,13 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
           </label>
         </div>
         <div className="flex gap-2">
+          {item?.custom && (
+            <Button tone="danger" onClick={() => {
+              if (!window.confirm(`Delete ${item.productName} (${item.size})? This can't be undone.`)) return;
+              try { removeCatalogueItem(item.sku); onDone(); }
+              catch (e) { setError(e instanceof Error ? e.message : "This product can't be deleted."); }
+            }}>Delete</Button>
+          )}
           <Button onClick={onDone}>Cancel</Button>
           <Button tone="primary" onClick={submit}>{isNew ? "Add product" : "Save"}</Button>
         </div>

@@ -169,4 +169,29 @@ test("the shop gets public catalogue fields and only the signed-in customer's ow
   assert.equal((await call("unconfirmed",{op:"public"})).body.client,null);
 });
 
+
+
+test("products added in the back office can be deleted only while unused; out of stock reaches the shop",async()=>{
+  const base=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-M-25");
+  const extra={...base,sku:"CUSTOM-HOODIE-L",slug:null,productName:"OCTA Hoodie",size:"Large",category:"merch",custom:true};
+  await act("zuan","saveCatalogueItem",[{...extra,soldOut:true}]);
+  assert.equal((await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="CUSTOM-HOODIE-L").soldOut,undefined,"the shop-only flag is never stored");
+  assert.equal((await act("danium","removeCatalogueItem",["CUSTOM-HOODIE-L"])).status,400);
+  assert.equal((await act("zuan","removeCatalogueItem",["OCTA-M-25"])).status,400,"website products are hidden, not deleted");
+  assert.equal((await act("zuan","removeCatalogueItem",["CUSTOM-HOODIE-L"])).status,200);
+  assert.ok(!(await call("zuan",{op:"load"})).body.data.catalogue.some(i=>i.sku==="CUSTOM-HOODIE-L"));
+  // OCTA-X-25 is on invoices: it can't be deleted even when added by hand.
+  const x=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X-25");
+  await act("zuan","saveCatalogueItem",[{...x,custom:true}]);
+  assert.match((await act("zuan","removeCatalogueItem",["OCTA-X-25"])).body.error,/invoices/);
+  await act("zuan","saveCatalogueItem",[{...x,stock:"out"}]);
+  await act("zuan","saveCatalogueItem",[{...base,stock:"auto"}]);
+  const shop=(await call(null,{op:"public"})).body.catalogue;
+  assert.equal(shop.find(i=>i.sku==="OCTA-X-25").soldOut,true);
+  assert.equal(shop.find(i=>i.sku==="OCTA-M-25").soldOut,true,"automatic with nothing booked in is out of stock");
+  assert.equal(shop.find(i=>i.sku==="OCTA-BOOST-5").soldOut,false);
+  await act("accounts","bookInStock",[{id:"sb-1",sku:"OCTA-M-25",date:today,supplierId:null,supplierInvoiceId:null,batchNumber:"B1",expiryDate:null,qty:5,unitCostEx:400,unitCostIncl:460,sellPrice:null,notes:"",createdAt:today},{updateCost:false,updatePrice:false}]);
+  assert.equal((await call(null,{op:"public"})).body.catalogue.find(i=>i.sku==="OCTA-M-25").soldOut,false,"booking stock in puts it back on sale");
+});
+
 after(()=>db.close());

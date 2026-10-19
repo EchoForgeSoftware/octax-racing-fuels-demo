@@ -33,6 +33,7 @@ export function ComingSoon() {
             const first = items[0];
             const prices = items.map((i) => i.retail).filter((v): v is number => v !== null);
             const pictured = items.find((i) => i.pack);
+            const allOut = items.every((i) => i.soldOut);
             return (
               <li key={first.productName} className="flex flex-col border-2 border-ink bg-panel p-5">
                 {pictured?.pack && <ProductShot product={packProduct(pictured, pictured.pack)} className="-mx-5 -mt-5 mb-4 block h-auto w-[calc(100%+2.5rem)] max-w-none border-b-2 border-ink" />}
@@ -40,10 +41,10 @@ export function ComingSoon() {
                 <h3 className="mt-1 font-display text-2xl leading-none">{first.productName}</h3>
                 {first.short && <p className="mt-3 text-sm text-ink-soft">{first.short}</p>}
                 <ul className="mt-3 flex flex-wrap gap-1.5" aria-label="Sizes">
-                  {items.map((i) => <li key={i.sku} className="border border-ink px-2 py-0.5 font-mono text-[0.68rem] uppercase">{i.size}</li>)}
+                  {items.map((i) => <li key={i.sku} className={`border border-ink px-2 py-0.5 font-mono text-[0.68rem] uppercase ${i.soldOut ? "text-muted line-through" : ""}`}>{i.size}{i.soldOut ? " (out of stock)" : ""}</li>)}
                 </ul>
                 <p className="num mt-auto pt-4 font-display text-xl">{prices.length ? `${prices.length < items.length || new Set(prices).size > 1 ? "From " : ""}${formatPrice(Math.min(...prices))}` : "Price on request"}</p>
-                <Link href="/contact/" className="mt-3 flex items-center justify-center border-2 border-ink bg-ink px-4 py-2.5 font-display text-sm uppercase text-paper hover:bg-lime hover:text-ink">Order now</Link>
+                <Link href="/contact/" className="mt-3 flex items-center justify-center border-2 border-ink bg-ink px-4 py-2.5 font-display text-sm uppercase text-paper hover:bg-lime hover:text-ink">{allOut ? "Out of stock · ask when it's back" : "Order now"}</Link>
               </li>
             );
           })}

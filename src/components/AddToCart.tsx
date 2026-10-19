@@ -40,6 +40,8 @@ export function AddToCart({
   const ownPrice = !!pricing.client && unit !== null && list !== null && unit < list;
   // Sizes without a listed price are sold on quotation, not through the cart.
   const quote = unit === null;
+  // Out of stock (set in the back office): the price still shows, ordering waits.
+  const soldOut = !quote && pricing.soldOut(variant.sku);
   // The price shown follows the quantity, so the customer sees the line total as they change it.
   const total = (unit ?? 0) * qty;
   const courier = courierFor(variant.size, qty, pricing.courierFee);
@@ -105,7 +107,21 @@ export function AddToCart({
         </div>
       </fieldset>
 
-      {quote ? (
+      {soldOut ? (
+        <>
+          <p role="status" className="mt-5 border-2 border-flare p-3 text-sm">
+            <strong className="block font-display uppercase text-flare">Out of stock</strong>
+            The {variant.size} size is out of stock right now. Ask us when it&apos;s back, or choose another size.
+          </p>
+          <Link
+            href="/contact/"
+            className="mt-4 flex w-full items-center justify-center gap-2 border-2 border-ink bg-ink px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-lime hover:text-ink"
+          >
+            Ask when it&apos;s back
+            <Icon name="arrow" size={16} />
+          </Link>
+        </>
+      ) : quote ? (
         <>
           <p className="mt-5 text-sm text-ink-soft">
             The {variant.size} size is priced on quotation. Send us your quantity and
