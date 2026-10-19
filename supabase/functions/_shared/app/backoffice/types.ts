@@ -38,6 +38,28 @@ export type CatalogueItem = {
   comingSoon: boolean;
   /** Costing table (cost lines ex VAT, purity); its total can set `cost`. */
   costing?: Costing;
+  /** Products added in the back office: the pack picture and label, drawn like the OCTA range. */
+  pack?: PackDesign;
+};
+
+/** A container from the OCTA range with a label made from these words. */
+export type PackDesign = {
+  container: "can" | "drum" | "jug" | "bottle";
+  /** Backdrop colour of the product picture. */
+  colour: "lime" | "flare" | "ink" | "cobalt";
+  /** Lime mark after OCTA: one letter (X, M) or a word (BOOST). */
+  mark: string;
+  /** Product word printed large (e.g. NITRO), with an optional lime highlight (e.g. 98%). */
+  title: string;
+  highlight: string;
+  /** Grade tag beside the UN lines on can and drum labels (e.g. PLUS). */
+  badge: string;
+  un: string;
+  hazardClass: string;
+  pictograms: ("flame" | "goggles" | "gloves" | "respirator" | "no-flame")[];
+  /** Up to three short lines on jug and bottle labels. */
+  lines: string[];
+  disclaimer: string;
 };
 
 export type Client = {

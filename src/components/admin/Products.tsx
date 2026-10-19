@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { useBackoffice } from "./BackofficeContext";
 import { Button, Field, Input, PageTitle, Panel, Select, Textarea } from "./ui";
-import type { CatalogueCategory, CatalogueItem } from "@/lib/backoffice/types";
+import type { CatalogueCategory, CatalogueItem, PackDesign } from "@/lib/backoffice/types";
+import { cleanPack, defaultPack } from "@/lib/packDesign";
+import { PackEditor } from "./PackEditor";
 import { formatPrice } from "@/lib/format";
 import { costingCost, defaultCosting, type Costing } from "@/lib/backoffice/costing";
 import { CostingTable } from "./Costing";
@@ -86,6 +88,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     comingSoon: item?.comingSoon ?? false,
   }));
   const [costing, setCosting] = useState<Costing | null>(() => item?.costing ?? null);
+  const [pack, setPack] = useState<PackDesign | null>(() => item?.pack ?? null);
   const vatRegistered = !!data?.settings.vatRegistered;
   const [error, setError] = useState<string | null>(null);
   const set = (patch: Partial<typeof f>) => setF({ ...f, ...patch });
@@ -105,6 +108,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
       retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost,
       short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
       ...(costing ? { costing } : {}),
+      ...(pack ? { pack: cleanPack(pack) } : {}),
     });
     onDone();
   }
@@ -146,6 +150,25 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
             </p>
           );
         })()}
+        {!builtIn && (pack ? (
+          <>
+            <div className="flex flex-wrap items-center justify-between gap-2 sm:col-span-2 lg:col-span-4">
+              <h3 className="font-display text-lg">Product picture and label</h3>
+              <button type="button" onClick={() => setPack(null)} className="font-mono text-xs uppercase tracking-wider text-muted underline hover:text-flare">Remove picture</button>
+            </div>
+            <PackEditor item={{ sku: item?.sku ?? "NEW", productName: f.productName.trim() || "New product", size: f.size, short: f.short }} value={pack} onChange={setPack} />
+          </>
+        ) : (
+          <div className="sm:col-span-2 lg:col-span-4">
+            <Button onClick={() => {
+              // Another size of the same product already has a picture: start from its label.
+              const sibling = data?.catalogue.find((i) => i.pack && i.productName.trim().toLowerCase() === f.productName.trim().toLowerCase());
+              const start = defaultPack({ productName: f.productName, size: f.size, category: f.category });
+              setPack(sibling?.pack ? { ...sibling.pack, container: start.container } : start);
+            }}>Make a product picture</Button>
+            <span className="ml-3 text-xs text-muted">Choose a 25 L can, 210 L drum, 5 L jug or 500 ml bottle and type the label words. It shows on the shop and gives you a print label.</span>
+          </div>
+        ))}
         <Field label="Short description" className="sm:col-span-2 lg:col-span-4"><Input value={f.short} onChange={(e) => set({ short: e.target.value })} maxLength={160} /></Field>
         <Field label="Full description" className="sm:col-span-2 lg:col-span-4"><Textarea rows={4} value={f.description} onChange={(e) => set({ description: e.target.value })} /></Field>
       </div>

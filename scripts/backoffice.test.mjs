@@ -215,3 +215,15 @@ test("the back office picks up new and renamed website products without touching
   assert.deepEqual(changes.filter(i=>i.sku.startsWith("OCTA-X95")).map(i=>i.sku).sort(),["OCTA-X95-210","OCTA-X95-25"]);
   assert.equal(seed.catalogueChanges(data.catalogue).length,0,"an up-to-date catalogue needs nothing");
 });
+
+test("products added in the back office get a pack picture and label from the words typed",()=>{
+  const pd=loadTs("src/lib/packDesign.ts");
+  const start=pd.defaultPack({productName:"OCTA-N Nitro methane 98%",size:"25L",category:"fuel"});
+  assert.equal(start.mark,"N");assert.equal(start.title,"NITRO");assert.equal(start.highlight,"98%");assert.equal(start.container,"can");assert.equal(start.un,"UN 1170");
+  assert.equal(pd.defaultPack({productName:"OCTA Hoodie",size:"Large",category:"merch"}).un,"","merch has no dangerous-goods line");
+  const product=pd.packProduct({sku:"CUSTOM-N-25",productName:"OCTA-N Nitro methane 98%",size:"5L"},{...start,container:"drum",badge:"plus",title:"a very long label word"});
+  assert.equal(product.variants[0].size,"210L plastic drum","a size that doesn't fit the container shows the container's own size");
+  assert.equal(product.label.layout,"wide");assert.equal(product.label.badge,"PLUS");assert.equal(product.label.title.length,12);
+  const jug=pd.packProduct({sku:"S",productName:"X",size:"5L"},{...start,container:"jug",lines:["one","two","three","four"]});
+  assert.equal(jug.label.layout,"tall");assert.deepEqual(jug.label.lines,["ONE","TWO","THREE"]);assert.equal(jug.label.badge,undefined);
+});

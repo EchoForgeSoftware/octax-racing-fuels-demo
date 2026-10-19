@@ -4,6 +4,8 @@ import Link from "next/link";
 import { comingSoon } from "@/lib/products";
 import { usePricing } from "./PricingContext";
 import { formatPrice } from "@/lib/format";
+import { packProduct } from "@/lib/packDesign";
+import { ProductShot } from "./pack/ProductShot";
 
 const GROUP_LABEL = { fuel: "Race fuel", track: "Track prep", merch: "Merch", detailing: "Detailing" } as const;
 
@@ -30,8 +32,10 @@ export function ComingSoon() {
           {newIn.map((items) => {
             const first = items[0];
             const prices = items.map((i) => i.retail).filter((v): v is number => v !== null);
+            const pictured = items.find((i) => i.pack);
             return (
               <li key={first.productName} className="flex flex-col border-2 border-ink bg-panel p-5">
+                {pictured?.pack && <ProductShot product={packProduct(pictured, pictured.pack)} className="-mx-5 -mt-5 mb-4 block h-auto w-[calc(100%+2.5rem)] max-w-none border-b-2 border-ink" />}
                 <p className="font-mono text-[0.68rem] font-bold uppercase tracking-wider text-muted">{first.category === "merch" ? "Merch" : first.category === "detailing" ? "Detailing" : "OCTA"}</p>
                 <h3 className="mt-1 font-display text-2xl leading-none">{first.productName}</h3>
                 {first.short && <p className="mt-3 text-sm text-ink-soft">{first.short}</p>}
