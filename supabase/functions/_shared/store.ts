@@ -34,6 +34,35 @@ export function backofficeStore(db: Db): Store {
       if (error) throw new Error("file failed");
       return data?.data ?? null;
     },
+    async listStaff() {
+      const { data, error } = await db.from("bo_staff").select("user_id,display_name,role,active").order("display_name");
+      if (error) throw new Error("staff list failed");
+      return Promise.all((data ?? []).map(async (row: { user_id: string; display_name: string; role: string; active: boolean }) => {
+        const { data: found } = await db.auth.admin.getUserById(row.user_id);
+        return { ...row, email: found?.user?.email ?? null };
+      }));
+    },
+    async saveStaff(userId, name, role, active) {
+      const { error } = await db.from("bo_staff").upsert({ user_id: userId, display_name: name, role, active }, { onConflict: "user_id" });
+      if (error) throw new Error("staff save failed");
+    },
+    async ensureLogin(email, password) {
+      const created = await db.auth.admin.createUser({ email, password, email_confirm: true });
+      if (!created.error && created.data?.user) return { id: created.data.user.id };
+      // Already registered (for example stuck waiting for a confirmation email): confirm it and set the password.
+      if (!/already|registered|exists/i.test(created.error?.message ?? "")) return { error: `The login couldn't be created: ${created.error?.message ?? "unknown error"}` };
+      for (let page = 1; page <= 20; page++) {
+        const { data, error } = await db.auth.admin.listUsers({ page, perPage: 1000 });
+        if (error) break;
+        const found = data.users.find((u: { email?: string }) => u.email?.toLowerCase() === email);
+        if (found) {
+          const updated = await db.auth.admin.updateUserById(found.id, { password, email_confirm: true });
+          return updated.error ? { error: `The login couldn't be updated: ${updated.error.message}` } : { id: found.id };
+        }
+        if (data.users.length < 1000) break;
+      }
+      return { error: "That email is registered but couldn't be found. Try again." };
+    },
     async insertOrder(row) {
       // A retry with the same reference keeps the first order (ignoreDuplicates).
       const { error } = await db.from("orders").upsert(row, { onConflict: "ref", ignoreDuplicates: true });

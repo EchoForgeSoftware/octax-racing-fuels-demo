@@ -1,6 +1,7 @@
 "use client";
 
 import { DEFAULT_ORDER_EMAILS } from "@/lib/backoffice/orderEmail";
+import { StaffLogins } from "./StaffLogins";
 
 import { MAX_ADMINS, ROLE_LABEL, STAFF } from "@/lib/backoffice/roles";
 import Link from "next/link";
@@ -81,7 +82,7 @@ export function SettingsAdmin() {
           </div>
         </Panel>
         <Panel title="Reps"><p className="text-sm text-ink-soft">Reps, their details and referral commissions are on the <Link href="/admin/reps/" className="underline">Reps page</Link>.</p></Panel>
-        <Panel title={`Admins (${STAFF.length} of ${MAX_ADMINS})`}>
+        {mode === "live" ? <StaffLogins /> : <Panel title={`Admins (${STAFF.length} of ${MAX_ADMINS})`}>
           <ul className="divide-y divide-line">
             {STAFF.map((a) => (
               <li key={a.id} className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 py-2 text-sm">
@@ -95,7 +96,7 @@ export function SettingsAdmin() {
             only. Accounts handles supplier invoices, bank statements, customer balances and statements.
             Quotes, invoices and payments show who saved them. In the live setup each admin signs in with the email shown.
           </p>
-        </Panel>
+        </Panel>}
         <Panel title="Templates and data">
           <Button onClick={() => {const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));const link=document.createElement("a");link.href=url;link.download=mode==="demo"?"octa-demo-backup.json":`octa-backoffice-backup-${today}.json`;link.click();setTimeout(()=>URL.revokeObjectURL(url),10000);}}>{mode==="demo"?"Back up demo data":"Download a backup"}</Button>
           <p className="text-sm text-ink-soft">An Excel invoice and quote template in the same layout, for manual invoicing away from the website.</p>

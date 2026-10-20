@@ -260,4 +260,30 @@ test("each new website order emails the business and the customer once",async()=
   const html=sent[2].html;assert.ok(!html.includes("<script"));
 });
 
+
+
+test("main admins create staff logins on the website; nobody else can",async()=>{
+  const logins=new Map();
+  const staffStore={...store,
+    async listStaff(){return (await db.query("select user_id,display_name,role,active from public.bo_staff order by display_name")).rows.map(r=>({...r,email:logins.get(r.user_id)??null}));},
+    async saveStaff(id,name,role,active){await db.query("insert into public.bo_staff values($1,$2,$3,$4) on conflict(user_id) do update set display_name=excluded.display_name,role=excluded.role,active=excluded.active",[id,name,role,active]);},
+    async ensureLogin(email,password){
+      const existing=[...logins].find(([,e])=>e===email);
+      if(existing)return{id:existing[0]};
+      const id=crypto.randomUUID();await db.query("insert into auth.users values($1,$2,now())",[id,email]);logins.set(id,email);return{id};
+    }};
+  const as=(who,body)=>server.handle(body,user(who),staffStore,today,makeId);
+  assert.equal((await as("danium",{op:"staff"})).status,403);
+  assert.equal((await as("accounts",{op:"createLogin",email:"x@octa-boost.com",name:"X",role:"main",password:"long-enough-pw"})).status,403);
+  assert.equal((await as("zuan",{op:"createLogin",email:"new@octa-boost.com",name:"New",role:"main",password:"short"})).status,400);
+  assert.equal((await as("zuan",{op:"createLogin",email:"rep2@example.test",name:"Rep",role:"rep",password:"long-enough-pw"})).status,400,"reps need a rep record first");
+  const made=await as("zuan",{op:"createLogin",email:"New.Person@octa-boost.com",name:"New Person",role:"viewer",password:"long-enough-pw"});
+  assert.equal(made.status,200);
+  const row=made.body.staff.find(s=>s.email==="new.person@octa-boost.com");
+  assert.equal(row.role,"viewer");assert.equal(row.active,true);
+  assert.equal((await as("zuan",{op:"setStaffActive",userId:people.zuan.id,active:false})).status,400,"you can't switch yourself off");
+  const off=await as("zuan",{op:"setStaffActive",userId:row.user_id,active:false});
+  assert.equal(off.body.staff.find(s=>s.user_id===row.user_id).active,false);
+});
+
 after(()=>db.close());

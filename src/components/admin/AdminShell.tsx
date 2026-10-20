@@ -219,6 +219,7 @@ function Frame({ children }: { children: ReactNode }) {
         <div className="hidden px-5 pb-6 lg:absolute lg:bottom-0 lg:block">
           {admin && <p className="mb-3 text-xs text-paper/75">Signed in as <strong className="text-paper">{admin.name}</strong><span className="block text-paper/50">{ROLE_LABEL[admin.role]}</span></p>}
           <Link href="/" className="block font-mono text-xs uppercase tracking-wider text-paper/60 hover:text-lime">View shop →</Link>
+          {mode === "live" && <Link href="/admin/password/" className="mt-3 block font-mono text-xs uppercase tracking-wider text-paper/60 hover:text-lime">Change password</Link>}
           <button type="button" onClick={signOut} className="mt-3 font-mono text-xs uppercase tracking-wider text-paper/60 hover:text-lime">Sign out</button>
         </div>
       </aside>
@@ -227,6 +228,16 @@ function Frame({ children }: { children: ReactNode }) {
           <div role="note" className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-ink bg-lime px-4 py-2 text-xs sm:px-6">
             <span><strong>DEMO DATA</strong> · Sample clients and documents, saved in this browser only.{admin && <span className="lg:hidden"> · Signed in as <strong>{admin.name}</strong></span>}</span>
             <button type="button" onClick={signOut} className="font-mono font-bold uppercase tracking-wider underline lg:hidden">Sign out</button>
+          </div>
+        )}
+        {mode === "live" && (
+          // Phones: who is signed in, with the links the desktop sidebar shows.
+          <div className="flex flex-wrap items-center justify-between gap-2 border-b-2 border-ink bg-paper-2 px-4 py-2 text-xs lg:hidden">
+            <span>Signed in as <strong>{admin?.name}</strong></span>
+            <span className="flex gap-4 font-mono font-bold uppercase tracking-wider">
+              <Link href="/admin/password/" className="underline">Password</Link>
+              <button type="button" onClick={signOut} className="underline">Sign out</button>
+            </span>
           </div>
         )}
         {mode === "live" && (saving || syncError) && (

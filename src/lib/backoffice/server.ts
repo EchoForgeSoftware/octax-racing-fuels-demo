@@ -35,7 +35,15 @@ export interface Store {
   file(id: string): Promise<{ name: string; type: string; dataUrl: string } | null>;
   /** Website orders: the customer-facing order row (public.orders). Returns an error message, or null when saved (or already saved). */
   insertOrder?(row: Record<string, unknown>): Promise<string | null>;
+  /** Staff logins (main admins only): everyone with a staff row, with their sign-in email. */
+  listStaff?(): Promise<StaffLogin[]>;
+  saveStaff?(userId: string, name: string, role: Exclude<Role, "rep">, active: boolean): Promise<void>;
+  /** Create a confirmed login with this password, or confirm an existing one and set its password. */
+  ensureLogin?(email: string, password: string): Promise<{ id: string } | { error: string }>;
 }
+
+export type StaffLogin = { user_id: string; display_name: string; role: Role; active: boolean; email: string | null };
+const STAFF_ROLES = ["main", "viewer", "accounts", "rep"] as const;
 
 /**
  * Change the back-office records outside a staff action (website orders,
@@ -256,6 +264,39 @@ export async function handle(body: unknown, user: AuthUser | null, store: Store,
         data = start;
       }
       return { status: 200, body: { admin, data: data ? scopeBackoffice(data, admin) : null, needsSetup: !data } };
+    }
+
+    // Staff logins, created by a main admin on the website: no confirmation email needed.
+    if (req.op === "staff" || req.op === "createLogin" || req.op === "setStaffActive") {
+      const admin = await whoIs(user, store, toData(await store.load(["settings", "reps"])));
+      if (admin?.role !== "main") return { status: 403, body: { error: "Only main admins manage staff logins." } };
+      if (!store.listStaff || !store.saveStaff || !store.ensureLogin) return { status: 503, body: { error: "Staff logins are unavailable." } };
+      const r = req as Record<string, unknown>;
+      if (req.op === "createLogin") {
+        const email = typeof r.email === "string" ? r.email.trim().toLowerCase() : "";
+        const name = typeof r.name === "string" ? r.name.trim().slice(0, 200) : "";
+        const role = STAFF_ROLES.find((x) => x === r.role);
+        const password = typeof r.password === "string" ? r.password : "";
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 254) return { status: 400, body: { error: "Enter a valid email address." } };
+        if (!name) return { status: 400, body: { error: "Enter the person's name." } };
+        if (!role) return { status: 400, body: { error: "Choose a role." } };
+        if (password.length < 12 || password.length > 128) return { status: 400, body: { error: "Use a temporary password of at least 12 characters." } };
+        if (role === "rep") {
+          const reps = toData(await store.load(["settings", "reps"]))?.reps ?? [];
+          if (!reps.some((x) => x.active && x.email.toLowerCase() === email)) return { status: 400, body: { error: "Add the rep under Sales reps first (with this email), then create their login." } };
+        }
+        const login = await store.ensureLogin(email, password);
+        if ("error" in login) return { status: 400, body: { error: login.error } };
+        // Reps get their access from the Sales reps list; everyone else from a staff row.
+        if (role !== "rep") await store.saveStaff(login.id, name, role, true);
+      }
+      if (req.op === "setStaffActive") {
+        const target = (await store.listStaff()).find((x) => x.user_id === r.userId);
+        if (!target || target.role === "rep") return { status: 404, body: { error: "That login isn't on the staff list." } };
+        if (target.user_id === user.id && r.active !== true) return { status: 400, body: { error: "You can't switch off your own login." } };
+        await store.saveStaff(target.user_id, target.display_name, target.role as Exclude<Role, "rep">, r.active === true);
+      }
+      return { status: 200, body: { staff: await store.listStaff() } };
     }
 
     if (req.op === "file") {
