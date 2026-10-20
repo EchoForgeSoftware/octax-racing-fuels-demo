@@ -2,6 +2,7 @@
 
 import { DEFAULT_ORDER_EMAILS } from "@/lib/backoffice/orderEmail";
 import { StaffLogins } from "./StaffLogins";
+import { DEFAULT_DELIVERY } from "@/lib/delivery";
 
 import { MAX_ADMINS, ROLE_LABEL, STAFF } from "@/lib/backoffice/roles";
 import Link from "next/link";
@@ -47,6 +48,36 @@ export function SettingsAdmin() {
         <Field label="Email every new order to" className="mt-4" hint="Comma separated, up to 5. They get the order, customer and delivery details as soon as an order is placed (and when an Ozow payment comes in). The customer gets their own confirmation with the bank details.">
           <Input value={s.orderEmails ?? DEFAULT_ORDER_EMAILS} onChange={(e) => set({ orderEmails: e.target.value })} />
         </Field>
+      </Panel>
+      <Panel title="Delivery and collection" className="mb-6">
+        {(() => {
+          const d = { ...DEFAULT_DELIVERY, ...(s.deliveryRules ?? {}), collection: { ...DEFAULT_DELIVERY.collection, ...(s.deliveryRules?.collection ?? {}) } };
+          const setD = (patch: Partial<typeof d>) => set({ deliveryRules: { ...d, ...patch } });
+          return (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <p className="text-sm text-ink-soft sm:col-span-2">At checkout customers choose: <strong>collect (free)</strong>, or add <strong>local delivery</strong> (the towns below) or <strong>courier</strong> (everywhere else). The courier fee per pack is under VAT and terms.</p>
+              <Field label="Local delivery towns (we deliver ourselves)" className="sm:col-span-2" hint="Comma separated, e.g. Boksburg, Benoni, Brakpan. Towns further than the radius get courier.">
+                <Input value={d.localTowns.map((t) => t.replace(/\b\w/g, (c) => c.toUpperCase())).join(", ")} onChange={(e) => setD({ localTowns: e.target.value.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean) })} />
+              </Field>
+              <Field label="Local delivery radius (km)" hint="We also deliver ourselves to towns within this distance of the towns above.">
+                <Input type="number" min={0} max={100} step="1" value={d.localKm} onChange={(e) => setD({ localKm: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
+              </Field>
+              <Field label="Local delivery fee per order (R)" hint="Leave empty to charge the courier rates.">
+                <Input type="number" min={0} step="1" value={d.localFee ?? ""} onChange={(e) => setD({ localFee: e.target.value === "" ? null : Math.max(0, Number(e.target.value)) })} />
+              </Field>
+              <Field label="Delivery from (packs)" hint="Smaller orders can only be collected.">
+                <Input type="number" min={1} step="1" value={d.minPacks} onChange={(e) => setD({ minPacks: Math.max(1, Math.round(Number(e.target.value) || 1)) })} />
+              </Field>
+              <label className="flex items-start gap-3 text-sm sm:col-span-2">
+                <input type="checkbox" checked={d.collection.enabled} onChange={(e) => setD({ collection: { ...d.collection, enabled: e.target.checked } })} className="mt-0.5 h-5 w-5 accent-[var(--color-ink)]" />
+                <span><strong>Customers can collect</strong><span className="block text-ink-soft">Free. The address below is only shown after someone orders (confirmation page and email), never on the website.</span></span>
+              </label>
+              <Field label="Collection address" className="sm:col-span-2"><Textarea rows={2} value={d.collection.address} onChange={(e) => setD({ collection: { ...d.collection, address: e.target.value } })} /></Field>
+              <Field label="Collection times" className="sm:col-span-2" hint="e.g. Mon–Fri 08:00–17:00, Sat 08:00–12:00"><Input value={d.collection.hours} onChange={(e) => setD({ collection: { ...d.collection, hours: e.target.value } })} /></Field>
+              <p className="text-xs text-muted sm:col-span-2">Click Save settings after changing these. Checkout, the cart, the Delivery &amp; Returns page and the order server all follow them.</p>
+            </div>
+          );
+        })()}
       </Panel>
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Business">

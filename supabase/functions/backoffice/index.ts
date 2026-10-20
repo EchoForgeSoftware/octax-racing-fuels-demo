@@ -67,7 +67,7 @@ Deno.serve(async (request: Request) => {
       const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
       const botSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
       const tools: OrderTools = {
-        quote: (items, catalogue, city) => quoteCart(items, catalogue, city),
+        quote: (items, catalogue, city, opts) => quoteCart(items, catalogue, city, opts),
         validateCustomer: (input) => validateCustomer(input) as ReturnType<OrderTools["validateCustomer"]>,
         send: sendEmails,
         allowed: async () => {

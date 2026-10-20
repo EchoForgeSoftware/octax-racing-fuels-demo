@@ -52,10 +52,20 @@ export function OrderConfirmation() {
             <p className="kicker text-muted">Amount to pay</p>
             <p className="num mt-1 font-display text-2xl text-flare">{formatPrice(order.total)}</p>
             <p className="num mt-0.5 text-xs text-muted">
-              {formatPrice(order.subtotal)} + {order.courier > 0 ? `${formatPrice(order.courier)} courier` : "free delivery"}
+              {formatPrice(order.subtotal)} + {order.courier > 0 ? `${formatPrice(order.courier)} ${order.delivery?.method === "local" ? "local delivery" : "courier"}` : order.delivery?.method === "collect" ? "collect (free)" : "free delivery"}
             </p>
           </div>
         </div>
+      )}
+
+      {order?.delivery?.method === "collect" && (
+        <section className="mt-7 border-2 border-ink bg-lime p-4">
+          <h2 className="font-display text-xl">Collect your order</h2>
+          {order.collection?.address ? (
+            <p className="mt-2 whitespace-pre-line text-sm">{order.collection.address}{order.collection.hours ? `\n${order.collection.hours}` : ""}</p>
+          ) : <p className="mt-2 text-sm">We&apos;ll contact you with the collection address and time.</p>}
+          <p className="mt-2 text-xs">Bring your order reference. Collection is once your payment has reflected.</p>
+        </section>
       )}
 
       <section className="mt-7">

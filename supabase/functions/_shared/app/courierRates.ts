@@ -35,6 +35,13 @@ const localTowns = Object.entries(TOWNS)
   .map(([name]) => name)
   .sort();
 
+/** Known towns within `radiusKm` of any of the base towns (by town centre), base towns included. */
+export function townsNear(bases: string[], radiusKm: number): string[] {
+  const centres = bases.map((b) => TOWNS[b.toLowerCase()]).filter(Boolean);
+  const near = Object.entries(TOWNS).filter(([, at]) => centres.some((c) => km(c, at) <= radiusKm)).map(([name]) => name);
+  return [...new Set([...bases.map((b) => b.toLowerCase()), ...near])].sort();
+}
+
 export const courierRates = { fee: 200, freeFrom: { "5": 10, "25": 10, "0.5": 12 }, localRadiusKm: RADIUS_KM, localTowns };
 
 /** The delivery town matched in a free-text city ("Benoni, Gauteng" → "benoni"), if it is inside the area. */

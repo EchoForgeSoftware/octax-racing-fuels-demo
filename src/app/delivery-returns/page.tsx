@@ -3,8 +3,7 @@ import { Breadcrumbs } from "@/components/Breadcrumbs";
 import { BusinessDetails } from "@/components/BusinessDetails";
 import { buildMetadata } from "@/lib/metadata";
 import { LEGAL } from "@/lib/site";
-import { courierRates } from "@/lib/courierRates";
-import { CourierFee } from "@/components/CourierFee";
+import { DeliveryPolicy } from "@/components/DeliveryPolicy";
 
 export const metadata = buildMetadata({ path: "/delivery-returns/", title: "Delivery, Cancellations & Returns",
   description: "OCTA local delivery and courier charges, exchanges for incorrectly supplied stock, returns and limitation of liability." });
@@ -20,11 +19,7 @@ export default function DeliveryReturnsPage() {
       <div className="mt-8 space-y-8 text-ink-soft">
         <section>
           <h2 className={h2}>Delivery</h2>
-          <h3 className="mt-4 font-bold text-ink">Local delivery</h3>
-          <p className="mt-1">Delivery can be arranged within a {courierRates.localRadiusKm} km radius of our premises. Please contact us with your full delivery address to confirm availability and cost.</p>
-          <h3 className="mt-4 font-bold text-ink">Courier delivery</h3>
-          <p className="mt-1">Orders outside the {courierRates.localRadiusKm} km radius are sent via courier.</p>
-          <p className="mt-2">Standard courier charge: <CourierFee /> per pack.</p>
+          <DeliveryPolicy />
           <p className="mt-2">Free courier applies when you order:</p>
           <ul className="mt-1 list-inside list-disc space-y-1">
             <li>10 or more units of the same 5 L or 25 L product, or</li>

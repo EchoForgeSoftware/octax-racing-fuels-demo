@@ -8,6 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { ProcessingOverlay } from "./ProcessingOverlay";
 import { Icon } from "./Icon";
 import { OrderTotals } from "./OrderTotals";
+import { deliveryOptions, type DeliveryMethod } from "@/lib/delivery";
 import { cartCourier, courierNote, localTown } from "@/lib/courier";
 import { CustomerInfoForm, type Contact } from "./CustomerInfoForm";
 import { emptyProfile, profileErrors, type CustomerProfile } from "@/lib/backoffice/customerForm";
@@ -42,7 +43,7 @@ export function CheckoutView() {
   const bot = useBotCheck();
   const { items, subtotal, clear, ready } = useCart();
   const { user, profile, saveProfile, enabled, ready: authReady, demo } = useAuth();
-  const { courierFee, orderingOpen, ready: pricingReady } = usePricing();
+  const { courierFee, orderingOpen, ready: pricingReady, delivery: deliveryRulesNow } = usePricing();
   // Ordering needs this build's switch and a main admin opening it in back-office Settings.
   const open = orderingEnabled && orderingOpen;
   const router = useRouter();
@@ -50,6 +51,7 @@ export function CheckoutView() {
   const [processing, setProcessing] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<"ozow" | "eft">("ozow");
+  const [deliveryMethod, setDeliveryMethod] = useState<DeliveryMethod | null>(null);
   // Typed delivery town; inside the local area we can arrange local delivery (cost confirmed with the customer).
   const [typedCity, setTypedCity] = useState<string | null>(null);
   // Order on a personal name or company details; companies are saved as customers straight away.
@@ -59,7 +61,7 @@ export function CheckoutView() {
   const [accountContact, setAccountContact] = useState<Contact>({ name: "", email: "", phone: "", company: "", vat: "" });
   const [accountProfile, setAccountProfile] = useState<CustomerProfile>(() => emptyProfile("company"));
   const [demoResult, setDemoResult] = useState<{ number: string; client: string; saved: boolean } | null>(null);
-  const canSubmit = open && !demo && (paymentMethod === "eft" || ozowEnabled);
+  const canSubmitPayment = open && !demo && (paymentMethod === "eft" || ozowEnabled);
   const submitting = useRef(false);
   const pendingOrder = useRef<{ signature: string; order: PlacedOrder } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -68,6 +70,11 @@ export function CheckoutView() {
 
   const city = typedCity ?? profile?.city ?? "";
   const local = localTown(city);
+  // Collect is free; delivery (local or courier) is the add-on, from the rules in back-office Settings → Delivery.
+  const deliveryChoices = deliveryOptions(items, city, deliveryRulesNow);
+  const chosen = deliveryChoices.find((o) => o.method === deliveryMethod && o.available) ?? deliveryChoices.find((o) => o.available) ?? null;
+  const deliveryFee = chosen?.fee ?? 0;
+  const canSubmit = canSubmitPayment && !!chosen;
   if (demoResult) {
     return (
       <div role="status" className="border-2 border-ink bg-panel p-8 sm:p-12">
@@ -136,7 +143,7 @@ export function CheckoutView() {
     if (data.get("accept_terms") !== "on") return setErrors({ accept_terms: requiredMessages.accept_terms });
     const result = recordDemoWebsiteOrder({
       ref: newOrderRef(), items: items.map((i) => ({ sku: i.sku, name: i.name, size: i.size, price: i.price, qty: i.qty })),
-      courier: cartCourier(items, get("city"), courierFee).fee, paymentMethod, orderAs,
+      courier: deliveryFee, paymentMethod, orderAs,
       customer: { name: get("fullname"), email: get("email"), phone: get("phone"), company: orderAs === "company" ? get("company") : "", vat: orderAs === "company" ? normaliseVat(get("vat")) : "", address: get("address"), city: get("city"), registration: get("registration") },
       saveCustomer: data.get("save_customer") === "on",
       profile: openAccount ? accountProfile : undefined,
@@ -166,12 +173,13 @@ export function CheckoutView() {
     };
     // Keep the order for the confirmation page (amount to pay, EFT reference)
     // and store it in Supabase so it reaches the business and order history.
-    const signature = JSON.stringify({ items, customer, userId: user?.id ?? null, paymentMethod, termsVersion: LEGAL.version });
+    const signature = JSON.stringify({ items, customer, userId: user?.id ?? null, paymentMethod, termsVersion: LEGAL.version, delivery: chosen?.method });
     if (pendingOrder.current?.signature !== signature) {
       const checkoutFingerprint = [...new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(signature)))].map((byte) => byte.toString(16).padStart(2, "0")).join("");
       const previous = paymentMethod === "ozow" ? readOrder() : null;
       const reuse = previous?.paymentMethod === "ozow" && previous.checkoutToken && previous.checkoutFingerprint === checkoutFingerprint;
-      pendingOrder.current = { signature, order: reuse ? previous : { ...buildOrder(items, customer), paymentMethod, termsVersion: LEGAL.version,
+      pendingOrder.current = { signature, order: reuse ? previous : { ...buildOrder(items, customer), courier: deliveryFee, total: subtotal + deliveryFee,
+        delivery: chosen ? { method: chosen.method, label: chosen.label } : undefined, paymentMethod, termsVersion: LEGAL.version,
         ...(paymentMethod === "ozow" ? { checkoutFingerprint, checkoutToken: crypto.randomUUID().replaceAll("-", "") + crypto.randomUUID().replaceAll("-", "") } : {}) } };
     }
     const order = pendingOrder.current.order;
@@ -180,7 +188,7 @@ export function CheckoutView() {
         // Retain the reference before leaving the site, including for guests.
         if (!saveOrder(order)) throw new Error("Your browser couldn't keep your payment reference. Allow site storage and try again.");
         const payment = await createOzowPayment(order, customer, data.get("accept_terms") === "on", bot.token,
-          { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration") });
+          { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration"), deliveryMethod: chosen?.method });
         if (!saveOrder(payment.order)) throw new Error("Your browser couldn't keep your payment reference. Please allow site storage before continuing.");
         if (user && data.get("save_details")) {
           await saveProfile({ full_name: customer.name, phone: customer.phone, company: customer.company || null,
@@ -197,7 +205,7 @@ export function CheckoutView() {
     }
     const started = Date.now();
     const result = await placeEftOrder(order, customer,
-      { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration"), profile: openAccount ? accountProfile : undefined },
+      { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration"), profile: openAccount ? accountProfile : undefined, deliveryMethod: chosen?.method },
       data.get("accept_terms") === "on", bot.token || undefined);
     bot.reset();
     if (result.error || !result.order) {
@@ -316,6 +324,26 @@ export function CheckoutView() {
         )}
 
         <fieldset className="border-2 border-ink bg-panel p-6">
+          <legend className="px-2 font-display text-2xl uppercase">Delivery</legend>
+          <p className="mb-5 text-sm text-ink-soft">Collect your order for free, or add delivery.</p>
+          <div className="grid gap-3">
+            {deliveryChoices.map((o) => (
+              <label key={o.method} className={`flex items-start gap-3 border-2 p-4 transition-colors ${!o.available ? "cursor-not-allowed border-line bg-paper-2 opacity-60" : chosen?.method === o.method ? "cursor-pointer border-ink bg-lime" : "cursor-pointer border-line bg-paper-2 hover:border-ink"}`}>
+                <input type="radio" name="delivery_method" value={o.method} checked={chosen?.method === o.method} disabled={processing || !o.available}
+                  onChange={() => { setDeliveryMethod(o.method); setSubmitError(null); }} className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-ink)]" />
+                <span className="min-w-0 flex-1">
+                  <span className="flex flex-wrap justify-between gap-2 font-display text-sm uppercase"><span>{o.label}</span><span className="num">{o.fee > 0 ? `+ ${formatPrice(o.fee)}` : "Free"}</span></span>
+                  <span className="mt-1 block text-xs text-ink-soft">
+                    {o.method === "collect" ? `We send the collection address with your order confirmation.${deliveryRulesNow.collection.hours ? ` Collection times: ${deliveryRulesNow.collection.hours}.` : ""}`
+                      : o.available ? (o.method === "local" ? "We deliver to you ourselves." : "Sent by courier to your address.") : o.reason}
+                  </span>
+                </span>
+              </label>
+            ))}
+          </div>
+          {!chosen && <p role="alert" className="mt-3 text-sm text-flare">{deliveryRulesNow.collection.enabled ? "Choose collection, or add more packs for delivery." : "Add more packs for delivery, or contact us to arrange your order."}</p>}
+        </fieldset>
+        <fieldset className="border-2 border-ink bg-panel p-6">
           <legend className="px-2 font-display text-2xl uppercase">Payment</legend>
           <p className="mb-5 text-sm text-ink-soft">Choose how you’d like to pay.</p>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -388,7 +416,7 @@ export function CheckoutView() {
           ))}
         </ul>
         <div className="mt-5 border-t-2 border-ink">
-          <OrderTotals items={items} subtotal={subtotal} city={city} />
+          <OrderTotals items={items} subtotal={subtotal} city={city} delivery={chosen ? { label: chosen.label, fee: chosen.fee } : null} />
         </div>
         {submitError && <p role="alert" className="mt-5 border-2 border-flare p-3 text-sm">{submitError}</p>}
         <div className="mt-5 border-t-2 border-ink pt-5 text-sm text-ink-soft">

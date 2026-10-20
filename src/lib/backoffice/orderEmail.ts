@@ -3,6 +3,7 @@
 // Functions through Resend (supabase/functions/_shared/email.ts).
 import type { BusinessSettings } from "./types";
 import type { WebsiteOrder } from "./orders";
+import { DELIVERY_NAME } from "../delivery";
 
 export type Email = { to: string[]; subject: string; html: string; text: string; replyTo?: string };
 
@@ -47,9 +48,13 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
   const state = status === "paid" ? `Paid by ${method}` : `${method}, awaiting payment`;
   const items = itemLines(o);
   const deliver = `${c.address}, ${c.city} ${c.postcode}`.trim();
+  const how = o.deliveryMethod ? DELIVERY_NAME[o.deliveryMethod] : "Delivery";
+  const collect = o.deliveryMethod === "collect";
+  const point = settings.deliveryRules?.collection;
+  const collectAt = collect && point?.address ? `${point.address}${point.hours ? ` (${point.hours})` : ""}` : "";
   const summary: [string, string][] = [
     ...items.map((i): [string, string] => [i.text, i.amount]),
-    ["Courier", totals.courier > 0 ? money(totals.courier) : "Free"],
+    [collect ? "Collect" : how, totals.courier > 0 ? money(totals.courier) : "Free"],
     ["Total", money(totals.total)],
   ];
 
@@ -62,7 +67,8 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
       `${status === "paid" ? "Payment received for" : "New"} website order ${o.ref} (${state}).`,
       invoice ? `Invoice: ${invoice}` : "",
       "",
-      `Customer: ${c.name}${c.company ? `, ${c.company}` : ""}`, `Email: ${c.email}`, `Phone: ${c.phone}`, `Deliver to: ${deliver}`,
+      `Customer: ${c.name}${c.company ? `, ${c.company}` : ""}`, `Email: ${c.email}`, `Phone: ${c.phone}`,
+      collect ? "Customer collects" : `${how} to: ${deliver}`,
       "",
       ...summary.map(([k, v]) => `${k}: ${v}`),
       "",
@@ -70,7 +76,7 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
     ].filter((l, i, a) => l !== "" || a[i - 1] !== "").join("\n"),
     html: wrap(`${status === "paid" ? "Paid" : "New"} website order ${o.ref}`,
       `<p><strong>${esc(state)}</strong>${invoice ? ` · Invoice ${esc(invoice)}` : ""}</p>`
-      + table([["Customer", `${c.name}${c.company ? `, ${c.company}` : ""}`], ["Email", c.email], ["Phone", c.phone], ["Deliver to", deliver]])
+      + table([["Customer", `${c.name}${c.company ? `, ${c.company}` : ""}`], ["Email", c.email], ["Phone", c.phone], collect ? ["Delivery", "Customer collects"] : [how, deliver]])
       + `<hr style="border:0;border-top:1px solid #ddd">` + table(summary)
       + `<p><a href="${ADMIN_URL}" style="display:inline-block;background:#191817;color:#fff;padding:10px 14px;text-decoration:none">Open the back office</a></p>`),
   } : null;
@@ -88,14 +94,14 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
       ...summary.map(([k, v]) => `${k}: ${v}`),
       ...(pay ? ["", "Please pay by EFT:", `Account holder: ${b.holder}`, `Bank: ${b.bank}`, `Account number: ${b.account}`, `Branch code: ${b.branch}`,
         `Account type: ${b.type}`, `Reference: ${o.ref}`, `Amount: ${money(totals.total)}`, "", "We dispatch once the payment reflects. Reply to this email with your proof of payment."] : []),
-      "", `Delivery to: ${deliver}`, "", `${settings.tradingAs || "OCTA Performance"} · ${settings.phone || ""} · ${settings.email || ""}`,
+      "", collectAt ? `Collect from: ${collectAt}` : collect ? "We'll tell you where and when to collect." : `${how} to: ${deliver}`, "", `${settings.tradingAs || "OCTA Performance"} · ${settings.phone || ""} · ${settings.email || ""}`,
     ].join("\n"),
     html: wrap(status === "paid" ? "Payment received" : "Thank you for your order",
       `<p>Order reference: <strong>${esc(o.ref)}</strong></p>` + table(summary)
       + (pay ? `<h3>Pay by EFT</h3>` + table([["Account holder", b.holder], ["Bank", b.bank], ["Account number", b.account], ["Branch code", b.branch],
         ["Account type", b.type], ["Reference", o.ref], ["Amount", money(totals.total)]])
         + `<p>We dispatch once the payment reflects. Reply to this email with your proof of payment.</p>` : "")
-      + `<p style="color:#555">Delivery to: ${esc(deliver)}</p><p style="color:#555">${esc(settings.tradingAs || "OCTA Performance")} · ${esc(settings.phone || "")} · ${esc(settings.email || "")}</p>`),
+      + `<p style="color:#555">${esc(collectAt ? `Collect from: ${collectAt}` : collect ? "We'll tell you where and when to collect." : `${how} to: ${deliver}`)}</p><p style="color:#555">${esc(settings.tradingAs || "OCTA Performance")} · ${esc(settings.phone || "")} · ${esc(settings.email || "")}</p>`),
   } : null;
   return { business, customer };
 }

@@ -1,5 +1,6 @@
 // GENERATED from src/lib/backoffice/types.ts by scripts/gen-backoffice-function.mjs. Do not edit.
 import type { Costing } from "./costing.ts";
+import type { DeliverySettings } from "../delivery.ts";
 import type { CustomerProfile } from "./customerForm.ts";
 // Back-office data: the admin catalogue (prices, costs, descriptions), clients
 // and their pricing, quotes, invoices and payments. The same shapes back the
@@ -208,6 +209,8 @@ export type BusinessSettings = {
   courierFee?: number;
   /** Main admins open and close online ordering on the website (Settings). Closed when missing. */
   onlineOrdering?: boolean;
+  /** Collection and delivery rules for website orders (Settings → Delivery). */
+  deliveryRules?: Partial<DeliverySettings>;
   /** Who gets an email for every website order (comma separated). Empty = info@ and zuan@. */
   orderEmails?: string;
   next: { quote: number; invoice: number };

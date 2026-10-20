@@ -7,6 +7,7 @@ import { addDays, formatNumber, priceFor } from "./calc";
 import { accountEmails, type CustomerProfile } from "./customerForm";
 import { isSoldOut, stockLevels } from "./stock";
 import { courierRates, localTown } from "../courierRates";
+import { DELIVERY_NAME, deliveryRules, type DeliveryMethod } from "../delivery";
 import type { BackofficeData, Client, Document } from "./types";
 
 type Env = { today: string; uid: (prefix: string) => string };
@@ -49,6 +50,8 @@ export type WebsiteOrder = {
   saveCustomer?: boolean;
   registration?: string;
   profile?: CustomerProfile;
+  /** Collect, OCTA local delivery or courier, as chosen at checkout. */
+  deliveryMethod?: DeliveryMethod;
 };
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -93,11 +96,13 @@ export function recordWebsiteOrder(d: BackofficeData, o: WebsiteOrder, env: Env)
       unitCost: d.catalogue.find((x) => x.sku === i.sku)?.cost ?? 0 })),
     courier: o.courier, notes: [
       `Website order · ${o.method === "ozow" ? "Ozow" : "EFT"} · awaiting payment.`,
+      o.deliveryMethod ? `${DELIVERY_NAME[o.deliveryMethod]}.` : "",
       guest ? `Customer: ${text(c.name, 200)}, ${text(c.email, 254)}, ${text(c.phone, 40)}.` : "",
       `Deliver to: ${text(c.address, 500)}, ${text(c.city, 120)} ${text(c.postcode, 20)}.`,
     ].filter(Boolean).join(" "),
     reference: o.ref, quoteState: "accepted", linkedId: null, cancelled: false, payments: [], createdAt: env.today, createdBy: "Website",
-    delivery: { method: localTown(c.city) ? "own" : "courier", status: "pending" },
+    delivery: { method: o.deliveryMethod === "collect" ? "collect" : o.deliveryMethod === "local" ? "own" : o.deliveryMethod === "courier" ? "courier"
+      : localTown(c.city, deliveryRules(d.settings).localArea) ? "own" : "courier", status: "pending" },
   };
   d.documents.push(doc);
   return doc.number;

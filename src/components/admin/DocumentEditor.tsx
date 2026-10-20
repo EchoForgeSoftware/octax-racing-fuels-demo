@@ -14,6 +14,7 @@ import { cartCourier, DELIVERY_LABEL } from "@/lib/courier";
 import { SignaturePad } from "./SignaturePad";
 import { sellWarnings, stockLevels } from "@/lib/backoffice/stock";
 import { defaultDelivery } from "./BackofficeContext";
+import { deliveryRules } from "@/lib/delivery";
 import { formatPrice } from "@/lib/format";
 import type { Channel, Delivery, Document, DocLine, Payment } from "@/lib/backoffice/types";
 import { canChangePrices, canCreateOrders, canEdit, canRecordPayments, canSeeProfit, canSignDelivery, canView } from "@/lib/backoffice/roles";
@@ -99,7 +100,7 @@ export function DocumentEditor() {
       return price !== null ? { ...l, unitPrice: price } : l;
     });
     set({ clientId, lines, channel: c ? defaultsFor(c.type).channel : doc!.channel,
-      ...(doc!.kind === "invoice" && doc!.delivery?.status !== "delivered" ? { delivery: defaultDelivery(c) } : {}) });
+      ...(doc!.kind === "invoice" && doc!.delivery?.status !== "delivered" ? { delivery: defaultDelivery(c, deliveryRules(data?.settings).localArea) } : {}) });
   }
 
   function addProduct(sku: string) {

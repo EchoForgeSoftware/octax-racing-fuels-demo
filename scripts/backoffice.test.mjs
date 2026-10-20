@@ -227,3 +227,16 @@ test("products added in the back office get a pack picture and label from the wo
   const jug=pd.packProduct({sku:"S",productName:"X",size:"5L"},{...start,container:"jug",lines:["one","two","three","four"]});
   assert.equal(jug.label.layout,"tall");assert.deepEqual(jug.label.lines,["ONE","TWO","THREE"]);assert.equal(jug.label.badge,undefined);
 });
+
+test("delivery options: collection first, local inside the radius, courier elsewhere, minimum packs",()=>{
+  const d=loadTs("src/lib/delivery.ts");
+  const rules=d.deliveryRules({courierFee:200,deliveryRules:{localTowns:["Boksburg"],localKm:20,localFee:null,minPacks:3,collection:{enabled:true,address:"x",hours:""}}});
+  assert.ok(rules.localArea.includes("germiston"));assert.ok(!rules.localArea.includes("pretoria"));
+  const small=d.deliveryOptions([{size:"5L",qty:1}],"Pretoria",rules);
+  assert.deepEqual(small.map(o=>[o.method,o.available]),[["collect",true],["courier",false]]);
+  const big=d.deliveryOptions([{size:"5L",qty:3}],"Germiston",rules);
+  assert.deepEqual(big.map(o=>[o.method,o.available,o.fee]),[["collect",true,0],["local",true,600]]);
+  assert.equal(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",rules,"courier").ok,false);
+  assert.equal(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",rules).method,"collect","no choice: collection");
+  assert.equal(d.deliveryRules({deliveryRules:{collection:{enabled:true,address:"  "}}}).collection.enabled,false,"no address, no collection");
+});

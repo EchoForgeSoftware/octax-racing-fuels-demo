@@ -30,7 +30,7 @@ async function callPayment(body: Record<string, unknown>) {
   return data;
 }
 
-export async function createOzowPayment(order: PlacedOrder, customer: CustomerDetails, termsAccepted: boolean, captchaToken?: string, account?: { orderAs: "personal" | "company"; saveCustomer: boolean; registration: string }): Promise<{ redirectUrl: string; order: PlacedOrder }> {
+export async function createOzowPayment(order: PlacedOrder, customer: CustomerDetails, termsAccepted: boolean, captchaToken?: string, account?: { orderAs: "personal" | "company"; saveCustomer: boolean; registration: string; deliveryMethod?: string }): Promise<{ redirectUrl: string; order: PlacedOrder }> {
   const data = await callPayment({ action: "create", ref: order.ref, checkoutToken: order.checkoutToken,
     items: order.items.map(({ sku, qty }) => ({ sku, qty })), customer, expectedTotal: order.total, termsAccepted, termsVersion: order.termsVersion, captchaToken, ...account });
   const redirect = new URL(data.redirectUrl);

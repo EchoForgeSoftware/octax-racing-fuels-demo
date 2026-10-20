@@ -19,6 +19,9 @@ export type PlacedOrder = {
   checkoutToken?: string;
   checkoutFingerprint?: string;
   termsVersion?: string;
+  /** How the order reaches the customer, and where to collect (shown only after ordering). */
+  delivery?: { method: string; label: string };
+  collection?: { address: string; hours: string };
 };
 
 const KEY = "octa-last-order";
@@ -76,7 +79,7 @@ export type CustomerDetails = {
 };
 
 /** Account choices made at checkout, used for the back-office customer record. */
-export type OrderAccount = { orderAs: "personal" | "company"; saveCustomer: boolean; registration: string; profile?: unknown };
+export type OrderAccount = { orderAs: "personal" | "company"; saveCustomer: boolean; registration: string; profile?: unknown; deliveryMethod?: string };
 
 /**
  * Place an EFT order. The server prices it from the live back office (the

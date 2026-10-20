@@ -8,16 +8,20 @@ import { customerClient, orderingOpen, recordWebsiteOrder, recordWebsitePayment,
 import { todaySA } from "./app/backoffice/calc.ts";
 import { orderEmails, type Email } from "./app/backoffice/orderEmail.ts";
 import { sendEmails } from "./email.ts";
+import { deliveryRules, pickDelivery } from "./app/delivery.ts";
 
 // deno-lint-ignore no-explicit-any
 type Db = any;
 const makeId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 
 /** null until the back office is set up. `email` must be a verified customer email. */
-export async function liveShop(db: Db, email: string | null): Promise<{ open: boolean; catalogue: ShopCatalogue } | null> {
+type Pick = ReturnType<typeof pickDelivery>;
+export async function liveShop(db: Db, email: string | null): Promise<{ open: boolean; catalogue: ShopCatalogue; pick?: (lines: { size: string; qty: number }[], city: string, wanted: unknown) => Pick } | null> {
   const data = toData(await backofficeStore(db).load());
   if (!data) return null;
-  return { open: orderingOpen(data), catalogue: shopCatalogue(data, customerClient(data, email), todaySA()) };
+  const rules = deliveryRules(data.settings);
+  return { open: orderingOpen(data), catalogue: shopCatalogue(data, customerClient(data, email), todaySA()),
+    pick: (lines, city, wanted) => pickDelivery(lines, city, rules, wanted) };
 }
 
 /** The order as an unpaid website invoice. The payment itself never depends on this succeeding. */

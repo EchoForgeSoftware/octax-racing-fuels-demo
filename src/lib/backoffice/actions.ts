@@ -7,6 +7,7 @@ import { addDays, balance, formatNumber, priceFor, supplierBalance } from "./cal
 import { matchTxn, parseFnbCsv, txnKey } from "./bank";
 import { canCreateOrders, canEdit, canRecordPayments, canSignDelivery, type Area, type User } from "./roles";
 import { localTown } from "../courierRates";
+import { deliveryRules } from "../delivery";
 import type { CustomerProfile } from "./customerForm";
 import type { Allocation, BackofficeData, BankTxn, BusinessSettings, CatalogueItem, Client, Delivery, Document, Payment, Referral, Rep, StockBatch, StockCount, Supplier, SupplierInvoice } from "./types";
 
@@ -77,8 +78,9 @@ function id(v: unknown): string {
 export const docTotalOf = (doc: Document) => Math.round((doc.lines.reduce((n, l) => n + l.qty * l.unitPrice, 0) + doc.courier) * 100) / 100;
 
 /** New invoices: own delivery inside the local area, courier elsewhere; cash customers collect. */
-export function defaultDelivery(client: Client | null | undefined): Delivery {
-  const method = client?.cash ? "collect" : localTown(client?.city) ? "own" : "courier";
+/** `towns`: the local delivery towns from Settings → Delivery (the 30 km list when not given). */
+export function defaultDelivery(client: Client | null | undefined, towns?: string[]): Delivery {
+  const method = client?.cash ? "collect" : localTown(client?.city, towns) ? "own" : "courier";
   return { method, status: "pending" };
 }
 
@@ -118,7 +120,7 @@ function orderFromTaker(input: Document, d: BackofficeData, admin: User, env: En
   if (!money(input.courier)) throw new ActionError("Enter a valid courier amount.");
   const day = date(input.date, env.today);
   const due = date(input.dueDate, addDays(day, d.settings.paymentTermsDays));
-  const method = DELIVERY_METHODS.includes(input.delivery?.method as Delivery["method"]) ? input.delivery!.method : defaultDelivery(client).method;
+  const method = DELIVERY_METHODS.includes(input.delivery?.method as Delivery["method"]) ? input.delivery!.method : defaultDelivery(client, deliveryRules(d.settings).localArea).method;
   return {
     id: id(input.id), kind: "invoice", number: "", clientId: client.id, date: day, dueDate: due < day ? day : due,
     channel: CHANNELS.includes(input.channel) ? input.channel : "private", lines, courier: Math.round(input.courier * 100) / 100,

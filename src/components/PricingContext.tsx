@@ -11,6 +11,7 @@ import { isSoldOut, stockLevels } from "@/lib/backoffice/stock";
 import { courierRates } from "@/lib/courierRates";
 import { accountEmails } from "@/lib/backoffice/customerForm";
 import { callBackoffice } from "@/lib/backoffice/api";
+import { deliveryRules, type DeliveryRules } from "@/lib/delivery";
 import type { CatalogueItem, Client } from "@/lib/backoffice/types";
 
 type Pricing = {
@@ -40,6 +41,8 @@ type Pricing = {
   orderingOpen: boolean;
   /** False while the live prices and ordering status are still loading. */
   ready: boolean;
+  /** Collection and delivery rules from back-office Settings → Delivery. */
+  delivery: DeliveryRules;
 };
 
 const fallback: Pricing = {
@@ -56,12 +59,13 @@ const fallback: Pricing = {
   soldOut: () => false,
   orderingOpen: false,
   ready: true,
+  delivery: deliveryRules(null),
 };
 
 const Ctx = createContext<Pricing>(fallback);
 
 /** What the shop needs from the back office: no costs, and only this customer's own prices. */
-type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null; orderingOpen?: boolean };
+type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null; orderingOpen?: boolean; delivery?: DeliveryRules };
 type PublicReply = ({ ready: false } | ({ ready: true } & Source)) & { staff?: boolean };
 
 /**
@@ -86,7 +90,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         // The website login email, or any authorised buyer on the account (Customer Information Form).
         const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
         const levels = stockLevels(data, todaySA());
-        setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client, orderingOpen: true });
+        setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client, orderingOpen: true, delivery: deliveryRules(data.settings) });
       };
       read();
       setReady(true);
@@ -97,7 +101,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     callBackoffice<PublicReply>({ op: "public" })
       .then((reply) => {
         if (!active) return;
-        setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client, orderingOpen: reply.orderingOpen === true } : null);
+        setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client, orderingOpen: reply.orderingOpen === true, delivery: reply.delivery } : null);
         setStaff(reply.staff === true);
         setReady(true);
       })
@@ -131,6 +135,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       soldOut: (sku) => bySku.get(sku)?.soldOut === true,
       orderingOpen: data.orderingOpen === true,
       ready,
+      delivery: data.delivery ?? deliveryRules({ courierFee: data.courierFee ?? undefined }),
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;

@@ -11,6 +11,7 @@ import { ActionError, ACTION_NAMES, defaultDelivery, runAction, type ActionName,
 import { scopeBackoffice } from "@/lib/backoffice/scope";
 import { BackofficeError, callBackoffice } from "@/lib/backoffice/api";
 import { useAuth } from "../AuthContext";
+import { deliveryRules } from "@/lib/delivery";
 
 export { defaultDelivery };
 export type { AllocationTarget, ImportResult } from "@/lib/backoffice/actions";
@@ -235,7 +236,7 @@ export function BackofficeProvider({ children }: { children: ReactNode }) {
         return { id: uid(kind === "quote" ? "q" : "i"), kind, number: "", clientId, date: today, dueDate: addDays(today, days),
           channel: client ? defaultsFor(client.type).channel : "private", lines: [], courier: 0, notes: "", reference: "",
           quoteState: "draft", linkedId: null, cancelled: false, payments: [], createdAt: today,
-          ...(kind === "invoice" ? { delivery: defaultDelivery(client) } : {}) };
+          ...(kind === "invoice" ? { delivery: defaultDelivery(client, deliveryRules(visible?.settings).localArea) } : {}) };
       },
       newSupplier() {
         return { id: uid("s"), name: "", contact: "", email: "", phone: "", vat: "", bankMatch: "", notes: "", createdAt: today };

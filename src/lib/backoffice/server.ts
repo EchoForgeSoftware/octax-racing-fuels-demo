@@ -13,6 +13,7 @@ import { scopeBackoffice } from "./scope";
 import { isSoldOut, stockLevels } from "./stock";
 import { customerClient, orderingOpen, recordWebsiteOrder, shopCatalogue, type ShopCatalogue, type WebsiteOrder } from "./orders";
 import { orderEmails, type Email } from "./orderEmail";
+import { deliveryRules, pickDelivery } from "../delivery";
 import type { BackofficeData, CatalogueItem, Client } from "./types";
 
 /** One stored record per row: collection + id. Settings are a single row. */
@@ -65,7 +66,7 @@ export async function updateBackoffice<T>(store: Store, operation: string, mutat
 
 /** Payment rules from supabase/functions/_shared/payment.ts, passed in by the Edge Function. */
 export type OrderTools = {
-  quote(items: unknown, catalogue: ShopCatalogue, city: unknown): { items: { sku: string; slug: string; name: string; size: string; price: number; qty: number }[]; subtotal: number; courier: number; total: number };
+  quote(items: unknown, catalogue: ShopCatalogue, city: unknown, opts?: { skipCourier?: boolean }): { items: { sku: string; slug: string; name: string; size: string; price: number; qty: number }[]; subtotal: number; courier: number; total: number };
   validateCustomer(input: unknown): WebsiteOrder["customer"];
   /** False when this caller has placed too many orders recently. */
   allowed?(): Promise<boolean>;
@@ -93,7 +94,11 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
     const data = toData(await store.load());
     if (!orderingOpen(data)) return { status: 503, body: { error: "Online ordering isn't open yet. Please contact us to order." } };
     const client = user?.emailConfirmed ? customerClient(data!, user.email) : null;
-    const quote = tools.quote(req.items, shopCatalogue(data!, client, today), customer.city);
+    // Items from the live catalogue; delivery from the delivery rules and the customer's choice.
+    const base = tools.quote(req.items, shopCatalogue(data!, client, today), customer.city, { skipCourier: true });
+    const delivery = pickDelivery(base.items, customer.city, deliveryRules(data!.settings), req.deliveryMethod);
+    if (!delivery.ok) return { status: 400, body: { error: delivery.reason } };
+    const quote = { ...base, courier: delivery.fee, total: Math.round((base.subtotal + delivery.fee) * 100) / 100 };
     if (typeof req.expectedTotal !== "number" || Math.round(req.expectedTotal * 100) !== Math.round(quote.total * 100)) {
       return { status: 409, body: { error: "Prices or delivery have changed since your cart was made. Refresh the page and check your order before placing it." } };
     }
@@ -108,7 +113,9 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
       orderAs: req.orderAs === "company" ? "company" : "personal", saveCustomer: req.saveCustomer === true,
       registration: typeof req.registration === "string" ? req.registration.slice(0, 40) : "",
       profile: req.profile && typeof req.profile === "object" && JSON.stringify(req.profile).length < 50000 ? req.profile as WebsiteOrder["profile"] : undefined,
+      deliveryMethod: delivery.method,
     };
+    const collection = delivery.method === "collect" ? { address: data!.settings.deliveryRules?.collection?.address ?? "", hours: data!.settings.deliveryRules?.collection?.hours ?? "" } : null;
     const recorded = await updateBackoffice(store, "website-order", (d, env) => {
       const isNew = !d.documents.some((x) => x.kind === "invoice" && x.reference === order.ref);
       return { number: recordWebsiteOrder(d, order, env), isNew };
@@ -119,7 +126,8 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
       await tools.send([mail.business, mail.customer].filter((m): m is Email => m !== null)).catch(() => undefined);
     }
     return { status: 200, body: {
-      order: { ref: req.ref, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total, name: customer.name, email: customer.email, placedAt: new Date().toISOString(), paymentMethod: "eft" },
+      order: { ref: req.ref, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total, name: customer.name, email: customer.email, placedAt: new Date().toISOString(), paymentMethod: "eft",
+        delivery: { method: delivery.method, label: delivery.label }, ...(collection ? { collection } : {}) },
       invoice: recorded.ok ? recorded.result.number : null,
     } };
   } catch (error) {
@@ -223,7 +231,7 @@ function publicView(data: BackofficeData | null, user: AuthUser | null, today: s
     tier: found.tier, linkedEmail: "", createdAt: "",
     prices: Object.fromEntries(data.catalogue.flatMap((i) => { const p = priceFor(i, found); return p ? [[i.sku, p]] : []; })),
   } : null;
-  return { ready: true, catalogue, courierFee: data.settings.courierFee ?? null, client, orderingOpen: orderingOpen(data) };
+  return { ready: true, catalogue, courierFee: data.settings.courierFee ?? null, client, orderingOpen: orderingOpen(data), delivery: deliveryRules(data.settings) };
 }
 
 function validStart(d: unknown): d is BackofficeData {

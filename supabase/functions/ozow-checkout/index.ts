@@ -58,7 +58,11 @@ Deno.serve(async (request: Request) => {
     // Prices, stock and courier fee from the live back office; the built-in list until it is set up.
     const live = await liveShop(db, userEmail);
     if (live && !live.open) throw new CheckoutError("Online ordering isn't open yet. Please contact us to order.", 503);
-    const quote = quoteCart(body.items, live?.catalogue ?? catalogue, customer.city);
+    const base = quoteCart(body.items, live?.catalogue ?? catalogue, customer.city, live?.pick ? { skipCourier: true } : undefined);
+    // Delivery from the back-office rules: collect, local delivery or courier, as chosen at checkout.
+    const delivery = live?.pick ? live.pick(base.items, customer.city, body.deliveryMethod) : null;
+    if (delivery && !delivery.ok) throw new CheckoutError(delivery.reason);
+    const quote = delivery?.ok ? { ...base, courier: delivery.fee, total: Math.round((base.subtotal + delivery.fee) * 100) / 100 } : base;
     if (typeof body.expectedTotal !== "number" || !Number.isFinite(body.expectedTotal) || Math.round(body.expectedTotal * 100) !== Math.round(quote.total * 100)) {
       throw new CheckoutError("The order total has changed. Refresh your cart before starting payment.", 409);
     }
@@ -80,7 +84,8 @@ Deno.serve(async (request: Request) => {
     await recordOrder(db, { ref: body.ref, method: "ozow", customer, courier: quote.courier,
       items: quote.items.map(({ sku, name, size, price, qty }) => ({ sku, name, size, price, qty })),
       orderAs: body.orderAs === "company" ? "company" : "personal", saveCustomer: body.saveCustomer === true,
-      registration: typeof body.registration === "string" ? body.registration.slice(0, 40) : "" });
+      registration: typeof body.registration === "string" ? body.registration.slice(0, 40) : "",
+      ...(delivery?.ok ? { deliveryMethod: delivery.method } : {}) });
     let redirectUrl = payment.redirect_url;
     if (!redirectUrl) {
       const result = await requestOzow(config, "/payments", payment.request_payload, payment.ref);

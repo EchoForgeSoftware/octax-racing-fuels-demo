@@ -26,7 +26,8 @@ export function validateCapability(ref: unknown, token: unknown): asserts ref is
   }
 }
 
-export function quoteCart(input: unknown, catalogue: Catalogue, city?: unknown) {
+/** `skipCourier`: items only; delivery is priced from the back-office delivery rules (src/lib/delivery.ts). */
+export function quoteCart(input: unknown, catalogue: Catalogue, city?: unknown, opts?: { skipCourier?: boolean }) {
   if (!Array.isArray(input) || input.length < 1 || input.length > 30) throw new CheckoutError("Please check the items in your cart.");
   const quantities = new Map<string, number>();
   for (const line of input) {
@@ -45,9 +46,9 @@ export function quoteCart(input: unknown, catalogue: Catalogue, city?: unknown) 
     const litres = /ml/i.test(product.size) ? parseFloat(product.size) / 1000 : parseFloat(product.size);
     const threshold = catalogue.courier.freeFrom[String(litres)];
     const drum = /drum/i.test(product.size);
-    if (!drum && !threshold) throw new CheckoutError("Delivery for this pack needs a quote. Please use manual EFT after confirming delivery with us.");
+    if (!opts?.skipCourier && !drum && !threshold) throw new CheckoutError("Delivery for this pack needs a quote. Please use manual EFT after confirming delivery with us.");
     subtotalCents += Math.round(product.price * 100) * qty;
-    if (drum || qty < threshold) courierCents += Math.round(catalogue.courier.fee * 100) * qty;
+    if (!opts?.skipCourier && (drum || qty < threshold)) courierCents += Math.round(catalogue.courier.fee * 100) * qty;
     return { ...product, price: product.price, qty };
   });
   // Local-area orders (30 km) pay the standard courier rate; any cheaper local delivery is confirmed by the business.
