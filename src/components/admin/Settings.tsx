@@ -56,7 +56,7 @@ export function SettingsAdmin() {
           return (
             <div className="grid gap-4 sm:grid-cols-2">
               <p className="text-sm text-ink-soft sm:col-span-2">At checkout customers choose: <strong>collect (free)</strong>, or add <strong>local delivery</strong> (the towns below) or <strong>courier</strong> (everywhere else). The courier fee per pack is under VAT and terms.</p>
-              <Field label="Local delivery towns (we deliver ourselves)" className="sm:col-span-2" hint="Comma separated, e.g. Boksburg, Benoni, Brakpan. Towns further than the radius get courier.">
+              <Field label="Local delivery towns (we deliver ourselves)" className="sm:col-span-2" hint="Comma separated, e.g. Boksburg, Benoni, Brakpan. Towns further than the radius: pickup or courier.">
                 <Input value={d.localTowns.map((t) => t.replace(/\b\w/g, (c) => c.toUpperCase())).join(", ")} onChange={(e) => setD({ localTowns: e.target.value.split(",").map((t) => t.trim().toLowerCase()).filter(Boolean) })} />
               </Field>
               <Field label="Local delivery radius (km)" hint="We also deliver ourselves to towns within this distance of the towns above.">
@@ -65,9 +65,13 @@ export function SettingsAdmin() {
               <Field label="Local delivery fee per order (R)" hint="Leave empty to charge the courier rates.">
                 <Input type="number" min={0} step="1" value={d.localFee ?? ""} onChange={(e) => setD({ localFee: e.target.value === "" ? null : Math.max(0, Number(e.target.value)) })} />
               </Field>
-              <Field label="Delivery from (packs)" hint="Smaller orders can only be collected.">
-                <Input type="number" min={1} step="1" value={d.minPacks} onChange={(e) => setD({ minPacks: Math.max(1, Math.round(Number(e.target.value) || 1)) })} />
+              <Field label="Local delivery from (litres)" hint="5 × 25 L = 125 L. A 210 L drum counts as 210. Smaller orders are collected.">
+                <Input type="number" min={0} step="5" value={d.minLitres} onChange={(e) => setD({ minLitres: Math.max(0, Math.round(Number(e.target.value) || 0)) })} />
               </Field>
+              <label className="flex items-start gap-3 text-sm sm:col-span-2">
+                <input type="checkbox" checked={d.courierOnline} onChange={(e) => setD({ courierOnline: e.target.checked })} className="mt-0.5 h-5 w-5 accent-[var(--color-ink)]" />
+                <span><strong>Customers can choose courier online</strong><span className="block text-ink-soft">Off: courier shows as &quot;on request&quot; and customers contact you for a quote. Switch on once you have a flat courier rate (set the fee per pack under VAT and terms).</span></span>
+              </label>
               <label className="flex items-start gap-3 text-sm sm:col-span-2">
                 <input type="checkbox" checked={d.collection.enabled} onChange={(e) => setD({ collection: { ...d.collection, enabled: e.target.checked } })} className="mt-0.5 h-5 w-5 accent-[var(--color-ink)]" />
                 <span><strong>Customers can collect</strong><span className="block text-ink-soft">Free. The address below is only shown after someone orders (confirmation page and email), never on the website.</span></span>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { asset } from "@/lib/site";
 import { technicalSheets, type TechnicalSheet } from "@/lib/technicalSheets";
+import { IfOnWebsite } from "./Available";
 import { OctaLogo } from "./brand/Wordmark";
 
 export function ProductDataSheet({ sheet }: { sheet: TechnicalSheet }) {
@@ -26,7 +27,7 @@ export function TechnicalDataSheets() {
     </div>
     <p className="mt-5 max-w-2xl text-sm text-paper/75">Product profiles, dosage tables and technical properties. Download the OCTA reference sheets, issued under ZRG-X (PTY) LTD.</p>
     <div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-      {technicalSheets.map((sheet, i) => <article key={sheet.slug} className="group flex flex-col border-2 border-paper/25 bg-paper text-ink">
+      {technicalSheets.map((sheet, i) => <IfOnWebsite key={sheet.slug} slug={sheet.slug}><article className="group flex flex-col border-2 border-paper/25 bg-paper text-ink">
         <a href={asset(sheet.pdf)} target="_blank" rel="noopener noreferrer" aria-label={`Preview ${sheet.name} technical data sheet`} className="relative block overflow-hidden border-b-2 border-ink bg-[#dedbd2] px-6 pb-0 pt-6">
           <span className="absolute left-0 top-0 z-10 bg-lime px-3 py-1 font-mono text-xs font-bold">TDS / {String(i + 1).padStart(2, "0")}</span>
           <img src={asset(sheet.preview)} alt={`${sheet.name} technical data sheet with OCTA and ZRG-X branding`} width={620} height={877} loading="lazy" className="mx-auto block h-auto w-full max-w-52 origin-bottom -rotate-3 border border-ink/20 shadow-[5px_5px_0_0_rgba(25,24,23,0.2)] transition-transform duration-300 group-hover:rotate-0" />
@@ -38,7 +39,7 @@ export function TechnicalDataSheets() {
           <a href={asset(sheet.pdf)} download className="mt-5 flex items-center justify-between border-2 border-ink bg-lime px-3 py-3 font-mono text-[0.65rem] font-bold uppercase tracking-wide transition-colors hover:bg-ink hover:text-paper">Download PDF <span aria-hidden="true">↓</span></a>
           <Link href={`/shop/${sheet.slug}/`} className="mt-3 text-center font-mono text-[0.62rem] uppercase tracking-wide underline underline-offset-4 hover:text-flare">View product</Link>
         </div>
-      </article>)}
+      </article></IfOnWebsite>)}
     </div>
     <p className="mt-6 max-w-2xl text-xs leading-relaxed text-paper/65">These are technical data sheets, not Safety Data Sheets (SDS). Consult the current SDS before handling. Octane-increase values are shown as supplied; test methods and units for those increases were not provided.</p>
   </section>;

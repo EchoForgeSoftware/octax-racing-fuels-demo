@@ -34,6 +34,8 @@ export function AddToCart({
   const [added, setAdded] = useState(false);
 
   const variant = product.variants[variantIndex];
+  // Switched off in the back office: the page stays (for links) but nothing can be ordered.
+  const offWebsite = !product.variants.some((v) => pricing.available(v.sku));
   // Back-office price, or the signed-in customer's agreed price.
   const unit = pricing.price(variant.sku, variant.price);
   const list = pricing.listPrice(variant.sku, variant.price);
@@ -55,6 +57,19 @@ export function AddToCart({
     );
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2000);
+  }
+
+  if (offWebsite) {
+    return (
+      <div role="status" className="border-2 border-ink bg-panel p-5">
+        <p className="font-display text-2xl uppercase">Not available right now</p>
+        <p className="mt-2 text-sm text-ink-soft">This product isn&apos;t on sale at the moment. Have a look at the rest of the range, or contact us.</p>
+        <Link href="/shop/" className="mt-4 flex w-full items-center justify-center gap-2 border-2 border-ink bg-ink px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-lime hover:text-ink">
+          Shop the range
+          <Icon name="arrow" size={16} />
+        </Link>
+      </div>
+    );
   }
 
   return (

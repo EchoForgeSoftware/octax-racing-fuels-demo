@@ -90,7 +90,7 @@ function CartTotals({ subtotal, label }: { subtotal: number; label: string }) {
           <dd className="text-right text-muted">Chosen at checkout</dd>
         </div>
         <p className="text-right text-xs text-muted">
-          {delivery.collection.enabled ? "Collect for free, or add delivery at checkout. " : ""}Courier {formatPrice(delivery.courierFee)} per pack; delivery from {delivery.minPacks} pack{delivery.minPacks === 1 ? "" : "s"}.
+          {delivery.collection.enabled ? "Collect for free, or add delivery at checkout. " : ""}Local delivery within {delivery.localKm} km from {delivery.minLitres} L; courier {delivery.courierOnline ? `${formatPrice(delivery.courierFee)} per pack` : "on request"}.
         </p>
       </dl>
       <div className="mt-5 flex items-end justify-between gap-4 border-t-2 border-ink pt-4">

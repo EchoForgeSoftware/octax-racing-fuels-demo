@@ -1,5 +1,7 @@
 "use client";
 
+import { packProduct } from "@/lib/packDesign";
+
 import Link from "next/link";
 import { useCart } from "./CartContext";
 import { formatPrice } from "@/lib/format";
@@ -11,7 +13,8 @@ import { courierNote } from "@/lib/courier";
 import { usePricing } from "./PricingContext";
 
 export function CartView() {
-  const { courierFee } = usePricing();
+  const pricing = usePricing();
+  const { courierFee } = pricing;
   const { items, count, setQty, remove, subtotal, ready } = useCart();
 
   if (!ready) {
@@ -45,9 +48,12 @@ export function CartView() {
       <ul className="divide-y-2 divide-ink border-2 border-ink bg-panel" aria-label="Items in your cart">
         {items.map((i) => {
           const product = getProduct(i.slug);
+          // Products added in the back office have no page of their own: link to New in, show their pack picture.
+          const listed = product ? null : pricing.item(i.sku);
+          const href = product ? `/shop/${i.slug}/` : "/shop/#new-in-section";
           return (
             <li key={i.sku} className="grid grid-cols-[4.5rem_1fr] gap-x-4 gap-y-3 p-4 sm:grid-cols-[5.5rem_1fr_auto] sm:items-center">
-              <Link href={`/shop/${i.slug}/`} tabIndex={-1} aria-hidden="true" className="block self-start border-2 border-ink">
+              <Link href={href} tabIndex={-1} aria-hidden="true" className="block self-start border-2 border-ink">
                 {product && (
                   <ProductShot
                     product={product}
@@ -56,10 +62,13 @@ export function CartView() {
                     className="block aspect-square w-full"
                   />
                 )}
+                {!product && (listed?.pack
+                  ? <ProductShot product={packProduct(listed, listed.pack)} frame="square" className="block aspect-square w-full" />
+                  : <span className="grid aspect-square w-full place-items-center bg-paper-2 font-display text-xs uppercase">{i.size}</span>)}
               </Link>
 
               <div className="min-w-0">
-                <Link href={`/shop/${i.slug}/`} className="font-display text-base uppercase leading-tight hover:text-flare">
+                <Link href={href} className="font-display text-base uppercase leading-tight hover:text-flare">
                   {i.name}
                 </Link>
                 <p className="num mt-1.5 font-mono text-xs uppercase tracking-wider text-muted">

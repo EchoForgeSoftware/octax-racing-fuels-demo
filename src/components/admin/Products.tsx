@@ -78,6 +78,8 @@ function ProductRow({ item }: { item: CatalogueItem }) {
 function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () => void }) {
   const { saveCatalogueItem, removeCatalogueItem, data, today } = useBackoffice();
   const isNew = !item;
+  // Products with their own website page keep their name, size and category; everything else is fully editable.
+  const builtIn = !!item?.slug;
   const [f, setF] = useState(() => ({
     productName: item?.productName ?? "",
     size: item?.size ?? "",
@@ -116,6 +118,23 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
 
   function submit() {
     if (!f.productName.trim() || !f.size.trim()) return setError("Enter a product name and a size or variant (e.g. Large, 500ml).");
+    // New products: several sizes at once ("S, M, L, XL") become one product per size.
+    const sizes = isNew ? [...new Set(f.size.split(",").map((x) => x.trim()).filter(Boolean))] : [f.size.trim()];
+    if (isNew && sizes.length > 1) {
+      const skuFor = (size: string) => `CUSTOM-${f.productName.replace(/[^a-z0-9]+/gi, "-").toUpperCase().slice(0, 24)}-${size.replace(/[^a-z0-9]+/gi, "").toUpperCase().slice(0, 8)}`;
+      if (sizes.some((size) => data?.catalogue.some((i) => i.sku === skuFor(size)))) return setError("One of those sizes already exists for this product.");
+      for (const k of ["retail", "agent", "bulk", "cost"] as const) if (f[k] && !(Number(f[k]) >= 0)) return setError("Prices must be numbers of 0 or more.");
+      const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
+      for (const size of sizes) {
+        saveCatalogueItem({
+          sku: skuFor(size), slug: null, custom: true, productName: f.productName.trim(), size, category: f.category,
+          retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost,
+          short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
+          ...(costing ? { costing } : {}), ...(pack ? { pack: cleanPack(pack) } : {}), ...(f.stock !== "in" ? { stock: f.stock } : {}),
+        });
+      }
+      return onDone();
+    }
     for (const k of ["retail", "agent", "bulk", "cost"] as const) if (f[k] && !(Number(f[k]) >= 0)) return setError("Prices must be numbers of 0 or more.");
     const sku = item?.sku ?? `CUSTOM-${f.productName.replace(/[^a-z0-9]+/gi, "-").toUpperCase().slice(0, 24)}-${f.size.replace(/[^a-z0-9]+/gi, "").toUpperCase().slice(0, 8)}`;
     if (isNew && data?.catalogue.some((i) => i.sku === sku)) return setError("A product with that name and size already exists.");
@@ -123,9 +142,9 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
     saveCatalogueItem({
       sku, slug: item?.slug ?? null, custom: item?.custom ?? true,
-      productName: item?.custom === false ? item.productName : f.productName.trim(),
-      size: item?.custom === false ? item.size : f.size.trim(),
-      category: item?.custom === false ? item.category : f.category,
+      productName: builtIn ? item!.productName : f.productName.trim(),
+      size: builtIn ? item!.size : f.size.trim(),
+      category: builtIn ? item!.category : f.category,
       retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost,
       short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
       ...(costing ? { costing } : {}),
@@ -135,13 +154,12 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
     onDone();
   }
 
-  const builtIn = item?.custom === false;
   return (
     <Panel title={isNew ? "Add product" : undefined} className={isNew ? "mb-6" : "!border-0"}>
       {error && <p role="alert" className="mb-3 border-2 border-flare p-3 text-sm">{error}</p>}
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <Field label="Product name" className="sm:col-span-2"><Input value={f.productName} disabled={builtIn} onChange={(e) => set({ productName: e.target.value })} /></Field>
-        <Field label="Size / variant"><Input value={f.size} disabled={builtIn} onChange={(e) => set({ size: e.target.value })} placeholder="e.g. Large, 500ml" /></Field>
+        <Field label="Size / variant"><Input value={f.size} disabled={builtIn} onChange={(e) => set({ size: e.target.value })} placeholder={isNew ? "e.g. 25L, or S, M, L, XL" : "e.g. Large, 500ml"} /></Field>
         <Field label="Category">
           <Select value={f.category} disabled={builtIn} onChange={(e) => set({ category: e.target.value as CatalogueCategory })}>
             {(Object.keys(CATEGORY_LABEL) as CatalogueCategory[]).map((c) => <option key={c} value={c}>{CATEGORY_LABEL[c]}</option>)}
@@ -217,7 +235,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
           </label>
         </div>
         <div className="flex gap-2">
-          {item?.custom && (
+          {item && !builtIn && (
             <Button tone="danger" onClick={() => {
               if (!window.confirm(`Delete ${item.productName} (${item.size})? This can't be undone.`)) return;
               try { removeCatalogueItem(item.sku); onDone(); }
@@ -228,7 +246,9 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
           <Button tone="primary" onClick={submit}>{isNew ? "Add product" : "Save"}</Button>
         </div>
       </div>
-      {builtIn && <p className="mt-3 text-xs text-muted">Name, size and category of website products are fixed because they match the labels and product pages.</p>}
+      {isNew && <p className="mt-3 text-xs text-muted">Several sizes (e.g. hoodies): type them separated by commas, like <strong>S, M, L, XL</strong>. Each size becomes its own line with the same price; change a size&apos;s price afterwards if it differs.</p>}
+      {!isNew && !builtIn && item?.comingSoon && <p className="mt-3 text-xs text-muted">To sell this online: untick <strong>Coming soon</strong>, enter a website price and Save. It moves to <strong>New in</strong> on the shop and can be ordered.</p>}
+      {builtIn && <p className="mt-3 text-xs text-muted">Name, size and category of products with their own website page are fixed because they match the labels and product pages. Untick <strong>Show on the website</strong> to take it off the website.</p>}
     </Panel>
   );
 }

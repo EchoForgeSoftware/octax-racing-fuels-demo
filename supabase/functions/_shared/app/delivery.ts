@@ -17,8 +17,10 @@ export type DeliverySettings = {
   localKm: number;
   /** Local delivery charge per order; null = the courier rates. */
   localFee: number | null;
-  /** Fewest packs (any size) an order needs for delivery; smaller orders can only be collected. */
-  minPacks: number;
+  /** Fewest litres an order needs for local delivery (5 × 25 L = 125 L); smaller orders are collected. */
+  minLitres: number;
+  /** Customers can choose courier online; when off, courier is "on request" (contact us). */
+  courierOnline: boolean;
   collection: { enabled: boolean; address: string; hours: string };
 };
 
@@ -31,9 +33,10 @@ export type DeliveryRules = Omit<DeliverySettings, "collection"> & {
 
 export const DEFAULT_DELIVERY: DeliverySettings = {
   localTowns: ["boksburg", "benoni", "brakpan"],
-  localKm: 20,
+  localKm: 25,
   localFee: null,
-  minPacks: 3,
+  minLitres: 125,
+  courierOnline: false,
   collection: { enabled: false, address: "", hours: "" },
 };
 
@@ -51,13 +54,18 @@ export function deliveryRules(settings: { courierFee?: number; deliveryRules?: P
     localKm: radius,
     localArea: townsNear(towns, radius),
     localFee: fee(d.localFee),
-    minPacks: Math.max(1, Math.min(100, Math.round(Number(d.minPacks) || 1))),
+    minLitres: Math.max(0, Math.min(10000, Math.round(Number(d.minLitres) || 0))),
+    courierOnline: d.courierOnline === true,
     courierFee: fee(settings?.courierFee) ?? courierRates.fee,
     collection: { enabled: d.collection?.enabled === true && !!d.collection.address?.trim(), hours: String(d.collection?.hours ?? "").slice(0, 200) },
   };
 }
 
 const litres = (size: string) => (/ml/i.test(size) ? parseFloat(size) / 1000 : parseFloat(size));
+/** Litres in an order ("25L" × 5 = 125; merch and other sizes count 0). */
+export function orderLitres(lines: { size: string; qty: number }[]): number {
+  return lines.reduce((n, l) => { const each = /\d\s*(ml|l)\b/i.test(l.size) || /drum/i.test(l.size) ? litres(l.size) : 0; return n + (Number.isFinite(each) ? each : 0) * l.qty; }, 0);
+}
 const FREE_FROM: Record<string, number> = courierRates.freeFrom;
 
 /** Courier per the policy: a fee per pack, free from 10 (5 L / 25 L) or 12 (500 ml) of one product; drums always pay; other sizes quoted. */
@@ -79,9 +87,8 @@ export const DELIVERY_NAME: Record<DeliveryMethod, string> = { local: "OCTA loca
 
 /** The ways this order can reach the customer: collection first (free), then delivery as an add-on. */
 export function deliveryOptions(lines: { size: string; qty: number }[], city: string | null | undefined, rules: DeliveryRules): DeliveryOption[] {
-  const packs = lines.reduce((n, l) => n + l.qty, 0);
-  const enough = packs >= rules.minPacks;
-  const short = `Delivery is from ${rules.minPacks} packs${rules.collection.enabled ? "; you can collect smaller orders" : ""}.`;
+  const enough = orderLitres(lines) >= rules.minLitres;
+  const short = `Local delivery is for orders of ${rules.minLitres} L or more (e.g. 5 × 25 L)${rules.collection.enabled ? "; you can collect smaller orders" : ""}.`;
   const town = localTown(city, rules.localArea);
   const courier = courierCost(lines, rules.courierFee);
   // Collection (free, at the collection point) comes first; delivery is the paid add-on.
@@ -92,8 +99,11 @@ export function deliveryOptions(lines: { size: string; qty: number }[], city: st
     options.push({ method: "local", label: `${DELIVERY_NAME.local} (${town.replace(/\b\w/g, (c) => c.toUpperCase())})`, fee,
       available: enough && !quoted, ...(!enough ? { reason: short } : quoted ? { reason: "Some items need a delivery quote. Please contact us." } : {}) });
   } else {
-    options.push({ method: "courier", label: DELIVERY_NAME.courier, fee: courier.fee, available: enough && !courier.quoted,
-      ...(!enough ? { reason: short } : courier.quoted ? { reason: "Some items need a courier quote. Please contact us." } : {}) });
+    // Courier: on request until a flat rate is agreed (Settings → Delivery: courier online).
+    options.push({ method: "courier", label: rules.courierOnline ? DELIVERY_NAME.courier : "Courier (on request)", fee: courier.fee,
+      available: rules.courierOnline && !courier.quoted,
+      ...(!rules.courierOnline ? { reason: "Courier is arranged on request. Contact us with your address and we'll quote." }
+        : courier.quoted ? { reason: "Some items need a courier quote. Please contact us." } : {}) });
   }
   return options;
 }

@@ -182,7 +182,7 @@ test("products added in the back office can be deleted only while unused; out of
   assert.ok(!(await call("zuan",{op:"load"})).body.data.catalogue.some(i=>i.sku==="CUSTOM-HOODIE-L"));
   // OCTA-X-25 is on invoices: it can't be deleted even when added by hand.
   const x=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X-25");
-  await act("zuan","saveCatalogueItem",[{...x,custom:true}]);
+  await act("zuan","saveCatalogueItem",[{...x,custom:true,slug:null}]);
   assert.match((await act("zuan","removeCatalogueItem",["OCTA-X-25"])).body.error,/invoices/);
   await act("zuan","saveCatalogueItem",[{...x,stock:"out"}]);
   await act("zuan","saveCatalogueItem",[{...base,stock:"auto"}]);
@@ -205,7 +205,7 @@ test("website EFT orders are priced from the live back office and land as unpaid
   const place=(who,changes={})=>server.placeOrder({ref:"OCTA-ABCDEF123456",items:[{sku:"OCTA-BOOST-5",qty:2}],customer,expectedTotal:1280,termsAccepted:true,termsVersion:"2026-10-18",...changes},who?user(who):null,shopStore,today,makeId,tools);
   assert.equal((await place(null)).status,503,"closed until a main admin opens online ordering");
   const s=(await call("zuan",{op:"load"})).body.data.settings;
-  await act("zuan","saveSettings",[{...s,onlineOrdering:true,deliveryRules:{minPacks:1}}]);
+  await act("zuan","saveSettings",[{...s,onlineOrdering:true,deliveryRules:{minLitres:0,courierOnline:true}}]);
   assert.equal((await call(null,{op:"public"})).body.orderingOpen,true);
   assert.equal((await place(null,{expectedTotal:1})).status,409,"the browser's total must match the server's");
   assert.equal((await place(null,{termsAccepted:false})).status,400);
@@ -296,19 +296,22 @@ test("customers collect for free or add delivery; the server holds them to the d
   const shopStore={...store,async insertOrder(){return null;}};
   const tools={quote:pay.quoteCart,validateCustomer:pay.validateCustomer};
   const s=(await call("zuan",{op:"load"})).body.data.settings;
-  await act("zuan","saveSettings",[{...s,deliveryRules:{localTowns:["boksburg","benoni","brakpan"],localKm:20,localFee:150,minPacks:3,collection:{enabled:true,address:"12 Test Street, Boksburg",hours:"Mon-Fri 8-5"}}}]);
+  const rules={localTowns:["boksburg","benoni","brakpan"],localKm:25,localFee:150,minLitres:125,courierOnline:false,collection:{enabled:true,address:"12 Test Street, Boksburg",hours:"Mon-Fri 8-5"}};
+  await act("zuan","saveSettings",[{...s,deliveryRules:rules}]);
   const shop=(await call(null,{op:"public"})).body;
-  assert.equal(shop.delivery.minPacks,3);assert.equal(shop.delivery.collection.address,undefined,"the collection address is never public");
+  assert.equal(shop.delivery.minLitres,125);assert.equal(shop.delivery.courierOnline,false);assert.equal(shop.delivery.collection.address,undefined,"the collection address is never public");
   const customer=(city)=>({name:"Buyer",email:"b@buyer-mail.co.za",phone:"0821234567",company:"",vat:"",address:"1 Rd",city,postcode:"0000"});
   const place=(ref,qty,city,method,expectedTotal)=>server.placeOrder({ref,items:[{sku:"OCTA-BOOST-5",qty}],customer:customer(city),expectedTotal,termsAccepted:true,termsVersion:"2026-10-18",deliveryMethod:method},null,shopStore,today,makeId,tools);
   const collect=await place("OCTA-00000000D001",1,"Durban","collect",440);
   assert.equal(collect.status,200);assert.equal(collect.body.order.courier,0);assert.equal(collect.body.order.collection.address,"12 Test Street, Boksburg");
-  assert.equal((await place("OCTA-00000000D002",1,"Durban","courier",640)).status,400,"delivery is from 3 packs");
+  assert.equal((await place("OCTA-00000000D002",1,"Durban","courier",640)).status,400,"courier is on request until switched on");
+  assert.equal((await place("OCTA-00000000D006",3,"Germiston","local",1470)).status,400,"15 L is under the 125 L for local delivery");
+  const local=await place("OCTA-00000000D004",25,"Germiston","local",11150);
+  assert.equal(local.status,200,"125 L to Germiston (within 25 km): 25 x R440 + local delivery R150");
+  assert.equal((await place("OCTA-00000000D005",25,"Germiston","courier",11000)).status,400,"inside the local area it is local delivery, not courier");
+  await act("zuan","saveSettings",[{...s,deliveryRules:{...rules,courierOnline:true}}]);
   const courier=await place("OCTA-00000000D003",3,"Durban","courier",1920);
-  assert.equal(courier.status,200,"3 packs by courier: 3 x R440 + 3 x R200");
-  const local=await place("OCTA-00000000D004",3,"Germiston","local",1470);
-  assert.equal(local.status,200,"Germiston is within 20 km: local delivery R150");
-  assert.equal((await place("OCTA-00000000D005",3,"Germiston","courier",1920)).status,400,"inside the local area it is local delivery, not courier");
+  assert.equal(courier.status,200,"courier switched on: 3 x R440 + 3 x R200");
   const docs=(await call("zuan",{op:"load"})).body.data.documents;
   assert.equal(docs.find(x=>x.reference==="OCTA-00000000D001").delivery.method,"collect");
   assert.equal(docs.find(x=>x.reference==="OCTA-00000000D004").delivery.method,"own");

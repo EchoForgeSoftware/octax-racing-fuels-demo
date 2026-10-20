@@ -17,13 +17,15 @@ export function DeliveryPolicy() {
           <p className="mt-1">You can collect your order free of charge once payment has reflected. The collection address is sent with your order confirmation.{d.collection.hours ? ` Collection times: ${d.collection.hours}.` : ""}</p>
         </>
       )}
-      <h3 className="mt-4 font-bold text-ink">Delivery from {d.minPacks} pack{d.minPacks === 1 ? "" : "s"}</h3>
-      <p className="mt-1">Delivery is available on orders of {d.minPacks} or more packs (any size).{d.collection.enabled ? " Smaller orders can be collected." : ""} You choose collection or delivery at checkout.</p>
       <h3 className="mt-4 font-bold text-ink">Local delivery</h3>
-      <p className="mt-1">We deliver ourselves within {d.localKm} km of {list(d.localTowns)}{d.localFee === null ? ", at the standard courier rates below." : d.localFee > 0 ? ` for ${formatPrice(d.localFee)} per order.` : " free of charge."}</p>
+      <p className="mt-1">We deliver ourselves within {d.localKm} km of {list(d.localTowns)} on orders of {d.minLitres} L or more (for example 5 × 25 L){d.localFee === null ? ", at the standard courier rates below." : d.localFee > 0 ? `, for ${formatPrice(d.localFee)} per order.` : ", free of charge."}{d.collection.enabled ? " Smaller orders can be collected." : ""} You choose collection or delivery at checkout.</p>
       <h3 className="mt-4 font-bold text-ink">Courier delivery</h3>
-      <p className="mt-1">Orders to other areas are sent by courier.</p>
-      <p className="mt-2">Standard courier charge: {formatPrice(d.courierFee)} per pack. 210 L drums always pay the courier charge.</p>
+      {d.courierOnline ? (
+        <>
+          <p className="mt-1">Orders to other areas can be sent by courier.</p>
+          <p className="mt-2">Standard courier charge: {formatPrice(d.courierFee)} per pack. 210 L drums always pay the courier charge.</p>
+        </>
+      ) : <p className="mt-1">Courier delivery is arranged on request. <a href="/contact/" className="underline">Contact us</a> with your address and order and we&apos;ll give you a quote.</p>}
     </>
   );
 }

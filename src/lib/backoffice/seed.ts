@@ -315,6 +315,8 @@ function sampleSuppliers(today: string): Pick<BackofficeData, "suppliers" | "sup
 export function catalogueChanges(current: CatalogueItem[]): CatalogueItem[] {
   const changes: CatalogueItem[] = [];
   for (const site of baseCatalogue(false)) {
+    // Only products with a website page; coming-soon items are edited (or deleted) in the back office.
+    if (!site.slug) continue;
     const have = current.find((i) => i.sku === site.sku);
     if (!have) { changes.push(site); continue; }
     if (have.custom) continue;

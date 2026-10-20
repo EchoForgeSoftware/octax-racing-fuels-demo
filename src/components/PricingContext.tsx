@@ -14,7 +14,7 @@ import { callBackoffice } from "@/lib/backoffice/api";
 import { deliveryRules, type DeliveryRules } from "@/lib/delivery";
 import type { CatalogueItem, Client } from "@/lib/backoffice/types";
 
-type Pricing = {
+export type Pricing = {
   /** Price this visitor pays for a SKU; `fallback` is the built-in website price. null = on quotation. */
   price: (sku: string, fallback: number | null) => number | null;
   /** The website (retail) price, to show next to a customer's own price. */
@@ -129,7 +129,8 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       },
       client,
       item: (sku) => bySku.get(sku) ?? null,
-      extras: data.catalogue.filter((i) => i.custom && i.active && !i.comingSoon),
+      // Added in the back office, or coming-soon items made live: everything without its own product page.
+      extras: data.catalogue.filter((i) => !i.slug && i.active && !i.comingSoon),
       courierFee: data.courierFee ?? courierRates.fee,
       staff,
       soldOut: (sku) => bySku.get(sku)?.soldOut === true,

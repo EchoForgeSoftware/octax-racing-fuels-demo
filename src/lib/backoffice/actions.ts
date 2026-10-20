@@ -306,7 +306,7 @@ const handlers: Handlers = {
     requireAccess(admin, "products");
     const item = d.catalogue.find((x) => x.sku === sku);
     if (!item) return;
-    if (!item.custom) throw new ActionError("Website products can't be deleted. Untick \"Show on the website\" to hide it.");
+    if (item.slug) throw new ActionError("Products with their own website page can't be deleted. Untick \"Show on the website\" to hide it.");
     const used = d.documents.some((doc) => doc.lines.some((l) => l.sku === sku)) || d.stock.some((b) => b.sku === sku) || d.stockCounts.some((c) => c.sku === sku);
     if (used) throw new ActionError(`${item.productName} (${item.size}) is on invoices, quotes or stock records, so it stays for your records. Untick "Show on the website" to hide it.`);
     d.catalogue = d.catalogue.filter((x) => x.sku !== sku);

@@ -6,13 +6,18 @@ import { gsap, useIsoLayoutEffect } from "@/lib/gsap";
 import { Magnetic } from "./anim/Magnetic";
 import { ProductShot } from "./pack/ProductShot";
 import { getProduct } from "@/lib/products";
+import { useOnWebsite } from "./Available";
 
 // The hero entrance plays for everyone (the site owner asked for it to be visible
 // on load); it is kept smooth and non-looping. Only the ambient pointer tilt is a
 // continuous effect, and it responds to direct user input.
-const hero = getProduct("octa-x-ethanol");
+/** The hero shows the first of these that is on the website (switched on in the back office). */
+const HERO_ORDER = ["octa-x-95-ethanol", "octa-x-ethanol", "octa-m-methanol"];
 
 export function Hero() {
+  const onWebsite = useOnWebsite();
+  const hero = HERO_ORDER.map((slug) => getProduct(slug)).find((p) => onWebsite(p)) ?? getProduct("octa-x-95-ethanol");
+  const purity = hero?.label.highlight ?? "";
   const scopeRef = useRef<HTMLElement | null>(null);
 
   useIsoLayoutEffect(() => {
@@ -133,7 +138,7 @@ export function Hero() {
           </h1>
 
           <p data-sub className="mt-7 max-w-xl text-lg text-ink-soft">
-            OCTA-X Plus 96% and OCTA-X 95% ethanol, OCTA-M 99.9% methanol and OCTA-BOOST for serious
+            OCTA-X ethanol, OCTA-M 99.9% methanol and OCTA-BOOST for serious
             performance builds. Every pack is batch-dated for freshness and consistency.
           </p>
 
@@ -161,7 +166,7 @@ export function Hero() {
             </div>
             <div className="grid grid-cols-2 gap-px border-t-2 border-ink bg-paper/20">
               {[
-                { k: "Ethanol", to: 96, suffix: "%", label: "96%" },
+                { k: hero?.category === "methanol" ? "Methanol" : "Ethanol", to: parseFloat(purity) || 95, suffix: "%", label: purity || "95%" },
                 { k: "Litre can", to: 25, suffix: "L", label: "25L" },
               ].map((s) => (
                 <div key={s.k} className="bg-ink p-4">

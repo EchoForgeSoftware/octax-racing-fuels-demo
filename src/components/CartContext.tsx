@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { products } from "@/lib/products";
-import { usePricing } from "./PricingContext";
+import { usePricing, type Pricing } from "./PricingContext";
 
 export type CartItem = {
   sku: string;
@@ -44,13 +44,21 @@ const CartCtx = createContext<CartState | null>(null);
  * items that are no longer sold or are now priced on quotation. `priceOf` gives
  * the back-office price and the signed-in customer's own price.
  */
-function reprice(saved: CartItem[], priceOf: (sku: string, fallback: number | null) => number | null): CartItem[] {
+function reprice(saved: CartItem[], pricing: Pricing | null): CartItem[] {
   return saved.flatMap((item) => {
     const product = products.find((p) => p.slug === item.slug);
     const variant = product?.variants.find((v) => v.sku === item.sku);
-    const price = variant ? priceOf(variant.sku, variant.price) : null;
-    if (!product || !variant || price === null) return [];
-    return [{ ...item, name: product.name, size: variant.size, price }];
+    if (product && variant) {
+      const price = pricing ? pricing.price(variant.sku, variant.price) : variant.price;
+      return price === null ? [] : [{ ...item, name: product.name, size: variant.size, price }];
+    }
+    // Products added in the back office (no product page): kept until the live catalogue has loaded,
+    // then checked against it (switched off, coming soon or without a price → removed).
+    if (!pricing || !pricing.ready) return [item];
+    const listed = pricing.item(item.sku);
+    const price = listed ? pricing.price(item.sku, null) : null;
+    if (!listed || listed.slug || price === null) return [];
+    return [{ ...item, slug: "", name: listed.productName, size: listed.size, price }];
   });
 }
 
@@ -62,13 +70,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Prices change in the back office and differ per signed-in customer.
   useEffect(() => {
-    setItems((prev) => (prev.length ? reprice(prev, pricing.price) : prev));
+    setItems((prev) => (prev.length ? reprice(prev, pricing) : prev));
   }, [pricing]);
 
   useEffect(() => {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) setItems(reprice(JSON.parse(raw) as CartItem[], (_sku, f) => f));
+      if (raw) setItems(reprice(JSON.parse(raw) as CartItem[], null));
     } catch {
       // ignore corrupt or unavailable storage
     }

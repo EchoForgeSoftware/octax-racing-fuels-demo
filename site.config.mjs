@@ -23,7 +23,7 @@ export const SITE = {
   shortName: "OCTA",
   tagline: "Fuel the addiction",
   description:
-    "OCTA Performance supplies OCTA-X ethanol 95% and OCTA-X Plus 96%, OCTA-M methanol, OCTA-BOOST and OCTA-SHOT octane boosters and OCTA-TORQUE diesel improver, with online ordering and delivery.",
+    "OCTA Performance supplies OCTA-X ethanol, OCTA-M methanol, OCTA-BOOST and OCTA-SHOT octane boosters and OCTA-TORQUE diesel improver, with online ordering and delivery.",
   // Company that owns the OCTA brand, as printed on the product labels.
   legalName: "ZRG-X (PTY) LTD",
   // Mailboxes on octa-boost.com (2026-10-16); phone, address and privacy contact from the owners (2026-10-18).

@@ -21,7 +21,6 @@ const content = `# ${SITE.name}
 - [Contact](${u("/contact/")}): Enquiries about products, orders and delivery.
 
 ## Products
-- [OCTA-X Plus Ethanol 96%](${u("/shop/octa-x-ethanol/")}): Our purest ethanol grade, for performance use. UN 1170, Class 3.
 - [OCTA-X Ethanol 95%](${u("/shop/octa-x-95-ethanol/")}): Ethanol for performance use. UN 1170, Class 3.
 - [OCTA-M Methanol 99.9%](${u("/shop/octa-m-methanol/")}): Methanol for performance use. UN 1230, Class 3.
 - [OCTA-BOOST](${u("/shop/octa-boost/")}): Octane booster for 95 octane pump fuel, 5L per 30L/25L/20L/15L base fuel. UN 1170, Class 3.

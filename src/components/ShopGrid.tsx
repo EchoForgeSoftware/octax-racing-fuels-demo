@@ -3,6 +3,7 @@
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { categories, products } from "@/lib/products";
 import { ProductCard } from "./ProductCard";
+import { useOnWebsite } from "./Available";
 
 const filters = [{ slug: "all", name: "All" }, ...categories];
 
@@ -21,7 +22,9 @@ export function ShopGrid() {
     router.replace(href, { scroll: false });
   }
 
-  const list = active === "all" ? products : products.filter((p) => p.category === active);
+  const onWebsite = useOnWebsite();
+  // Products switched off in the back office (Products & pricing) aren't listed.
+  const list = (active === "all" ? products : products.filter((p) => p.category === active)).filter(onWebsite);
   const activeName = filters.find((f) => f.slug === active)?.name;
 
   return (

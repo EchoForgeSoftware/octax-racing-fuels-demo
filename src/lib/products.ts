@@ -61,7 +61,7 @@ export const categories: Category[] = [
   {
     slug: "ethanol",
     name: "Ethanol",
-    blurb: "OCTA-X 95% and OCTA-X Plus 96% ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
+    blurb: "OCTA-X ethanol for performance use, for alcohol-fuelled and flex-fuel builds.",
   },
   {
     slug: "methanol",

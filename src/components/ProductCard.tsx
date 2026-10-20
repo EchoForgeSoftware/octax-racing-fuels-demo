@@ -7,13 +7,16 @@ import { LivePrice } from "./LivePrice";
 import { volumeLabel } from "@/lib/pack";
 import { ProductShot } from "./pack/ProductShot";
 import { usePricing } from "./PricingContext";
+import { useOnWebsite } from "./Available";
 
 export function ProductCard({ product }: { product: Product }) {
   const category = getCategory(product.category);
   // Pack sizes in place of a stock badge: no stock is held on hand.
   const sizes = product.variants.map((v) => volumeLabel(v.size)).join(" · ");
   const pricing = usePricing();
+  const onWebsite = useOnWebsite();
   const out = product.variants.filter((v) => pricing.soldOut(v.sku)).length;
+  if (!onWebsite(product)) return null;
 
   return (
     <Link

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { SITE, hasContactEmail, hasContactPhone } from "@/lib/site";
+import { IfOnWebsite } from "./Available";
 import { OctaLogo } from "./brand/Wordmark";
 import zrgLogo from "@/assets/zrg-x-logo.png";
 
@@ -44,7 +45,7 @@ export function Footer() {
               {SITE.tagline}
             </p>
             <p className="mt-3 max-w-xs text-sm text-paper/70">
-              OCTA-X and OCTA-X Plus ethanol, OCTA-M methanol and OCTA-BOOST octane booster for
+              OCTA-X ethanol, OCTA-M methanol and OCTA-BOOST octane booster for
               performance use.
             </p>
             <div className="mt-6 inline-flex items-center gap-3">
@@ -62,11 +63,14 @@ export function Footer() {
               <h2 className="kicker text-lime">{col.title}</h2>
               <ul className="mt-4 space-y-2.5">
                 {col.links.map((l) => (
-                  <li key={l.href}>
-                    <Link href={l.href} className="text-sm text-paper/80 transition-colors hover:text-lime">
-                      {l.label}
-                    </Link>
-                  </li>
+                  // Product links disappear when the product is switched off in the back office.
+                  <IfOnWebsite key={l.href} slug={l.href.replace(/^\/shop\/|\/$/g, "")}>
+                    <li>
+                      <Link href={l.href} className="text-sm text-paper/80 transition-colors hover:text-lime">
+                        {l.label}
+                      </Link>
+                    </li>
+                  </IfOnWebsite>
                 ))}
               </ul>
             </div>
