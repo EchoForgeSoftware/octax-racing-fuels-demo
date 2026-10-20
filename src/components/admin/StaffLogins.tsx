@@ -69,7 +69,10 @@ export function StaffLogins() {
                 <strong>{s.display_name}</strong>{admin?.id === s.user_id && <span className="ml-2 bg-lime px-1.5 py-0.5 font-mono text-[0.65rem] uppercase">You</span>}
                 <span className="block break-all text-ink-soft">{ROLE_LABEL[s.role]} · <span className="font-mono text-xs">{s.email ?? "—"}</span></span>
               </span>
-              {admin?.id !== s.user_id && (
+              {/* Main admins are always on; only the other logins can be switched off. */}
+              {s.role === "main" ? (
+                <span className="font-mono text-[0.65rem] uppercase tracking-wider text-muted">Always on</span>
+              ) : (
                 <Button disabled={busy} onClick={() => void run({ op: "setStaffActive", userId: s.user_id, active: !s.active })}>{s.active ? "Switch off" : "Switch on"}</Button>
               )}
             </li>

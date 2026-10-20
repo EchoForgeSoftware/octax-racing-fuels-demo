@@ -286,6 +286,9 @@ export async function handle(body: unknown, user: AuthUser | null, store: Store,
           const reps = toData(await store.load(["settings", "reps"]))?.reps ?? [];
           if (!reps.some((x) => x.active && x.email.toLowerCase() === email)) return { status: 400, body: { error: "Add the rep under Sales reps first (with this email), then create their login." } };
         }
+        // A main admin stays a main admin: their login can't be given a smaller role.
+        const current = (await store.listStaff()).find((x) => x.email?.toLowerCase() === email);
+        if (current?.role === "main" && role !== "main") return { status: 400, body: { error: `${current.display_name} is a main admin, and main admins can't be changed to another role.` } };
         const login = await store.ensureLogin(email, password);
         if ("error" in login) return { status: 400, body: { error: login.error } };
         // Reps get their access from the Sales reps list; everyone else from a staff row.
@@ -294,7 +297,8 @@ export async function handle(body: unknown, user: AuthUser | null, store: Store,
       if (req.op === "setStaffActive") {
         const target = (await store.listStaff()).find((x) => x.user_id === r.userId);
         if (!target || target.role === "rep") return { status: 404, body: { error: "That login isn't on the staff list." } };
-        if (target.user_id === user.id && r.active !== true) return { status: 400, body: { error: "You can't switch off your own login." } };
+        // Main admins can't be switched off, by anyone.
+        if (target.role === "main" && r.active !== true) return { status: 400, body: { error: "Main admins can't be switched off." } };
         await store.saveStaff(target.user_id, target.display_name, target.role as Exclude<Role, "rep">, r.active === true);
       }
       return { status: 200, body: { staff: await store.listStaff() } };

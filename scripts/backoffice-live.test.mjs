@@ -281,7 +281,10 @@ test("main admins create staff logins on the website; nobody else can",async()=>
   assert.equal(made.status,200);
   const row=made.body.staff.find(s=>s.email==="new.person@octa-boost.com");
   assert.equal(row.role,"viewer");assert.equal(row.active,true);
-  assert.equal((await as("zuan",{op:"setStaffActive",userId:people.zuan.id,active:false})).status,400,"you can't switch yourself off");
+  assert.equal((await as("zuan",{op:"setStaffActive",userId:people.zuan.id,active:false})).status,400,"main admins can't be switched off");
+  const boss=(await as("zuan",{op:"createLogin",email:"boss2@octa-boost.com",name:"Boss Two",role:"main",password:"long-enough-pw"})).body.staff.find(s=>s.email==="boss2@octa-boost.com");
+  assert.equal((await as("zuan",{op:"setStaffActive",userId:boss.user_id,active:false})).status,400,"not even by another main admin");
+  assert.equal((await as("zuan",{op:"createLogin",email:"boss2@octa-boost.com",name:"Boss Two",role:"viewer",password:"long-enough-pw"})).status,400,"a main admin can't be demoted");
   const off=await as("zuan",{op:"setStaffActive",userId:row.user_id,active:false});
   assert.equal(off.body.staff.find(s=>s.user_id===row.user_id).active,false);
 });
