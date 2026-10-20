@@ -61,7 +61,7 @@ await walk(root);
 const sitemap = readFileSync(join(root, "sitemap.xml"), "utf8");
 assert.doesNotMatch(sitemap, /\/(admin|account|cart|checkout)\//);
 for (const [, url] of sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)) assert.ok(canonicalUrls.has(url), `Sitemap URL lacks a matching page: ${url}`);
-assert.equal(products, 5);
+assert.equal(products, 4, "product pages with a website price (OCTA-X 95% is priced in the back office)");
 const agents = readFileSync(join(root,"agents/index.html"),"utf8");
 assert.ok(agents.includes("Review application") && agents.includes("/agents/"),"Missing reseller route/form");
 const sheets = JSON.parse(readFileSync(new URL("../src/data/technical-sheets.json", import.meta.url), "utf8"));

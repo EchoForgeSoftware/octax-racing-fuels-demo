@@ -4,7 +4,7 @@
 // Functions through Resend (supabase/functions/_shared/email.ts).
 import type { BusinessSettings } from "./types.ts";
 import type { WebsiteOrder } from "./orders.ts";
-import { DELIVERY_NAME } from "../delivery.ts";
+import { COURIER_QUOTE_NOTE, DELIVERY_NAME } from "../delivery.ts";
 
 export type Email = { to: string[]; subject: string; html: string; text: string; replyTo?: string };
 
@@ -42,6 +42,8 @@ function wrap(title: string, body: string) {
 <div style="padding:18px;border:2px solid #191817;border-top:0"><h2 style="margin:0 0 12px">${esc(title)}</h2>${body}</div></div>`;
 }
 
+const COURIER_PAY = `${COURIER_QUOTE_NOTE} Please wait for the quote and pay the order and the courier together. Reply to this email with your proof of payment.`;
+
 /** The notice to the business and the customer's confirmation for one order. */
 export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | null, settings: BusinessSettings, status: OrderStatus): { business: Email | null; customer: Email | null } {
   const c = o.customer;
@@ -55,7 +57,7 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
   const collectAt = collect && point?.address ? `${point.address}${point.hours ? ` (${point.hours})` : ""}` : "";
   const summary: [string, string][] = [
     ...items.map((i): [string, string] => [i.text, i.amount]),
-    [collect ? "Collect" : how, totals.courier > 0 ? money(totals.courier) : "Free"],
+    [collect ? "Collect" : how, o.courierQuote ? "To be quoted" : totals.courier > 0 ? money(totals.courier) : "Free"],
     ["Total", money(totals.total)],
   ];
 
@@ -70,6 +72,7 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
       "",
       `Customer: ${c.name}${c.company ? `, ${c.company}` : ""}`, `Email: ${c.email}`, `Phone: ${c.phone}`,
       collect ? "Customer collects" : `${how} to: ${deliver}`,
+      o.courierQuote ? "Courier on request: send the customer a courier quote and add it to the invoice." : "",
       "",
       ...summary.map(([k, v]) => `${k}: ${v}`),
       "",
@@ -94,14 +97,14 @@ export function orderEmails(o: WebsiteOrder, totals: Totals, invoice: string | n
       "",
       ...summary.map(([k, v]) => `${k}: ${v}`),
       ...(pay ? ["", "Please pay by EFT:", `Account holder: ${b.holder}`, `Bank: ${b.bank}`, `Account number: ${b.account}`, `Branch code: ${b.branch}`,
-        `Account type: ${b.type}`, `Reference: ${o.ref}`, `Amount: ${money(totals.total)}`, "", "We dispatch once the payment reflects. Reply to this email with your proof of payment."] : []),
+        `Account type: ${b.type}`, `Reference: ${o.ref}`, `Amount: ${money(totals.total)}${o.courierQuote ? " plus the courier quote" : ""}`, "", o.courierQuote ? COURIER_PAY : "We dispatch once the payment reflects. Reply to this email with your proof of payment."] : []),
       "", collectAt ? `Collect from: ${collectAt}` : collect ? "We'll tell you where and when to collect." : `${how} to: ${deliver}`, "", `${settings.tradingAs || "OCTA Performance"} · ${settings.phone || ""} · ${settings.email || ""}`,
     ].join("\n"),
     html: wrap(status === "paid" ? "Payment received" : "Thank you for your order",
       `<p>Order reference: <strong>${esc(o.ref)}</strong></p>` + table(summary)
       + (pay ? `<h3>Pay by EFT</h3>` + table([["Account holder", b.holder], ["Bank", b.bank], ["Account number", b.account], ["Branch code", b.branch],
-        ["Account type", b.type], ["Reference", o.ref], ["Amount", money(totals.total)]])
-        + `<p>We dispatch once the payment reflects. Reply to this email with your proof of payment.</p>` : "")
+        ["Account type", b.type], ["Reference", o.ref], ["Amount", `${money(totals.total)}${o.courierQuote ? " plus the courier quote" : ""}`]])
+        + `<p>${esc(o.courierQuote ? COURIER_PAY : "We dispatch once the payment reflects. Reply to this email with your proof of payment.")}</p>` : "")
       + `<p style="color:#555">${esc(collectAt ? `Collect from: ${collectAt}` : collect ? "We'll tell you where and when to collect." : `${how} to: ${deliver}`)}</p><p style="color:#555">${esc(settings.tradingAs || "OCTA Performance")} · ${esc(settings.phone || "")} · ${esc(settings.email || "")}</p>`),
   } : null;
   return { business, customer };

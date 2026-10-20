@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { uid, useBackoffice } from "./BackofficeContext";
 import { Button, Empty, Field, Input, PageTitle, Panel, Select, shortDate } from "./ui";
 import { referralEarning } from "@/lib/backoffice/calc";
+import { salesCommissions } from "@/lib/backoffice/commission";
 import { formatPrice } from "@/lib/format";
 import type { Capacity, Referral, Rep } from "@/lib/backoffice/types";
 
@@ -130,9 +131,41 @@ function RepCard({ rep }: { rep: Rep }) {
           {referrals.length === 0 ? <p className="text-sm text-ink-soft">No referrals yet.</p> : (
             <ul className="space-y-3">{referrals.map((r) => <ReferralRow key={r.id} referral={r} rep={rep} />)}</ul>
           )}
+          <SalesCommission rep={rep} />
         </div>
       </div>
     </section>
+  );
+}
+
+/** Commission on the rep's clients' invoices, from the percentages set per product (Products & pricing → Rep commission). */
+function SalesCommission({ rep }: { rep: Rep }) {
+  const { data } = useBackoffice();
+  if (!data) return null;
+  const rows = salesCommissions(data, rep.id);
+  const due = rows.filter((r) => r.due).reduce((n, r) => n + r.amount, 0);
+  const pending = rows.filter((r) => !r.due).reduce((n, r) => n + r.amount, 0);
+  const client = (id: string) => { const c = data.clients.find((x) => x.id === id); return c ? c.company || c.name : ""; };
+  return (
+    <div className="mt-6">
+      <h3 className="mb-2 font-mono text-xs font-bold uppercase tracking-wider">Sales commission</h3>
+      {rows.length === 0 ? <p className="text-sm text-ink-soft">No commission yet. It is credited automatically on invoices for this rep&apos;s clients, for products with a rep commission set.</p> : (
+        <>
+          <div className="num mb-2 flex flex-wrap gap-x-6 gap-y-1 text-sm">
+            <span>Earned (invoice paid): <strong>{formatPrice(Math.round(due * 100) / 100)}</strong></span>
+            <span>Pending (not paid yet): <strong>{formatPrice(Math.round(pending * 100) / 100)}</strong></span>
+          </div>
+          <ul className="divide-y divide-line border-y border-line text-sm">
+            {rows.slice(0, 50).map((r) => (
+              <li key={r.invoiceId} className="num flex flex-wrap justify-between gap-2 py-1.5">
+                <span>{r.number} · {shortDate(r.date)} · {client(r.clientId)}</span>
+                <span><strong>{formatPrice(r.amount)}</strong> <span className="text-xs text-muted">{r.due ? "earned" : "when paid"}</span></span>
+              </li>
+            ))}
+          </ul>
+        </>
+      )}
+    </div>
   );
 }
 

@@ -62,6 +62,7 @@ Deno.serve(async (request: Request) => {
     // Delivery from the back-office rules: collect, local delivery or courier, as chosen at checkout.
     const delivery = live?.pick ? live.pick(base.items, customer.city, body.deliveryMethod) : null;
     if (delivery && !delivery.ok) throw new CheckoutError(delivery.reason);
+    if (delivery?.ok && delivery.quoteLater) throw new CheckoutError("Courier is quoted after you order. Please choose EFT, or collection.");
     const quote = delivery?.ok ? { ...base, courier: delivery.fee, total: Math.round((base.subtotal + delivery.fee) * 100) / 100 } : base;
     if (typeof body.expectedTotal !== "number" || !Number.isFinite(body.expectedTotal) || Math.round(body.expectedTotal * 100) !== Math.round(quote.total * 100)) {
       throw new CheckoutError("The order total has changed. Refresh your cart before starting payment.", 409);

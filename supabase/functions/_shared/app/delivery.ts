@@ -81,7 +81,13 @@ export function courierCost(lines: { size: string; qty: number }[], feePerPack: 
   return { fee: cents / 100, quoted };
 }
 
-export type DeliveryOption = { method: DeliveryMethod; label: string; fee: number; available: boolean; reason?: string };
+/** quoteLater: courier on request; the order is placed now and the courier quote is added to the invoice afterwards. */
+export type DeliveryOption = { method: DeliveryMethod; label: string; fee: number; available: boolean; reason?: string; quoteLater?: boolean };
+
+/** What the customer is told about courier on request (checkout, policy, emails). */
+export const COURIER_QUOTE_NOTE = "We email you a courier quote for your address. Once the order and the courier are paid, courier delivery takes about 48 working hours.";
+
+const courierOnRequest = (): DeliveryOption => ({ method: "courier", label: "Courier (quote to follow)", fee: 0, available: true, quoteLater: true });
 
 export const DELIVERY_NAME: Record<DeliveryMethod, string> = { local: "OCTA local delivery", courier: "Courier", collect: "Collect" };
 
@@ -98,24 +104,25 @@ export function deliveryOptions(lines: { size: string; qty: number }[], city: st
     const quoted = rules.localFee === null && courier.quoted;
     options.push({ method: "local", label: `${DELIVERY_NAME.local} (${town.replace(/\b\w/g, (c) => c.toUpperCase())})`, fee,
       available: enough && !quoted, ...(!enough ? { reason: short } : quoted ? { reason: "Some items need a delivery quote. Please contact us." } : {}) });
+    // Too small for local delivery: courier on request is still possible.
+    if (!enough || quoted) options.push(courierOnRequest());
+  } else if (rules.courierOnline && !courier.quoted) {
+    options.push({ method: "courier", label: DELIVERY_NAME.courier, fee: courier.fee, available: true });
   } else {
-    // Courier: on request until a flat rate is agreed (Settings → Delivery: courier online).
-    options.push({ method: "courier", label: rules.courierOnline ? DELIVERY_NAME.courier : "Courier (on request)", fee: courier.fee,
-      available: rules.courierOnline && !courier.quoted,
-      ...(!rules.courierOnline ? { reason: "Courier is arranged on request. Contact us with your address and we'll quote." }
-        : courier.quoted ? { reason: "Some items need a courier quote. Please contact us." } : {}) });
+    // Courier on request until a flat rate is agreed (Settings → Delivery: courier online), or for items without a rate.
+    options.push(courierOnRequest());
   }
   return options;
 }
 
 /** The customer's choice (or the first one available), checked against the rules. */
 export function pickDelivery(lines: { size: string; qty: number }[], city: string | null | undefined, rules: DeliveryRules, wanted?: unknown):
-  { ok: true; method: DeliveryMethod; fee: number; label: string } | { ok: false; reason: string } {
+  { ok: true; method: DeliveryMethod; fee: number; label: string; quoteLater: boolean } | { ok: false; reason: string } {
   const options = deliveryOptions(lines, city, rules);
   // A choice that isn't offered here (e.g. courier inside the local area) is refused, never swapped silently.
   if (wanted && !options.some((o) => o.method === wanted)) return { ok: false, reason: "That delivery option isn't available for this address. Please choose again." };
   const choice = options.find((o) => o.method === wanted) ?? options.find((o) => o.available);
   if (!choice) return { ok: false, reason: options[0]?.reason ?? "Delivery isn't available for this order. Please contact us." };
   if (!choice.available) return { ok: false, reason: choice.reason ?? "That delivery option isn't available for this order." };
-  return { ok: true, method: choice.method, fee: choice.fee, label: choice.label };
+  return { ok: true, method: choice.method, fee: choice.fee, label: choice.label, quoteLater: choice.quoteLater === true };
 }

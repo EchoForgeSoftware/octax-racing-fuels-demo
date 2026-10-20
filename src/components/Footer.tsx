@@ -10,7 +10,6 @@ const columns = [
     title: "Shop",
     links: [
       { label: "All products", href: "/shop/" },
-      { label: "OCTA-X Plus Ethanol 96%", href: "/shop/octa-x-ethanol/" },
       { label: "OCTA-X Ethanol 95%", href: "/shop/octa-x-95-ethanol/" },
       { label: "OCTA-M Methanol 99.9%", href: "/shop/octa-m-methanol/" },
       { label: "OCTA-BOOST", href: "/shop/octa-boost/" },

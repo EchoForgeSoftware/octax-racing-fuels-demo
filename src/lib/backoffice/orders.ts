@@ -52,6 +52,8 @@ export type WebsiteOrder = {
   profile?: CustomerProfile;
   /** Collect, OCTA local delivery or courier, as chosen at checkout. */
   deliveryMethod?: DeliveryMethod;
+  /** Courier on request: the courier is quoted and added to the invoice after the order. */
+  courierQuote?: boolean;
 };
 
 const text = (v: unknown, max: number) => (typeof v === "string" ? v.trim().slice(0, max) : "");
@@ -96,7 +98,7 @@ export function recordWebsiteOrder(d: BackofficeData, o: WebsiteOrder, env: Env)
       unitCost: d.catalogue.find((x) => x.sku === i.sku)?.cost ?? 0 })),
     courier: o.courier, notes: [
       `Website order · ${o.method === "ozow" ? "Ozow" : "EFT"} · awaiting payment.`,
-      o.deliveryMethod ? `${DELIVERY_NAME[o.deliveryMethod]}.` : "",
+      o.deliveryMethod ? `${DELIVERY_NAME[o.deliveryMethod]}${o.courierQuote ? ": SEND THE CUSTOMER A COURIER QUOTE and add it to this invoice" : ""}.` : "",
       guest ? `Customer: ${text(c.name, 200)}, ${text(c.email, 254)}, ${text(c.phone, 40)}.` : "",
       `Deliver to: ${text(c.address, 500)}, ${text(c.city, 120)} ${text(c.postcode, 20)}.`,
     ].filter(Boolean).join(" "),

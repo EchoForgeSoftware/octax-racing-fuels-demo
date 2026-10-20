@@ -2,6 +2,7 @@
 // browser with pdf-lib (no server, no external fonts). Uses the PDF standard
 // Helvetica faces, so text is limited to the Windows-1252 character set.
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { deliveryRules } from "../delivery";
 import { balance, docSubtotal, docTotal, lineTotal, paid, priceFor, statement, STATUS_LABEL, invoiceStatus, quoteStatus } from "./calc";
 import type { BusinessSettings, CatalogueItem, Client, Document, Referral, Rep } from "./types";
 import { paymentAcknowledgementText, referralAgreementText, type Block } from "./referralText";
@@ -142,7 +143,6 @@ function bankBox(page: PDFPage, fonts: Fonts, settings: BusinessSettings, refere
 
 function footer(page: PDFPage, fonts: Fonts, settings: BusinessSettings, n: number, of: number) {
   page.drawRectangle({ x: M, y: 40, width: A4.w - 2 * M, height: 1, color: LINE });
-  text(page, "DEMO / SAMPLE DOCUMENT - NOT FOR PAYMENT", M, 52, fonts.bold, 8, RED);
   const footerLine = settings.email ? `${settings.invoiceFooter}  Enquiries: ${settings.email}` : settings.invoiceFooter;
   for (const [i,line] of wrap(footerLine,fonts.regular,7,A4.w-2*M).slice(0,2).entries()) text(page,line,M,29-i*9,fonts.regular,7,MUTED);
   text(page, `${settings.businessName}  |  Page ${n} of ${of}`, A4.w - M, 43, fonts.regular, 7, MUTED, "right");
@@ -154,7 +154,18 @@ async function setup() {
   return { pdf, fonts };
 }
 
-const DELIVERY_TEXT = { own: "OCTA delivery (local area, free)", courier: "Courier", collect: "Collected by the client" } as const;
+/** Delivery terms from Settings → Delivery and collection, as printed on price lists. */
+function deliveryTerms(settings: BusinessSettings) {
+  const r = deliveryRules(settings);
+  const towns = r.localTowns.map((t) => t.replace(/\b\w/g, (c) => c.toUpperCase())).join(", ");
+  return [
+    r.collection.enabled ? "Collection is free." : "",
+    `OCTA delivers within ${r.localKm} km of ${towns}${r.minLitres > 0 ? ` on orders of ${r.minLitres} L or more` : ""}${r.localFee !== null ? ` (${money(r.localFee)})` : ""}.`,
+    r.courierOnline ? `Courier elsewhere: ${money(r.courierFee)} per pack.` : "Courier elsewhere is quoted on request and paid before dispatch.",
+  ].filter(Boolean).join(" ");
+}
+
+const DELIVERY_TEXT = { own: "OCTA local delivery", courier: "Courier", collect: "Collected by the client" } as const;
 const PAID_VIA: Record<string, string> = { ozow: "Ozow (website)", eft: "EFT", cash: "Cash", card: "Card", other: "Other" };
 /** Same wording as the product labels, printed small on every delivery note. */
 const DISCLAIMER = "USE AT OWN RISK. OCTA products are for performance use only. To the maximum extent permitted by law, OCTA, ZRG-X (PTY) LTD and their directors and owners are not liable for loss, injury or damage arising from their use, other than liability that cannot lawfully be excluded.";
@@ -253,7 +264,7 @@ export async function documentPdf(doc: Document, client: Client | null, settings
   // Totals.
   const totals: [string, string, boolean][] = [
     ["Subtotal", money(docSubtotal(doc)), false],
-    ["Courier", doc.courier > 0 ? money(doc.courier) : "Free", false],
+    [doc.delivery?.method === "collect" ? "Collection" : "Delivery", doc.courier > 0 ? money(doc.courier) : "Free", false],
     ["Total", money(docTotal(doc)), true],
   ];
   if (doc.kind === "invoice" && doc.payments.length) {
@@ -365,7 +376,7 @@ export async function priceListPdf(client: Client, catalogue: CatalogueItem[], s
   });
   y -= 16;
   const notes = [
-    "Sample prices only. No VAT charged. Courier is quoted separately: R200 per pack; free from 10 of the same 5L or 25L product, or 12 of the same 500ml product. 210L drums are R200 each.",
+    `${settings.vatRegistered ? "Prices include VAT at 15%." : "No VAT charged: the supplier is not registered for VAT."} ${deliveryTerms(settings)}`,
     "Prices in red are agreed for your account. They show automatically when you sign in on the OCTA website with your account email.",
     "Prices can change weekly. This list is valid on the date shown; ask us for a quote for large orders.",
   ];

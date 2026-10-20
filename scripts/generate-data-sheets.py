@@ -112,7 +112,7 @@ def footer(c, sheet, page=1):
     c.restoreState()
     label(c, 'ZRG-X (PTY) LTD / OCTA PERFORMANCE', M+117, 68, INK)
     c.setFont('Body', 7.4); c.setFillColor(MUTED)
-    edition = {'2026-10-16': '16 October 2026', '2026-10-17': '17 October 2026'}[sheet['edition']]
+    y, mo, d = sheet['edition'].split('-'); edition = f"{int(d)} {['January','February','March','April','May','June','July','August','September','October','November','December'][int(mo)-1]} {y}"
     c.drawString(M+117,54,f'Reg. 2026/667453/07  |  Brand edition: {edition}')
     c.drawString(M+117,42,'Technical information. Not a Safety Data Sheet (SDS).')
     c.setFont('Body',7.3); c.drawString(M,22,'Consult the current SDS before handling. Follow the approved product instructions.')

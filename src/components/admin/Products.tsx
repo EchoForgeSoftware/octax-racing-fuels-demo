@@ -9,7 +9,8 @@ import { PackEditor } from "./PackEditor";
 import { isSoldOut, stockLevels } from "@/lib/backoffice/stock";
 import { formatPrice } from "@/lib/format";
 import { costingCost, defaultCosting, type Costing } from "@/lib/backoffice/costing";
-import { CostingTable } from "./Costing";
+import { CostingTable, RepCommission } from "./Costing";
+import type { RepShare } from "@/lib/backoffice/commission";
 
 const CATEGORY_LABEL: Record<CatalogueCategory, string> = {
   ethanol: "Ethanol", methanol: "Methanol", additives: "Fuel additives", fuel: "Race fuels (coming soon)",
@@ -97,6 +98,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
   const onHand = item && data ? stockLevels(data, today).find((l) => l.sku === item.sku)?.onHand ?? 0 : null;
   const [costing, setCosting] = useState<Costing | null>(() => item?.costing ?? null);
   const [pack, setPack] = useState<PackDesign | null>(() => item?.pack ?? null);
+  const [repShares, setRepShares] = useState<RepShare[]>(() => item?.repShares ?? []);
   // A new picture follows the product name, size and category until someone edits a label field.
   // Choosing a container or colour keeps that choice and still follows the name.
   const [packFollowsName, setPackFollowsName] = useState(false);
@@ -117,6 +119,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
   const set = (patch: Partial<typeof f>) => setF({ ...f, ...patch });
 
   function submit() {
+    const shares = repShares.filter((s) => s.percent > 0);
     if (!f.productName.trim() || !f.size.trim()) return setError("Enter a product name and a size or variant (e.g. Large, 500ml).");
     // New products: several sizes at once ("S, M, L, XL") become one product per size.
     const sizes = isNew ? [...new Set(f.size.split(",").map((x) => x.trim()).filter(Boolean))] : [f.size.trim()];
@@ -131,6 +134,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
           retail: money(f.retail), agent: money(f.agent), bulk: money(f.bulk), cost,
           short: f.short.trim(), description: f.description.trim(), active: f.active, comingSoon: f.comingSoon,
           ...(costing ? { costing } : {}), ...(pack ? { pack: cleanPack(pack) } : {}), ...(f.stock !== "in" ? { stock: f.stock } : {}),
+          ...(shares.length ? { repShares: shares } : {}),
         });
       }
       return onDone();
@@ -150,6 +154,7 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
       ...(costing ? { costing } : {}),
       ...(pack ? { pack: cleanPack(pack) } : {}),
       ...(f.stock !== "in" ? { stock: f.stock } : {}),
+      ...(shares.length ? { repShares: shares } : {}),
     });
     onDone();
   }
@@ -181,6 +186,12 @@ function ProductForm({ item, onDone }: { item: CatalogueItem | null; onDone: () 
             <span className="ml-3 text-xs text-muted">Work out the cost from product price per litre, sticker, container, cap, travel fee and other costs.</span>
           </div>
         )}
+        {(() => {
+          const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
+          const price = money(f.retail);
+          return <RepCommission reps={data?.reps.filter((r) => r.active) ?? []} value={repShares} onChange={setRepShares} sellPrice={price}
+            profit={price !== null && cost !== null ? Math.round((price - cost) * 100) / 100 : null} />;
+        })()}
         {(() => {
           const cost = costing?.useAsCost ? costingCost(costing, vatRegistered) : money(f.cost);
           const under = (["retail", "agent", "bulk"] as const).filter((k) => cost !== null && money(f[k]) !== null && money(f[k])! < cost);

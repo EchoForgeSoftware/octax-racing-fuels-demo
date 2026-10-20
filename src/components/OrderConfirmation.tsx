@@ -1,5 +1,7 @@
 "use client";
 
+import { COURIER_QUOTE_NOTE } from "@/lib/delivery";
+
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { Icon } from "./Icon";
@@ -52,10 +54,17 @@ export function OrderConfirmation() {
             <p className="kicker text-muted">Amount to pay</p>
             <p className="num mt-1 font-display text-2xl text-flare">{formatPrice(order.total)}</p>
             <p className="num mt-0.5 text-xs text-muted">
-              {formatPrice(order.subtotal)} + {order.courier > 0 ? `${formatPrice(order.courier)} ${order.delivery?.method === "local" ? "local delivery" : "courier"}` : order.delivery?.method === "collect" ? "collect (free)" : "free delivery"}
+              {formatPrice(order.subtotal)} + {order.delivery?.quoteLater ? "courier (quote to follow)" : order.courier > 0 ? `${formatPrice(order.courier)} ${order.delivery?.method === "local" ? "local delivery" : "courier"}` : order.delivery?.method === "collect" ? "collect (free)" : "free delivery"}
             </p>
           </div>
         </div>
+      )}
+
+      {order?.delivery?.quoteLater && (
+        <section className="mt-7 border-2 border-ink bg-lime p-4">
+          <h2 className="font-display text-xl">Courier quote to follow</h2>
+          <p className="mt-2 text-sm">{COURIER_QUOTE_NOTE} Please wait for the quote before paying, then pay the order and the courier together.</p>
+        </section>
       )}
 
       {order?.delivery?.method === "collect" && (

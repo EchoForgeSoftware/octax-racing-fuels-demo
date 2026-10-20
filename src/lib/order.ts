@@ -20,7 +20,7 @@ export type PlacedOrder = {
   checkoutFingerprint?: string;
   termsVersion?: string;
   /** How the order reaches the customer, and where to collect (shown only after ordering). */
-  delivery?: { method: string; label: string };
+  delivery?: { method: string; label: string; quoteLater?: boolean };
   collection?: { address: string; hours: string };
 };
 

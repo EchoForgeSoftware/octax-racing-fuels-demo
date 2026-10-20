@@ -13,8 +13,8 @@ import type { BackofficeData, CatalogueCategory, CatalogueItem, Channel, Client,
 
 /** Illustrative demo unit costs; final costs and pack sizes need business confirmation. */
 const COSTS: Record<string, number> = {
-  "OCTA-X-25": 555.68,
-  "OCTA-X-210": 5230.89,
+  "OCTA-X95-25": 555.68,
+  "OCTA-X95-210": 5230.89,
   "OCTA-M-25": 477.94,
   "OCTA-M-210": 4414.62,
   "OCTA-BOOST-5": 229.94,
@@ -101,7 +101,7 @@ export function demoData(today: string): BackofficeData {
   const clients: Client[] = SAMPLE_CLIENTS.map((c) => ({
     ...c,
     tier: defaultsFor(c.type).tier,
-    prices: (c.id === "c-alex" ? { "OCTA-X-25": 720, "OCTA-BOOST-5": 410 } : c.id === "c-highveld" ? { "OCTA-M-210": 4950 } : {}) as Record<string, number>,
+    prices: (c.id === "c-alex" ? { "OCTA-X95-25": 720, "OCTA-BOOST-5": 410 } : c.id === "c-highveld" ? { "OCTA-M-210": 4950 } : {}) as Record<string, number>,
     linkedEmail: c.id === "c-alex" ? "customer@example.test" : "",
     createdAt: created,
     repId: SAMPLE_REP_OF[c.id] ?? null,
@@ -246,9 +246,9 @@ export function demoData(today: string): BackofficeData {
 /** Sample batches: one expiring soon, one old, the rest fresh. */
 function sampleStock(today: string, catalogue: CatalogueItem[]): StockBatch[] {
   const plan: [string, number, string, number | null, number, string | null][] = [
-    ["OCTA-X-25", -120, "X25-2606", 40, 40, "s-fuel"],
-    ["OCTA-X-25", -20, "X25-2609", 300, 60, "s-fuel"],
-    ["OCTA-X-210", -60, "X210-2608", 250, 12, "s-fuel"],
+    ["OCTA-X95-25", -120, "X25-2606", 40, 40, "s-fuel"],
+    ["OCTA-X95-25", -20, "X25-2609", 300, 60, "s-fuel"],
+    ["OCTA-X95-210", -60, "X210-2608", 250, 12, "s-fuel"],
     ["OCTA-M-25", -60, "M25-2608", 280, 50, "s-fuel"],
     ["OCTA-M-210", -60, "M210-2608", 280, 10, "s-fuel"],
     ["OCTA-BOOST-5", -200, "B5-2604", null, 30, "s-fuel"],
@@ -286,15 +286,15 @@ function sampleSuppliers(today: string): Pick<BackofficeData, "suppliers" | "sup
     { id: "s-courier", name: "Fast Freight Courier (sample)", contact: "", email: "", phone: "", vat: "", bankMatch: "FAST FREIGHT", notes: "Sample courier account.", createdAt: created },
   ];
   const plan: [string, number, string, SupplierInvoice["category"], number, string, boolean][] = [
-    ["s-fuel", -170, "IAS-20411", "stock", 31000, "Ethanol 96% and methanol, bulk", true],
+    ["s-fuel", -170, "IAS-20411", "stock", 31000, "Ethanol 95% and methanol, bulk", true],
     ["s-pack", -160, "DC-7781", "packaging", 6890, "210L blue drums x10, 25L drums x40", true],
     ["s-courier", -140, "FF-3302", "courier", 3150, "Deliveries, month end", true],
-    ["s-fuel", -110, "IAS-20577", "stock", 29500, "Ethanol 96%, bulk", true],
+    ["s-fuel", -110, "IAS-20577", "stock", 29500, "Ethanol 95%, bulk", true],
     ["s-courier", -80, "FF-3419", "courier", 2780, "Deliveries, month end", true],
-    ["s-fuel", -50, "IAS-20702", "stock", 33800, "Methanol 99.9% and ethanol 96%", true],
+    ["s-fuel", -50, "IAS-20702", "stock", 33800, "Methanol 99.9% and ethanol 95%", true],
     ["s-pack", -35, "DC-7920", "packaging", 4210, "5L cans and labels", false],
     ["s-courier", -20, "FF-3530", "courier", 2960, "Deliveries, month end", false],
-    ["s-fuel", -9, "IAS-20815", "stock", 27500, "Ethanol 96%, bulk", false],
+    ["s-fuel", -9, "IAS-20815", "stock", 27500, "Ethanol 95%, bulk", false],
   ];
   const supplierInvoices: SupplierInvoice[] = plan.map(([supplierId, offset, number, category, amount, description, isPaid], i) => {
     const date = addDays(today, offset);
@@ -309,11 +309,15 @@ function sampleSuppliers(today: string): Pick<BackofficeData, "suppliers" | "sup
 
 /**
  * Website products the back office catalogue is missing or has under an old
- * name (e.g. OCTA-X renamed OCTA-X Plus, OCTA-X 95% added). Prices, costs and
+ * name, and products taken off the website (switched off). Prices, costs and
  * stock are never touched; a renamed product also takes the website's new text.
  */
 export function catalogueChanges(current: CatalogueItem[]): CatalogueItem[] {
   const changes: CatalogueItem[] = [];
+  // Taken off the website (e.g. OCTA-X Plus): hidden, and no longer tied to a product page.
+  for (const have of current) {
+    if (have.slug && !have.custom && !products.some((p) => p.slug === have.slug)) changes.push({ ...have, slug: null, active: false });
+  }
   for (const site of baseCatalogue(false)) {
     // Only products with a website page; coming-soon items are edited (or deleted) in the back office.
     if (!site.slug) continue;

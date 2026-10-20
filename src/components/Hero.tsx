@@ -12,7 +12,7 @@ import { useOnWebsite } from "./Available";
 // on load); it is kept smooth and non-looping. Only the ambient pointer tilt is a
 // continuous effect, and it responds to direct user input.
 /** The hero shows the first of these that is on the website (switched on in the back office). */
-const HERO_ORDER = ["octa-x-95-ethanol", "octa-x-ethanol", "octa-m-methanol"];
+const HERO_ORDER = ["octa-x-95-ethanol", "octa-m-methanol"];
 
 export function Hero() {
   const onWebsite = useOnWebsite();

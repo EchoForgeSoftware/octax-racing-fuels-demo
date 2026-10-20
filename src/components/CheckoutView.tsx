@@ -8,7 +8,7 @@ import { formatPrice } from "@/lib/format";
 import { ProcessingOverlay } from "./ProcessingOverlay";
 import { Icon } from "./Icon";
 import { OrderTotals } from "./OrderTotals";
-import { deliveryOptions, type DeliveryMethod } from "@/lib/delivery";
+import { COURIER_QUOTE_NOTE, deliveryOptions, type DeliveryMethod } from "@/lib/delivery";
 import { cartCourier, courierNote, localTown } from "@/lib/courier";
 import { CustomerInfoForm, type Contact } from "./CustomerInfoForm";
 import { emptyProfile, profileErrors, type CustomerProfile } from "@/lib/backoffice/customerForm";
@@ -332,9 +332,10 @@ export function CheckoutView() {
                 <input type="radio" name="delivery_method" value={o.method} checked={chosen?.method === o.method} disabled={processing || !o.available}
                   onChange={() => { setDeliveryMethod(o.method); setSubmitError(null); }} className="mt-1 h-4 w-4 shrink-0 accent-[var(--color-ink)]" />
                 <span className="min-w-0 flex-1">
-                  <span className="flex flex-wrap justify-between gap-2 font-display text-sm uppercase"><span>{o.label}</span><span className="num">{o.fee > 0 ? `+ ${formatPrice(o.fee)}` : "Free"}</span></span>
+                  <span className="flex flex-wrap justify-between gap-2 font-display text-sm uppercase"><span>{o.label}</span><span className="num">{o.quoteLater ? "Quoted" : o.fee > 0 ? `+ ${formatPrice(o.fee)}` : "Free"}</span></span>
                   <span className="mt-1 block text-xs text-ink-soft">
                     {o.method === "collect" ? `We send the collection address with your order confirmation.${deliveryRulesNow.collection.hours ? ` Collection times: ${deliveryRulesNow.collection.hours}.` : ""}`
+                      : o.quoteLater ? COURIER_QUOTE_NOTE
                       : o.available ? (o.method === "local" ? "We deliver to you ourselves." : "Sent by courier to your address.") : o.reason}
                   </span>
                 </span>
@@ -416,7 +417,7 @@ export function CheckoutView() {
           ))}
         </ul>
         <div className="mt-5 border-t-2 border-ink">
-          <OrderTotals items={items} subtotal={subtotal} city={city} delivery={chosen ? { label: chosen.label, fee: chosen.fee } : null} />
+          <OrderTotals items={items} subtotal={subtotal} city={city} delivery={chosen ? { label: chosen.label, fee: chosen.fee, quoted: chosen.quoteLater } : null} />
         </div>
         {submitError && <p role="alert" className="mt-5 border-2 border-flare p-3 text-sm">{submitError}</p>}
         <div className="mt-5 border-t-2 border-ink pt-5 text-sm text-ink-soft">

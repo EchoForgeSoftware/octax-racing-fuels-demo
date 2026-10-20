@@ -78,6 +78,15 @@ export function costingTotals(c: Costing): CostingTotals {
   return { lines, exVat, inclVat: inclVat(exVat) };
 }
 
+/** The cost per pack with and without the travel (delivery) line, as it counts for profit. */
+export function costingSplit(c: Costing, vatRegistered: boolean): { cost: number; travel: number; withoutTravel: number } {
+  const t = costingTotals(c);
+  const line = t.lines.find((l) => l.id === "travel");
+  const travel = line ? (vatRegistered ? line.amountEx : line.amountIncl) : 0;
+  const cost = vatRegistered ? t.exVat : t.inclVat;
+  return { cost, travel, withoutTravel: cents(cost - travel) };
+}
+
 /** The cost that counts for profit: incl VAT unless the business is VAT-registered. */
 export const costingCost = (c: Costing, vatRegistered: boolean) => {
   const t = costingTotals(c);

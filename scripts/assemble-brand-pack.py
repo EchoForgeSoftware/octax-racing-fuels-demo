@@ -52,9 +52,9 @@ for source in [labels,data]:
 readme='''OCTA PERFORMANCE / ZRG-X (PTY) LTD
 
 CONTENTS
-- octa-all-available-data-sheets.pdf: OCTA-X Plus, OCTA-M, BOOST, SHOT and TORQUE (6 pages).
-- octa-landscape-labels.pdf: all 6 landscape label masters, one per page
-  (OCTA-X 95%, OCTA-X Plus 96%, OCTA-M, BOOST, SHOT, TORQUE).
+- octa-all-available-data-sheets.pdf: OCTA-X 95%, OCTA-M, BOOST, SHOT and TORQUE (6 pages).
+- octa-landscape-labels.pdf: all 5 landscape label masters, one per page
+  (OCTA-X 95%, OCTA-M, BOOST, SHOT, TORQUE).
 - data-sheets/: the individual technical PDFs. OCTA-X 95% has none yet.
 - labels/: 6000 x 3750 PNGs (600 dpi metadata) and editable SVG artwork.
 - product-images/: 4000 x 4000 PNG illustrations of all 10 catalogue packs,

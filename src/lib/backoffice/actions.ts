@@ -3,6 +3,7 @@
 // same code on the full records after verifying the signed-in staff member, so
 // the role rules can't be skipped from a browser. Pure: tested in
 // scripts/backoffice.test.mjs and scripts/backoffice-live.test.mjs.
+import { cleanShares } from "./commission";
 import { addDays, balance, formatNumber, priceFor, supplierBalance } from "./calc";
 import { matchTxn, parseFnbCsv, txnKey } from "./bank";
 import { canCreateOrders, canEdit, canRecordPayments, canSignDelivery, type Area, type User } from "./roles";
@@ -300,7 +301,9 @@ const handlers: Handlers = {
     requireAccess(admin, "products");
     if (typeof item.sku !== "string" || !/^[\w.-]{1,60}$/.test(item.sku)) throw new ActionError("Use letters, numbers and dashes for the SKU.");
     const { soldOut: _shown, ...stored } = item;
-    upsert(d.catalogue, (x) => x.sku, { ...stored, ...(["in", "out", "auto"].includes(stored.stock as string) ? {} : { stock: undefined }) });
+    const repShares = cleanShares(stored.repShares, d.reps.map((r) => r.id));
+    upsert(d.catalogue, (x) => x.sku, { ...stored, ...(["in", "out", "auto"].includes(stored.stock as string) ? {} : { stock: undefined }),
+      repShares: repShares.length ? repShares : undefined });
   },
   removeCatalogueItem(d, admin, _env, sku) {
     requireAccess(admin, "products");

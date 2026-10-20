@@ -114,7 +114,7 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
       orderAs: req.orderAs === "company" ? "company" : "personal", saveCustomer: req.saveCustomer === true,
       registration: typeof req.registration === "string" ? req.registration.slice(0, 40) : "",
       profile: req.profile && typeof req.profile === "object" && JSON.stringify(req.profile).length < 50000 ? req.profile as WebsiteOrder["profile"] : undefined,
-      deliveryMethod: delivery.method,
+      deliveryMethod: delivery.method, courierQuote: delivery.quoteLater,
     };
     const collection = delivery.method === "collect" ? { address: data!.settings.deliveryRules?.collection?.address ?? "", hours: data!.settings.deliveryRules?.collection?.hours ?? "" } : null;
     const recorded = await updateBackoffice(store, "website-order", (d, env) => {
@@ -128,7 +128,7 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
     }
     return { status: 200, body: {
       order: { ref: req.ref, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total, name: customer.name, email: customer.email, placedAt: new Date().toISOString(), paymentMethod: "eft",
-        delivery: { method: delivery.method, label: delivery.label }, ...(collection ? { collection } : {}) },
+        delivery: { method: delivery.method, label: delivery.label, ...(delivery.quoteLater ? { quoteLater: true } : {}) }, ...(collection ? { collection } : {}) },
       invoice: recorded.ok ? recorded.result.number : null,
     } };
   } catch (error) {

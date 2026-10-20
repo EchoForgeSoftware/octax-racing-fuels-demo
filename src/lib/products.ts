@@ -154,13 +154,13 @@ const ETHANOL_DISCLAIMER = (name: string) =>
 
 export const products: Product[] = [
   {
-    // Standard grade, added 2026-10-19. Prices are set in the back office (on quotation until then).
+    // OCTA-X Plus (96%, SKUs OCTA-X-25/210) was taken off on 2026-10-20. Prices are set in the back office.
     slug: "octa-x-95-ethanol",
     name: "OCTA-X Ethanol 95%",
     category: "ethanol",
     short: "95% ethanol for performance use.",
     description:
-      "OCTA-X is 95% ethanol for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. For the highest purity, choose OCTA-X Plus (96%). Every can carries a manufacture date and batch number for traceability.",
+      "OCTA-X is 95% ethanol for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
     specs: [
       { label: "Ethanol", value: "95%" },
       { label: "UN number", value: "UN 1170" },
@@ -168,6 +168,7 @@ export const products: Product[] = [
       { label: "Traceability", value: "MFD date and batch on every pack" },
     ],
     applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
+    featured: true,
     variants: [
       { size: "25L", sku: "OCTA-X95-25", price: null },
       { size: "210L plastic drum", sku: "OCTA-X95-210", price: null },
@@ -183,40 +184,6 @@ export const products: Product[] = [
       chain: true,
       pictograms: PPE,
       disclaimer: ETHANOL_DISCLAIMER("OCTA-X"),
-    },
-  },
-  {
-    // The original OCTA-X packs and SKUs, renamed OCTA-X Plus on 2026-10-19.
-    slug: "octa-x-ethanol",
-    name: "OCTA-X Plus Ethanol 96%",
-    category: "ethanol",
-    short: "96% ethanol, our purest grade, for performance use.",
-    description:
-      "OCTA-X Plus is 96% ethanol, our purest grade, for performance use. Alcohol fuels carry their own oxygen and cool the intake charge as they evaporate, which is why ethanol-fuelled builds can run more timing and boost. Run it only in a fuel system rated for alcohol. Every can carries a manufacture date and batch number for traceability.",
-    specs: [
-      { label: "Ethanol", value: "96%" },
-      { label: "UN number", value: "UN 1170" },
-      { label: "Hazard class", value: "Class 3, flammable liquid" },
-      { label: "Traceability", value: "MFD date and batch on every pack" },
-    ],
-    applications: ["Ethanol-fuelled builds", "Flex-fuel setups", "Performance use"],
-    featured: true,
-    variants: [
-      { size: "25L", sku: "OCTA-X-25", price: 760 },
-      { size: "210L plastic drum", sku: "OCTA-X-210", price: 6160 },
-    ],
-    label: {
-      layout: "wide",
-      mark: "X",
-      title: "ETHANOL",
-      highlight: "96%",
-      badge: "PLUS",
-      un: "UN 1170",
-      hazardClass: "CLASS 3",
-      unPlacement: "above",
-      chain: true,
-      pictograms: PPE,
-      disclaimer: ETHANOL_DISCLAIMER("OCTA-X PLUS"),
     },
   },
   {

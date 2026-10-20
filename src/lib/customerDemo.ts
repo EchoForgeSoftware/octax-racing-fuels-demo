@@ -27,7 +27,7 @@ export function initialDemoProfile(): Profile {
 
 export function demoOrders(userId: string): OrderRow[] {
   if (userId !== DEMO_USER_ID) return [];
-  const ethanol = { sku: "OCTA-X-25", slug: "octa-x-ethanol", name: "OCTA-X Plus Ethanol 96%", size: "25L", price: 760, qty: 2 };
+  const ethanol = { sku: "OCTA-X95-25", slug: "octa-x-95-ethanol", name: "OCTA-X Ethanol 95%", size: "25L", price: 760, qty: 2 };
   const boost = { sku: "OCTA-BOOST-5", slug: "octa-boost", name: "OCTA-BOOST Octane Booster", size: "5L", price: 440, qty: 1 };
   // Production-shaped fixtures exercise the real payment display, but exist only
   // inside the local demo provider; nothing is written to Supabase or Ozow.

@@ -39,6 +39,8 @@ export type CatalogueItem = {
   comingSoon: boolean;
   /** Costing table (cost lines ex VAT, purity); its total can set `cost`. */
   costing?: Costing;
+  /** Rep commission on this product: % of the selling price (incl. VAT) per rep, credited on their clients' invoices. */
+  repShares?: { repId: string; percent: number }[];
   /** Products added in the back office: the pack picture and label, drawn like the OCTA range. */
   pack?: PackDesign;
   /** Website stock status: always in stock (default), out of stock, or automatic from Stock control. */

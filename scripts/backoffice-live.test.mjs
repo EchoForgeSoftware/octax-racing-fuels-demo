@@ -82,13 +82,13 @@ const client=(id,extra={})=>({id,type:"private",name:id,company:"",email:"",phon
 
 test("main admins save records; the reply and later loads come from the database",async()=>{
   await act("zuan","saveRep",[{id:"r-sipho",name:"Sipho",email:"Sipho.Rep@example.test",phone:"",active:true,createdAt:today}]);
-  await act("zuan","saveClient",[client("c-a",{repId:"r-sipho",prices:{"OCTA-X-25":999},linkedEmail:"buyer@example.test"})]);
+  await act("zuan","saveClient",[client("c-a",{repId:"r-sipho",prices:{"OCTA-X95-25":999},linkedEmail:"buyer@example.test"})]);
   await act("zuan","saveClient",[client("c-b")]);
-  const item=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X-25");
+  const item=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X95-25");
   await act("zuan","saveCatalogueItem",[{...item,cost:600,agent:1000}]);
   const loaded=(await call("zuan",{op:"load"})).body.data;
   assert.deepEqual(loaded.clients.map(c=>c.id).sort(),["c-a","c-b","c-octa-sales"]);
-  assert.equal(loaded.catalogue.find(i=>i.sku==="OCTA-X-25").cost,600);
+  assert.equal(loaded.catalogue.find(i=>i.sku==="OCTA-X95-25").cost,600);
   assert.equal(loaded.reps[0].email,"sipho.rep@example.test");
 });
 
@@ -103,7 +103,7 @@ test("a rep signs in by the email on their rep record and sees only their custom
 const order=(id,clientId,lines,extra={})=>({id,kind:"invoice",number:"",clientId,date:today,dueDate:"2026-10-25",channel:"private",lines,courier:200,notes:"",reference:"",quoteState:"draft",linkedId:null,cancelled:false,payments:[],createdAt:today,delivery:{method:"own",status:"delivered",signature:"data:image/png;base64,x",receivedName:"X",receivedSurname:"Y"},...extra});
 
 test("order takers' orders are rebuilt from trusted records: their customers, catalogue prices, no payments or sign-off",async()=>{
-  const tampered=order("i-rep1","c-a",[{id:"l1",sku:"OCTA-X-25",description:"",qty:2,unitPrice:1,unitCost:0}],{payments:[{id:"p",date:today,amount:5000,method:"cash",note:""}],cancelled:true});
+  const tampered=order("i-rep1","c-a",[{id:"l1",sku:"OCTA-X95-25",description:"",qty:2,unitPrice:1,unitCost:0}],{payments:[{id:"p",date:today,amount:5000,method:"cash",note:""}],cancelled:true});
   const r=await act("rep","saveDocument",[tampered]);
   assert.equal(r.status,200);
   const saved=r.body.result;
@@ -112,7 +112,7 @@ test("order takers' orders are rebuilt from trusted records: their customers, ca
   assert.equal(saved.delivery.status,"pending");
   const full=(await call("zuan",{op:"load"})).body.data.documents.find(d=>d.id==="i-rep1");
   assert.equal(full.lines[0].unitCost,600,"the cost snapshot is kept for profit");assert.equal(full.createdBy,"Sipho");
-  assert.equal((await act("rep","saveDocument",[order("i-rep2","c-b",[{id:"l1",sku:"OCTA-X-25",description:"",qty:1,unitPrice:1,unitCost:0}])])).status,400,"not their customer");
+  assert.equal((await act("rep","saveDocument",[order("i-rep2","c-b",[{id:"l1",sku:"OCTA-X95-25",description:"",qty:1,unitPrice:1,unitCost:0}])])).status,400,"not their customer");
   assert.equal((await act("rep","saveDocument",[order("i-rep3","c-a",[{id:"l1",sku:null,description:"Anything",qty:1,unitPrice:1,unitCost:0}])])).status,400,"no custom lines");
   assert.equal((await act("rep","saveDocument",[{...full,courier:0}])).status,400,"can't change a saved invoice");
   assert.equal((await act("danium","saveDocument",[order("q-1","c-b",[],{kind:"quote"})])).status,400);
@@ -132,7 +132,7 @@ test("each role's limits hold on the server whatever the browser sends",async()=
 
 test("someone saving at the same moment never reuses an invoice number",async()=>{
   clash=2;
-  const r=await act("zuan","saveDocument",[order("i-m1","c-b",[{id:"l1",sku:"OCTA-X-25",description:"X",qty:1,unitPrice:900,unitCost:600}],{delivery:{method:"own",status:"pending"}})]);
+  const r=await act("zuan","saveDocument",[order("i-m1","c-b",[{id:"l1",sku:"OCTA-X95-25",description:"X",qty:1,unitPrice:900,unitCost:600}],{delivery:{method:"own",status:"pending"}})]);
   assert.equal(r.status,200);assert.equal(r.body.result.number,"INV-0002");
   const r2=await act("zuan","convertQuote",["nope"]);assert.equal(r2.status,200);assert.equal(r2.body.result,null);
   const numbers=(await call("zuan",{op:"load"})).body.data.documents.map(d=>d.number);
@@ -140,7 +140,7 @@ test("someone saving at the same moment never reuses an invoice number",async()=
 });
 
 test("the browser's own new ids are reused, so a converted quote opens at the same address",async()=>{
-  await act("zuan","saveDocument",[order("q-9","c-b",[{id:"l1",sku:"OCTA-X-25",description:"X",qty:1,unitPrice:900,unitCost:600}],{kind:"quote",delivery:undefined})]);
+  await act("zuan","saveDocument",[order("q-9","c-b",[{id:"l1",sku:"OCTA-X95-25",description:"X",qty:1,unitPrice:900,unitCost:600}],{kind:"quote",delivery:undefined})]);
   const r=await act("zuan","convertQuote",["q-9"],["i-abcdef12"]);
   assert.equal(r.body.result.id,"i-abcdef12");
   assert.equal(r.body.data.documents.find(d=>d.id==="q-9").linkedId,"i-abcdef12");
@@ -165,7 +165,7 @@ test("the shop gets public catalogue fields and only the signed-in customer's ow
   assert.equal((await call("zuan",{op:"public"})).body.staff,true);assert.equal((await call("rep",{op:"public"})).body.staff,true);assert.equal((await call("customer",{op:"public"})).body.staff,false);
   assert.ok(visitor.catalogue.every(i=>i.cost===null&&i.agent===null&&i.bulk===null&&(!i.costing||i.costing.lines.length===0)));
   const buyer=(await call("customer",{op:"public"})).body;
-  assert.equal(buyer.client.id,"c-a");assert.equal(buyer.client.prices["OCTA-X-25"],999);assert.equal(buyer.client.notes,"");
+  assert.equal(buyer.client.id,"c-a");assert.equal(buyer.client.prices["OCTA-X95-25"],999);assert.equal(buyer.client.notes,"");
   assert.equal((await call("unconfirmed",{op:"public"})).body.client,null);
 });
 
@@ -180,14 +180,14 @@ test("products added in the back office can be deleted only while unused; out of
   assert.equal((await act("zuan","removeCatalogueItem",["OCTA-M-25"])).status,400,"website products are hidden, not deleted");
   assert.equal((await act("zuan","removeCatalogueItem",["CUSTOM-HOODIE-L"])).status,200);
   assert.ok(!(await call("zuan",{op:"load"})).body.data.catalogue.some(i=>i.sku==="CUSTOM-HOODIE-L"));
-  // OCTA-X-25 is on invoices: it can't be deleted even when added by hand.
-  const x=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X-25");
+  // OCTA-X95-25 is on invoices: it can't be deleted even when added by hand.
+  const x=(await call("zuan",{op:"load"})).body.data.catalogue.find(i=>i.sku==="OCTA-X95-25");
   await act("zuan","saveCatalogueItem",[{...x,custom:true,slug:null}]);
-  assert.match((await act("zuan","removeCatalogueItem",["OCTA-X-25"])).body.error,/invoices/);
+  assert.match((await act("zuan","removeCatalogueItem",["OCTA-X95-25"])).body.error,/invoices/);
   await act("zuan","saveCatalogueItem",[{...x,stock:"out"}]);
   await act("zuan","saveCatalogueItem",[{...base,stock:"auto"}]);
   const shop=(await call(null,{op:"public"})).body.catalogue;
-  assert.equal(shop.find(i=>i.sku==="OCTA-X-25").soldOut,true);
+  assert.equal(shop.find(i=>i.sku==="OCTA-X95-25").soldOut,true);
   assert.equal(shop.find(i=>i.sku==="OCTA-M-25").soldOut,true,"automatic with nothing booked in is out of stock");
   assert.equal(shop.find(i=>i.sku==="OCTA-BOOST-5").soldOut,false);
   await act("accounts","bookInStock",[{id:"sb-1",sku:"OCTA-M-25",date:today,supplierId:null,supplierInvoiceId:null,batchNumber:"B1",expiryDate:null,qty:5,unitCostEx:400,unitCostIncl:460,sellPrice:null,notes:"",createdAt:today},{updateCost:false,updatePrice:false}]);
@@ -209,7 +209,7 @@ test("website EFT orders are priced from the live back office and land as unpaid
   assert.equal((await call(null,{op:"public"})).body.orderingOpen,true);
   assert.equal((await place(null,{expectedTotal:1})).status,409,"the browser's total must match the server's");
   assert.equal((await place(null,{termsAccepted:false})).status,400);
-  assert.equal((await place(null,{items:[{sku:"OCTA-X-25",qty:1}],expectedTotal:960})).status,400,"out-of-stock products can't be ordered");
+  assert.equal((await place(null,{items:[{sku:"OCTA-X95-25",qty:1}],expectedTotal:960})).status,400,"out-of-stock products can't be ordered");
   const ok=await place(null);
   assert.equal(ok.status,200);assert.equal(ok.body.order.total,1280);assert.equal(orders.length,1);assert.equal(orders[0].payment_method,"eft");
   const again=await place(null);
@@ -304,7 +304,8 @@ test("customers collect for free or add delivery; the server holds them to the d
   const place=(ref,qty,city,method,expectedTotal)=>server.placeOrder({ref,items:[{sku:"OCTA-BOOST-5",qty}],customer:customer(city),expectedTotal,termsAccepted:true,termsVersion:"2026-10-18",deliveryMethod:method},null,shopStore,today,makeId,tools);
   const collect=await place("OCTA-00000000D001",1,"Durban","collect",440);
   assert.equal(collect.status,200);assert.equal(collect.body.order.courier,0);assert.equal(collect.body.order.collection.address,"12 Test Street, Boksburg");
-  assert.equal((await place("OCTA-00000000D002",1,"Durban","courier",640)).status,400,"courier is on request until switched on");
+  const quoted=await place("OCTA-00000000D002",1,"Durban","courier",440);
+  assert.equal(quoted.status,200,"courier on request: ordered now, courier quoted afterwards");assert.equal(quoted.body.order.delivery.quoteLater,true);
   assert.equal((await place("OCTA-00000000D006",3,"Germiston","local",1470)).status,400,"15 L is under the 125 L for local delivery");
   const local=await place("OCTA-00000000D004",25,"Germiston","local",11150);
   assert.equal(local.status,200,"125 L to Germiston (within 25 km): 25 x R440 + local delivery R150");
@@ -314,6 +315,8 @@ test("customers collect for free or add delivery; the server holds them to the d
   assert.equal(courier.status,200,"courier switched on: 3 x R440 + 3 x R200");
   const docs=(await call("zuan",{op:"load"})).body.data.documents;
   assert.equal(docs.find(x=>x.reference==="OCTA-00000000D001").delivery.method,"collect");
+  const toQuote=docs.find(x=>x.reference==="OCTA-00000000D002");
+  assert.equal(toQuote.delivery.method,"courier");assert.equal(toQuote.courier,0);assert.match(toQuote.notes,/COURIER QUOTE/);
   assert.equal(docs.find(x=>x.reference==="OCTA-00000000D004").delivery.method,"own");
   assert.equal(docs.find(x=>x.reference==="OCTA-00000000D003").courier,600);
 });

@@ -12,7 +12,7 @@ export function OrderTotals({ items, subtotal, label = "Subtotal", city, deliver
   /** Delivery town, when known. */
   city?: string;
   /** The delivery chosen at checkout (collect, local delivery or courier). */
-  delivery?: { label: string; fee: number } | null;
+  delivery?: { label: string; fee: number; quoted?: boolean } | null;
 }) {
   const { courierFee } = usePricing();
   if (delivery !== undefined) return <ChosenTotals subtotal={subtotal} label={label} delivery={delivery} />;
@@ -53,7 +53,7 @@ export function OrderTotals({ items, subtotal, label = "Subtotal", city, deliver
 }
 
 /** Checkout: the delivery the customer picked, and the total they pay. */
-function ChosenTotals({ subtotal, label, delivery }: { subtotal: number; label: string; delivery: { label: string; fee: number } | null }) {
+function ChosenTotals({ subtotal, label, delivery }: { subtotal: number; label: string; delivery: { label: string; fee: number; quoted?: boolean } | null }) {
   const fee = delivery?.fee ?? 0;
   return (
     <>
@@ -64,11 +64,11 @@ function ChosenTotals({ subtotal, label, delivery }: { subtotal: number; label: 
         </div>
         <div className="flex justify-between gap-4">
           <dt className="font-mono text-xs uppercase tracking-wider text-muted">{delivery?.label ?? "Delivery"}</dt>
-          <dd className={fee > 0 ? "font-bold" : "text-right text-muted"}>{delivery ? (fee > 0 ? formatPrice(fee) : "Free") : "Choose above"}</dd>
+          <dd className={fee > 0 ? "font-bold" : "text-right text-muted"}>{delivery ? (delivery.quoted ? "Quoted after ordering" : fee > 0 ? formatPrice(fee) : "Free") : "Choose above"}</dd>
         </div>
       </dl>
       <div className="mt-5 flex items-end justify-between gap-4 border-t-2 border-ink pt-4">
-        <span className="kicker">Total<span className="mt-1 block font-normal normal-case tracking-normal text-muted">Incl. VAT{fee > 0 ? " and delivery" : ""}</span></span>
+        <span className="kicker">Total<span className="mt-1 block font-normal normal-case tracking-normal text-muted">Incl. VAT{fee > 0 ? " and delivery" : delivery?.quoted ? ", courier excluded" : ""}</span></span>
         <span className="num font-display text-3xl text-flare">{formatPrice(subtotal + fee)}</span>
       </div>
     </>

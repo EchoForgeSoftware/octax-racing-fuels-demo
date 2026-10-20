@@ -1,5 +1,6 @@
 "use client";
 
+import { COURIER_QUOTE_NOTE } from "@/lib/delivery";
 import { formatPrice } from "@/lib/format";
 import { usePricing } from "./PricingContext";
 
@@ -25,7 +26,7 @@ export function DeliveryPolicy() {
           <p className="mt-1">Orders to other areas can be sent by courier.</p>
           <p className="mt-2">Standard courier charge: {formatPrice(d.courierFee)} per pack. 210 L drums always pay the courier charge.</p>
         </>
-      ) : <p className="mt-1">Courier delivery is arranged on request. <a href="/contact/" className="underline">Contact us</a> with your address and order and we&apos;ll give you a quote.</p>}
+      ) : <p className="mt-1">Courier delivery is on request: choose &quot;Courier (quote to follow)&quot; at checkout. {COURIER_QUOTE_NOTE}</p>}
     </>
   );
 }

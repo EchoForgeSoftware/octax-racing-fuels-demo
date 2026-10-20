@@ -1,11 +1,11 @@
 [
   {
-    "slug": "octa-x-ethanol",
+    "slug": "octa-x-95-ethanol",
     "pages": 1,
-    "name": "OCTA-X Plus",
-    "category": "Ethanol 96%",
-    "strapline": "Ethyl alcohol, 96% mass purity",
-    "description": "Ethyl alcohol of 96% mass purity, containing isopropanol as denaturant.",
+    "name": "OCTA-X",
+    "category": "Ethanol 95%",
+    "strapline": "Ethyl alcohol, 95% mass purity (dry basis)",
+    "description": "Ethyl alcohol of at least 95.0% mass purity on a dry basis, containing isopropanol.",
     "benefits": [],
     "tableTitle": "Specification",
     "columns": [
@@ -23,7 +23,7 @@
       ],
       [
         "Colour",
-        "Pt-Co",
+        "Hazen",
         "5 max",
         "ASTM D1209 / ASTM D5386"
       ],
@@ -31,12 +31,18 @@
         "Water",
         "Mass %",
         "0.4 max",
-        "ASTM E1364"
+        "ASTM D1364"
       ],
       [
-        "Ethanol",
+        "Acidity as acetic acid",
         "Mass %",
-        "96.0 min",
+        "0.001 max",
+        "ASTM D1613"
+      ],
+      [
+        "Ethanol (dry basis)",
+        "Mass %",
+        "95.0 min",
         "GC"
       ],
       [
@@ -52,25 +58,19 @@
         "GC"
       ],
       [
-        "Acidity as acetic acid",
-        "Mass %",
-        "0.01 max",
-        "ASTM D1613"
-      ],
-      [
         "Carbonyls as methyl ethyl ketone",
         "Mass %",
         "0.40 max",
-        "GC"
+        "B124"
       ]
     ],
     "notes": [
-      "GC = gas chromatography. Limits are reproduced from the supplied technical data sheet; no additional test certification is implied.",
+      "GC = gas chromatography. Limits are reproduced from the supplier's certificate of analysis; every batch is supplied with its own certificate on request.",
       "Highly flammable liquid: UN 1170, Class 3, as shown on the product label. Consult the current SDS before handling, storage or transport."
     ],
     "dosage": "Use as supplied for performance use.",
     "summary": "Product profile and full specification with test methods.",
-    "edition": "2026-10-17"
+    "edition": "2026-10-20"
   },
   {
     "slug": "octa-m-methanol",

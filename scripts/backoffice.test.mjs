@@ -27,7 +27,7 @@ test("demo staff and reps authenticate only with public sample credentials",()=>
   assert.equal(local.demoAdminById("rep:r-sipho",data.reps),null);
 });
 test("agreed customer pricing overrides tiers and cost snapshots preserve historical gross profit",()=>{
-  const data=seed.demoData(today),item=data.catalogue.find(i=>i.sku==="OCTA-X-25"),client=data.clients.find(c=>c.id==="c-alex");
+  const data=seed.demoData(today),item=data.catalogue.find(i=>i.sku==="OCTA-X95-25"),client=data.clients.find(c=>c.id==="c-alex");
   assert.equal(calc.priceFor(item,client),720);
   assert.equal(calc.priceFor(item,{tier:"agent",prices:{}}),item.agent);
   const doc=data.documents.find(d=>d.kind==="invoice"),profit=calc.docProfit(doc);
@@ -187,8 +187,8 @@ const costing=loadTs("src/lib/backoffice/costing.ts");
 
 test("costing: purity, per-litre product price, switchable lines, other costs and VAT",()=>{
   assert.equal(costing.litresIn("25L"),25); assert.equal(costing.litresIn("210L plastic drum"),210); assert.equal(costing.litresIn("500ml"),0.5); assert.equal(costing.litresIn("Large"),null);
-  const c=costing.defaultCosting({size:"25L",productName:"OCTA-X Ethanol 96%",category:"ethanol"});
-  assert.equal(c.purityEnabled,true); assert.equal(c.purity,96); assert.equal(c.litres,25);
+  const c=costing.defaultCosting({size:"25L",productName:"OCTA-X Ethanol 95%",category:"ethanol"});
+  assert.equal(c.purityEnabled,true); assert.equal(c.purity,95); assert.equal(c.litres,25);
   const set=(id,exVat)=>c.lines.find(l=>l.id===id).exVat=exVat;
   set("product",18); set("sticker",4); set("container",40); set("cap",3); set("travel",10);
   c.lines.push({id:"o1",label:"Other cost",description:"Pallet wrap",enabled:true,exVat:2,perLitre:false,builtIn:false});
@@ -206,13 +206,16 @@ test("costing: purity, per-litre product price, switchable lines, other costs an
   assert.equal(hoodie.lines[0].perLitre,false);
 });
 
-test("the back office picks up new and renamed website products without touching prices or costs",()=>{
+test("the back office picks up new, renamed and removed website products without touching prices or costs",()=>{
   const data=seed.emptyData();
-  const old=data.catalogue.map(i=>i.sku==="OCTA-X-25"?{...i,productName:"OCTA-X Ethanol 96%",short:"old",retail:999,cost:500}:i).filter(i=>!i.sku.startsWith("OCTA-X95"));
+  const gone={...data.catalogue.find(i=>i.sku==="OCTA-M-25"),sku:"OCTA-X-25",slug:"octa-x-ethanol",productName:"OCTA-X Plus Ethanol 96%",retail:760};
+  const old=[...data.catalogue.map(i=>i.sku==="OCTA-M-25"?{...i,productName:"OCTA-M old",short:"old",retail:999,cost:500}:i).filter(i=>i.sku!=="OCTA-X95-210"),gone];
   const changes=seed.catalogueChanges(old);
+  const renamed=changes.find(i=>i.sku==="OCTA-M-25");
+  assert.equal(renamed.productName,"OCTA-M Methanol 99.9%");assert.equal(renamed.retail,999);assert.equal(renamed.cost,500);assert.notEqual(renamed.short,"old");
+  assert.deepEqual(changes.filter(i=>i.sku.startsWith("OCTA-X95")).map(i=>i.sku),["OCTA-X95-210"]);
   const plus=changes.find(i=>i.sku==="OCTA-X-25");
-  assert.equal(plus.productName,"OCTA-X Plus Ethanol 96%");assert.equal(plus.retail,999);assert.equal(plus.cost,500);assert.notEqual(plus.short,"old");
-  assert.deepEqual(changes.filter(i=>i.sku.startsWith("OCTA-X95")).map(i=>i.sku).sort(),["OCTA-X95-210","OCTA-X95-25"]);
+  assert.equal(plus.active,false);assert.equal(plus.slug,null);assert.equal(plus.retail,760,"switched off, price kept");
   assert.equal(seed.catalogueChanges(data.catalogue).length,0,"an up-to-date catalogue needs nothing");
 });
 
@@ -236,13 +239,30 @@ test("delivery options: collection first, local inside the radius from a minimum
   const rules=d.deliveryRules({courierFee:200,deliveryRules:{localTowns:["Boksburg"],localKm:20,localFee:null,minLitres:15,collection:{enabled:true,address:"x",hours:""}}});
   assert.ok(rules.localArea.includes("germiston"));assert.ok(!rules.localArea.includes("pretoria"));
   const small=d.deliveryOptions([{size:"5L",qty:1}],"Pretoria",rules);
-  assert.deepEqual(small.map(o=>[o.method,o.available]),[["collect",true],["courier",false]]);
+  assert.deepEqual(small.map(o=>[o.method,o.available,o.fee,!!o.quoteLater]),[["collect",true,0,false],["courier",true,0,true]],"courier on request: quoted after ordering");
   const big=d.deliveryOptions([{size:"5L",qty:3}],"Germiston",rules);
   assert.deepEqual(big.map(o=>[o.method,o.available,o.fee]),[["collect",true,0],["local",true,600]]);
-  assert.equal(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",rules,"courier").ok,false);
+  assert.equal(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",rules,"courier").quoteLater,true);
+  const tooSmall=d.deliveryOptions([{size:"5L",qty:2}],"Germiston",rules);
+  assert.deepEqual(tooSmall.map(o=>[o.method,o.available]),[["collect",true],["local",false],["courier",true]],"too small for local delivery: collect or courier on request");
   assert.equal(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",rules).method,"collect","no choice: collection");
   assert.equal(d.pickDelivery([{size:"5L",qty:2}],"Germiston",rules,"local").ok,false,"10 L is under the local minimum");
   const online=d.deliveryRules({courierFee:200,deliveryRules:{courierOnline:true}});
-  assert.deepEqual(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",online,"courier"),{ok:true,method:"courier",fee:200,label:"Courier"});
+  assert.deepEqual(d.pickDelivery([{size:"5L",qty:1}],"Pretoria",online,"courier"),{ok:true,method:"courier",fee:200,label:"Courier",quoteLater:false});
   assert.equal(d.deliveryRules({deliveryRules:{collection:{enabled:true,address:"  "}}}).collection.enabled,false,"no address, no collection");
+});
+
+test("costing profit with and without travel; rep commission credited on the rep's clients' invoices, due when paid",()=>{
+  const c=costing.defaultCosting({size:"25L",productName:"OCTA-M Methanol 99.9%",category:"methanol"});
+  c.lines=c.lines.map(l=>l.id==="product"?{...l,exVat:10}:l.id==="travel"?{...l,exVat:100}:l);
+  const split=costing.costingSplit(c,false);
+  assert.equal(split.travel,115);assert.equal(split.cost,402.5);assert.equal(split.withoutTravel,287.5);
+  const com=loadTs("src/lib/backoffice/commission.ts");
+  assert.deepEqual(com.cleanShares([{repId:"r1",percent:5},{repId:"r1",percent:9},{repId:"nobody",percent:3},{repId:"r2",percent:0}],["r1","r2"]),[{repId:"r1",percent:5}]);
+  const inv=(id,clientId,paidAmount,extra={})=>({id,kind:"invoice",number:id,clientId,date:"2026-10-20",cancelled:false,courier:0,lines:[{sku:"A",qty:2,unitPrice:500},{sku:"B",qty:1,unitPrice:100}],payments:paidAmount?[{amount:paidAmount}]:[],...extra});
+  const data={clients:[{id:"c1",repId:"r1"},{id:"c2",repId:"r2"}],catalogue:[{sku:"A",repShares:[{repId:"r1",percent:5}]},{sku:"B"}],
+    documents:[inv("i1","c1",1100),inv("i2","c1",0),inv("i3","c2",1100),inv("i4","c1",1100,{cancelled:true}),{...inv("q1","c1",0),kind:"quote"}]};
+  const rows=com.salesCommissions(data,"r1");
+  assert.deepEqual(rows.map(r=>[r.invoiceId,r.amount,r.due]).sort(),[["i1",50,true],["i2",50,false]]);
+  assert.equal(com.salesCommissions(data,"r2").length,0,"no percentage for r2");
 });

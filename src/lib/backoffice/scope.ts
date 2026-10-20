@@ -13,7 +13,8 @@ export function scopeBackoffice(data: BackofficeData, user: User | null): Backof
     clients: clients.map(c => ({ ...c, notes: "", prices: user.role === "accounts" ? {} : c.prices, linkedEmail: "" })),
     documents: data.documents.filter(d => ids.has(d.clientId) && (user.role !== "viewer" && user.role !== "accounts" || d.kind === "invoice"))
       .map(d => ({ ...d, lines: d.lines.map(l => ({ ...l, unitCost: 0 })) })),
-    catalogue: data.catalogue.map(i => ({ ...i, cost: null, ...(user.role === "accounts" ? { agent: null, bulk: null } : {}) })),
+    catalogue: data.catalogue.map(i => ({ ...i, cost: null, costing: undefined, ...(user.role === "accounts" ? { agent: null, bulk: null } : {}),
+      repShares: user.role === "accounts" ? i.repShares : user.role === "rep" ? i.repShares?.filter(s => s.repId === user.repId) : undefined })),
     suppliers: user.role === "accounts" ? data.suppliers : [],
     supplierInvoices: user.role === "accounts" ? data.supplierInvoices : [],
     bank: user.role === "accounts" ? data.bank : [],
