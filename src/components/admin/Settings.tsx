@@ -1,5 +1,7 @@
 "use client";
 
+import { DEFAULT_ORDER_EMAILS } from "@/lib/backoffice/orderEmail";
+
 import { MAX_ADMINS, ROLE_LABEL, STAFF } from "@/lib/backoffice/roles";
 import Link from "next/link";
 import { useState } from "react";
@@ -41,6 +43,9 @@ export function SettingsAdmin() {
             </span>
           </span>
         </label>
+        <Field label="Email every new order to" className="mt-4" hint="Comma separated, up to 5. They get the order, customer and delivery details as soon as an order is placed (and when an Ozow payment comes in). The customer gets their own confirmation with the bank details.">
+          <Input value={s.orderEmails ?? DEFAULT_ORDER_EMAILS} onChange={(e) => set({ orderEmails: e.target.value })} />
+        </Field>
       </Panel>
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Business">

@@ -12,6 +12,7 @@ import type { Role, User } from "./roles";
 import { scopeBackoffice } from "./scope";
 import { isSoldOut, stockLevels } from "./stock";
 import { customerClient, orderingOpen, recordWebsiteOrder, shopCatalogue, type ShopCatalogue, type WebsiteOrder } from "./orders";
+import { orderEmails, type Email } from "./orderEmail";
 import type { BackofficeData, CatalogueItem, Client } from "./types";
 
 /** One stored record per row: collection + id. Settings are a single row. */
@@ -62,6 +63,8 @@ export type OrderTools = {
   allowed?(): Promise<boolean>;
   /** Bot check, when configured. */
   human?(token: unknown): Promise<boolean>;
+  /** Send emails (order notice to the business, confirmation to the customer); failures never affect the order. */
+  send?(emails: Email[]): Promise<void>;
 };
 
 /**
@@ -98,10 +101,18 @@ export async function placeOrder(body: unknown, user: AuthUser | null, store: St
       registration: typeof req.registration === "string" ? req.registration.slice(0, 40) : "",
       profile: req.profile && typeof req.profile === "object" && JSON.stringify(req.profile).length < 50000 ? req.profile as WebsiteOrder["profile"] : undefined,
     };
-    const recorded = await updateBackoffice(store, "website-order", (d, env) => recordWebsiteOrder(d, order, env), today, makeId);
+    const recorded = await updateBackoffice(store, "website-order", (d, env) => {
+      const isNew = !d.documents.some((x) => x.kind === "invoice" && x.reference === order.ref);
+      return { number: recordWebsiteOrder(d, order, env), isNew };
+    }, today, makeId);
+    // Emails go out once, for the first successful placement (a retry sends nothing).
+    if (tools.send && recorded.ok && recorded.result.isNew) {
+      const mail = orderEmails(order, quote, recorded.result.number, data!.settings, "awaiting");
+      await tools.send([mail.business, mail.customer].filter((m): m is Email => m !== null)).catch(() => undefined);
+    }
     return { status: 200, body: {
       order: { ref: req.ref, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total, name: customer.name, email: customer.email, placedAt: new Date().toISOString(), paymentMethod: "eft" },
-      invoice: recorded.ok ? recorded.result : null,
+      invoice: recorded.ok ? recorded.result.number : null,
     } };
   } catch (error) {
     const status = (error as { status?: unknown })?.status;

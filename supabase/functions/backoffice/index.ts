@@ -10,6 +10,7 @@ import { todaySA } from "../_shared/app/backoffice/calc.ts";
 import { quoteCart, sha256, validateCustomer } from "../_shared/payment.ts";
 import { verifyBot } from "../_shared/bot.ts";
 import { backofficeStore } from "../_shared/store.ts";
+import { sendEmails } from "../_shared/email.ts";
 
 const ORIGINS = ["https://octa-boost.com", "https://www.octa-boost.com"];
 const MAX_BODY = 9_000_000;
@@ -68,6 +69,7 @@ Deno.serve(async (request: Request) => {
       const tools: OrderTools = {
         quote: (items, catalogue, city) => quoteCart(items, catalogue, city),
         validateCustomer: (input) => validateCustomer(input) as ReturnType<OrderTools["validateCustomer"]>,
+        send: sendEmails,
         allowed: async () => {
           const { data, error } = await db.rpc("ozow_take_rate_limit", { p_bucket: await sha256(`${ip}:order`), p_max: 10 });
           return !error && data === true;

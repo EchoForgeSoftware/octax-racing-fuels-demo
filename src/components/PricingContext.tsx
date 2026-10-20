@@ -38,6 +38,8 @@ type Pricing = {
   soldOut: (sku: string) => boolean;
   /** Online ordering opened by a main admin in back-office Settings. */
   orderingOpen: boolean;
+  /** False while the live prices and ordering status are still loading. */
+  ready: boolean;
 };
 
 const fallback: Pricing = {
@@ -53,6 +55,7 @@ const fallback: Pricing = {
   staff: false,
   soldOut: () => false,
   orderingOpen: false,
+  ready: true,
 };
 
 const Ctx = createContext<Pricing>(fallback);
@@ -72,6 +75,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   const [source, setSource] = useState<Source | null>(null);
   const [staff, setStaff] = useState(false);
+  const [ready, setReady] = useState(false);
   const email = user?.email?.toLowerCase() ?? null;
 
   useEffect(() => {
@@ -85,22 +89,24 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client, orderingOpen: true });
       };
       read();
+      setReady(true);
       return onBackofficeChange(read);
     }
-    if (!accountsEnabled) return;
+    if (!accountsEnabled) { setReady(true); return; }
     let active = true;
     callBackoffice<PublicReply>({ op: "public" })
       .then((reply) => {
         if (!active) return;
         setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client, orderingOpen: reply.orderingOpen === true } : null);
         setStaff(reply.staff === true);
+        setReady(true);
       })
-      .catch(() => { if (active) { setSource(null); setStaff(false); } });
+      .catch(() => { if (active) { setSource(null); setStaff(false); setReady(true); } });
     return () => { active = false; };
   }, [email]);
 
   const value = useMemo<Pricing>(() => {
-    if (!source) return { ...fallback, staff };
+    if (!source) return { ...fallback, staff, ready };
     const data = source;
     const bySku = new Map(data.catalogue.map((i) => [i.sku, i]));
     const client = data.client;
@@ -124,12 +130,13 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       staff,
       soldOut: (sku) => bySku.get(sku)?.soldOut === true,
       orderingOpen: data.orderingOpen === true,
+      ready,
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;
       },
     };
-  }, [source, staff]);
+  }, [source, staff, ready]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

@@ -6,6 +6,8 @@ import { backofficeStore } from "./store.ts";
 import { toData, updateBackoffice } from "./app/backoffice/server.ts";
 import { customerClient, orderingOpen, recordWebsiteOrder, recordWebsitePayment, shopCatalogue, type ShopCatalogue, type WebsiteOrder } from "./app/backoffice/orders.ts";
 import { todaySA } from "./app/backoffice/calc.ts";
+import { orderEmails, type Email } from "./app/backoffice/orderEmail.ts";
+import { sendEmails } from "./email.ts";
 
 // deno-lint-ignore no-explicit-any
 type Db = any;
@@ -27,10 +29,20 @@ export async function recordOrder(db: Db, order: WebsiteOrder): Promise<void> {
   }
 }
 
-/** A verified Ozow payment on the order's invoice. */
+/** A verified Ozow payment on the order's invoice, and the "paid" emails (once). */
 export async function recordPayment(db: Db, ref: string, amount: number, transactionId: string): Promise<void> {
   try {
-    await updateBackoffice(backofficeStore(db), "ozow-payment", (d, env) => recordWebsitePayment(d, ref, amount, "ozow", transactionId, env), todaySA(), makeId);
+    const store = backofficeStore(db);
+    const recorded = await updateBackoffice(store, "ozow-payment", (d, env) => recordWebsitePayment(d, ref, amount, "ozow", transactionId, env), todaySA(), makeId);
+    if (!recorded.ok || !recorded.result) return;
+    const data = toData(await store.load(["settings", "documents"]));
+    const { data: row } = await db.from("orders").select("customer,items,subtotal,courier,total").eq("ref", ref).maybeSingle();
+    if (!data || !row) return;
+    const order: WebsiteOrder = { ref, method: "ozow", customer: row.customer, courier: Number(row.courier),
+      items: (row.items as WebsiteOrder["items"]).map(({ sku, name, size, price, qty }) => ({ sku, name, size, price: Number(price), qty: Number(qty) })) };
+    const invoice = data.documents.find((x) => x.kind === "invoice" && x.reference === ref)?.number ?? null;
+    const mail = orderEmails(order, { subtotal: Number(row.subtotal), courier: Number(row.courier), total: Number(row.total) }, invoice, data.settings, "paid");
+    await sendEmails([mail.business, mail.customer].filter((m): m is Email => m !== null));
   } catch {
     console.warn("Ozow payment not recorded in the back office");
   }

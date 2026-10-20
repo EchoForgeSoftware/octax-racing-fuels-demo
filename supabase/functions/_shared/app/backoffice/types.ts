@@ -208,6 +208,8 @@ export type BusinessSettings = {
   courierFee?: number;
   /** Main admins open and close online ordering on the website (Settings). Closed when missing. */
   onlineOrdering?: boolean;
+  /** Who gets an email for every website order (comma separated). Empty = info@ and zuan@. */
+  orderEmails?: string;
   next: { quote: number; invoice: number };
 };
 

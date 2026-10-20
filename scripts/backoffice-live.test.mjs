@@ -232,4 +232,32 @@ test("a confirmed online payment marks the website invoice paid once",async()=>{
   assert.equal(inv.payments.length,1);assert.equal(inv.payments[0].amount,1280);assert.match(inv.notes,/paid online/);
 });
 
+
+
+test("each new website order emails the business and the customer once",async()=>{
+  const pay=loadTs("supabase/functions/_shared/payment.ts");
+  const sent=[];
+  const shopStore={...store,async insertOrder(){return null;}};
+  const tools={quote:pay.quoteCart,validateCustomer:pay.validateCustomer,send:async(emails)=>{sent.push(...emails);}};
+  const customer={name:"Jo Buyer",email:"jo@buyer-mail.co.za",phone:"0821234567",company:"",vat:"",address:"1 Main Rd",city:"Durban",postcode:"4001"};
+  const body={ref:"OCTA-0000000000E1",items:[{sku:"OCTA-BOOST-5",qty:1}],customer,expectedTotal:640,termsAccepted:true,termsVersion:"2026-10-18"};
+  assert.equal((await server.placeOrder(body,null,shopStore,today,makeId,tools)).status,200);
+  assert.equal(sent.length,2);
+  const [business,toCustomer]=sent;
+  assert.deepEqual(business.to,["info@octa-boost.com","zuan@octa-boost.com"],"default: info@ and zuan@");
+  assert.match(business.subject,/New website order OCTA-0000000000E1 · R640\.00 · EFT, awaiting payment/);
+  assert.match(business.text,/Jo Buyer/);assert.match(business.text,/0821234567/);assert.match(business.text,/INV-/);assert.equal(business.replyTo,"jo@buyer-mail.co.za");
+  assert.deepEqual(toCustomer.to,["jo@buyer-mail.co.za"]);assert.match(toCustomer.text,/Reference: OCTA-0000000000E1/);assert.match(toCustomer.text,/Account number:/);
+  assert.ok(!/cost|margin/i.test(business.text+toCustomer.text),"no costs in emails");
+  await server.placeOrder(body,null,shopStore,today,makeId,tools);
+  assert.equal(sent.length,2,"a retried order sends nothing again");
+  // Recipients follow Settings; test addresses never get mail.
+  const s=(await call("zuan",{op:"load"})).body.data.settings;
+  await act("zuan","saveSettings",[{...s,orderEmails:"zuan@octa-boost.com; orders@example.test, BAD"}]);
+  await server.placeOrder({...body,ref:"OCTA-0000000000E2",customer:{...customer,email:"guest@example.test"}},null,shopStore,today,makeId,tools);
+  assert.equal(sent.length,3,"a test customer address gets no confirmation");
+  assert.deepEqual(sent[2].to,["zuan@octa-boost.com"]);
+  const html=sent[2].html;assert.ok(!html.includes("<script"));
+});
+
 after(()=>db.close());
