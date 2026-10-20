@@ -36,6 +36,8 @@ type Pricing = {
   staff: boolean;
   /** Shown as out of stock on the website (set in the back office, or automatic from Stock control). */
   soldOut: (sku: string) => boolean;
+  /** Online ordering opened by a main admin in back-office Settings. */
+  orderingOpen: boolean;
 };
 
 const fallback: Pricing = {
@@ -50,12 +52,13 @@ const fallback: Pricing = {
   purity: () => null,
   staff: false,
   soldOut: () => false,
+  orderingOpen: false,
 };
 
 const Ctx = createContext<Pricing>(fallback);
 
 /** What the shop needs from the back office: no costs, and only this customer's own prices. */
-type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null };
+type Source = { catalogue: CatalogueItem[]; courierFee: number | null; client: Client | null; orderingOpen?: boolean };
 type PublicReply = ({ ready: false } | ({ ready: true } & Source)) & { staff?: boolean };
 
 /**
@@ -79,7 +82,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
         // The website login email, or any authorised buyer on the account (Customer Information Form).
         const client = email ? data.clients.find((c) => accountEmails(c).includes(email)) ?? null : null;
         const levels = stockLevels(data, todaySA());
-        setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client });
+        setSource({ catalogue: data.catalogue.map((i) => ({ ...i, soldOut: isSoldOut(i, levels) })), courierFee: data.settings.courierFee ?? null, client, orderingOpen: true });
       };
       read();
       return onBackofficeChange(read);
@@ -89,7 +92,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
     callBackoffice<PublicReply>({ op: "public" })
       .then((reply) => {
         if (!active) return;
-        setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client } : null);
+        setSource(reply.ready ? { catalogue: reply.catalogue, courierFee: reply.courierFee, client: reply.client, orderingOpen: reply.orderingOpen === true } : null);
         setStaff(reply.staff === true);
       })
       .catch(() => { if (active) { setSource(null); setStaff(false); } });
@@ -120,6 +123,7 @@ export function PricingProvider({ children }: { children: ReactNode }) {
       courierFee: data.courierFee ?? courierRates.fee,
       staff,
       soldOut: (sku) => bySku.get(sku)?.soldOut === true,
+      orderingOpen: data.orderingOpen === true,
       purity: (slug) => {
         const c = data.catalogue.find((i) => i.slug === slug && i.costing?.purityEnabled && i.costing.purity !== null)?.costing;
         return c?.purity ?? null;

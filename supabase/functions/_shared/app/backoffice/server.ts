@@ -12,6 +12,7 @@ import { accountEmails } from "./customerForm.ts";
 import type { Role, User } from "./roles.ts";
 import { scopeBackoffice } from "./scope.ts";
 import { isSoldOut, stockLevels } from "./stock.ts";
+import { customerClient, orderingOpen, recordWebsiteOrder, shopCatalogue, type ShopCatalogue, type WebsiteOrder } from "./orders.ts";
 import type { BackofficeData, CatalogueItem, Client } from "./types.ts";
 
 /** One stored record per row: collection + id. Settings are a single row. */
@@ -27,11 +28,87 @@ export type StaffRow = { display_name: string; role: Role; active: boolean };
 export interface Store {
   load(collections?: Collection[]): Promise<Loaded>;
   /** Saves only if nothing else committed since `version`; returns false on a clash. */
-  commit(version: number, upserts: Row[], deletes: Omit<Row, "data">[], audit: { actor: string; operation: string; details: unknown }): Promise<boolean>;
+  commit(version: number, upserts: Row[], deletes: Omit<Row, "data">[], audit: { actor: string | null; operation: string; details: unknown }): Promise<boolean>;
   staff(userId: string): Promise<StaffRow | null>;
   /** First sign-in of an invited staff email (verified): becomes a staff row. */
   claimInvite(userId: string, email: string): Promise<StaffRow | null>;
   file(id: string): Promise<{ name: string; type: string; dataUrl: string } | null>;
+  /** Website orders: the customer-facing order row (public.orders). Returns an error message, or null when saved (or already saved). */
+  insertOrder?(row: Record<string, unknown>): Promise<string | null>;
+}
+
+/**
+ * Change the back-office records outside a staff action (website orders,
+ * confirmed online payments), with the same versioned commit and retries.
+ */
+export async function updateBackoffice<T>(store: Store, operation: string, mutate: (d: BackofficeData, env: Env) => T, today: string, makeId: (prefix: string) => string): Promise<{ ok: true; result: T } | { ok: false; reason: "not-set-up" | "busy" }> {
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const loaded = await store.load();
+    const before = toData(loaded);
+    if (!before) return { ok: false, reason: "not-set-up" };
+    const after = structuredClone(before);
+    const result = mutate(after, { today, uid: makeId });
+    const { upserts, deletes } = diff(before, after);
+    if (!upserts.length && !deletes.length) return { ok: true, result };
+    if (await store.commit(loaded.version, upserts, deletes, { actor: null, operation, details: { rows: upserts.length + deletes.length } })) return { ok: true, result };
+  }
+  return { ok: false, reason: "busy" };
+}
+
+/** Payment rules from supabase/functions/_shared/payment.ts, passed in by the Edge Function. */
+export type OrderTools = {
+  quote(items: unknown, catalogue: ShopCatalogue, city: unknown): { items: { sku: string; slug: string; name: string; size: string; price: number; qty: number }[]; subtotal: number; courier: number; total: number };
+  validateCustomer(input: unknown): WebsiteOrder["customer"];
+  /** False when this caller has placed too many orders recently. */
+  allowed?(): Promise<boolean>;
+  /** Bot check, when configured. */
+  human?(token: unknown): Promise<boolean>;
+};
+
+/**
+ * Place a website EFT order. Prices, courier and stock come from the live back
+ * office (the customer's own prices when signed in); the browser's total must
+ * match. The order is saved for the customer's history and as an unpaid
+ * website invoice in the back office. Retries with the same reference are safe.
+ */
+export async function placeOrder(body: unknown, user: AuthUser | null, store: Store, today: string, makeId: (prefix: string) => string, tools: OrderTools): Promise<Reply> {
+  const req = (body ?? {}) as Record<string, unknown>;
+  try {
+    if (typeof req.ref !== "string" || !/^OCTA-[A-F0-9]{12}$/.test(req.ref)) return { status: 400, body: { error: "Your order reference is invalid. Please reload checkout." } };
+    if (req.termsAccepted !== true || typeof req.termsVersion !== "string") return { status: 400, body: { error: "Please read and agree to the terms before placing your order." } };
+    if (tools.human && !await tools.human(req.captchaToken)) return { status: 400, body: { error: "Please complete the security check and try again." } };
+    if (tools.allowed && !await tools.allowed()) return { status: 429, body: { error: "Too many orders from this connection. Please wait a few minutes." } };
+    if (!store.insertOrder) return { status: 503, body: { error: "Ordering is unavailable. Please try again later." } };
+    const customer = tools.validateCustomer(req.customer);
+    const data = toData(await store.load());
+    if (!orderingOpen(data)) return { status: 503, body: { error: "Online ordering isn't open yet. Please contact us to order." } };
+    const client = user?.emailConfirmed ? customerClient(data!, user.email) : null;
+    const quote = tools.quote(req.items, shopCatalogue(data!, client, today), customer.city);
+    if (typeof req.expectedTotal !== "number" || Math.round(req.expectedTotal * 100) !== Math.round(quote.total * 100)) {
+      return { status: 409, body: { error: "Prices or delivery have changed since your cart was made. Refresh the page and check your order before placing it." } };
+    }
+    const saved = await store.insertOrder({
+      ref: req.ref, user_id: user?.id ?? null, customer, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total,
+      payment_method: "eft", terms_version: req.termsVersion,
+    });
+    if (saved) return { status: 400, body: { error: saved } };
+    const order: WebsiteOrder = {
+      ref: req.ref, method: "eft", customer, courier: quote.courier,
+      items: quote.items.map(({ sku, name, size, price, qty }) => ({ sku, name, size, price, qty })),
+      orderAs: req.orderAs === "company" ? "company" : "personal", saveCustomer: req.saveCustomer === true,
+      registration: typeof req.registration === "string" ? req.registration.slice(0, 40) : "",
+      profile: req.profile && typeof req.profile === "object" && JSON.stringify(req.profile).length < 50000 ? req.profile as WebsiteOrder["profile"] : undefined,
+    };
+    const recorded = await updateBackoffice(store, "website-order", (d, env) => recordWebsiteOrder(d, order, env), today, makeId);
+    return { status: 200, body: {
+      order: { ref: req.ref, items: quote.items, subtotal: quote.subtotal, courier: quote.courier, total: quote.total, name: customer.name, email: customer.email, placedAt: new Date().toISOString(), paymentMethod: "eft" },
+      invoice: recorded.ok ? recorded.result : null,
+    } };
+  } catch (error) {
+    const status = (error as { status?: unknown })?.status;
+    if (error instanceof Error && typeof status === "number") return { status, body: { error: error.message } };
+    return { status: 503, body: { error: "We couldn't place your order. Your cart has been kept. Please try again." } };
+  }
 }
 
 export type AuthUser = { id: string; email: string | null; emailConfirmed: boolean };
@@ -128,7 +205,7 @@ function publicView(data: BackofficeData | null, user: AuthUser | null, today: s
     tier: found.tier, linkedEmail: "", createdAt: "",
     prices: Object.fromEntries(data.catalogue.flatMap((i) => { const p = priceFor(i, found); return p ? [[i.sku, p]] : []; })),
   } : null;
-  return { ready: true, catalogue, courierFee: data.settings.courierFee ?? null, client };
+  return { ready: true, catalogue, courierFee: data.settings.courierFee ?? null, client, orderingOpen: orderingOpen(data) };
 }
 
 function validStart(d: unknown): d is BackofficeData {

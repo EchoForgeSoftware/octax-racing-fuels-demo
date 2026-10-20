@@ -1,5 +1,6 @@
 import { CheckoutError, verifiedOutcome, verifyWebhook } from "../_shared/payment.ts";
 import { database, required } from "../_shared/runtime.ts";
+import { recordPayment } from "../_shared/live.ts";
 
 Deno.serve(async (request: Request) => {
   if (request.method !== "POST") return new Response("Use POST", { status: 405 });
@@ -24,6 +25,8 @@ Deno.serve(async (request: Request) => {
     if (result) {
       const update = await db.rpc("record_ozow_result", { p_ref: ref, p_transaction_id: result.transactionId, p_status: result.status });
       if (update.error) return new Response("Please retry", { status: 503 });
+      // Mark the back-office invoice paid as well.
+      if (result.status === "paid") await recordPayment(db, ref, Number(data.request_payload.amount.value), result.transactionId);
     }
     return new Response(null, { status: 200 });
   } catch (error) {

@@ -14,7 +14,7 @@ import { emptyProfile, profileErrors, type CustomerProfile } from "@/lib/backoff
 import { recordDemoWebsiteOrder } from "@/lib/backoffice/local";
 import { usePricing } from "./PricingContext";
 import { todaySA } from "@/lib/backoffice/calc";
-import { buildOrder, newOrderRef, persistOrder, readOrder, saveOrder, type CustomerDetails, type PlacedOrder } from "@/lib/order";
+import { buildOrder, newOrderRef, placeEftOrder, readOrder, saveOrder, type CustomerDetails, type PlacedOrder } from "@/lib/order";
 import { useAuth } from "./AuthContext";
 import { normaliseVat, vatError } from "@/lib/vat";
 import { BankDetails } from "./BankDetails";
@@ -42,7 +42,9 @@ export function CheckoutView() {
   const bot = useBotCheck();
   const { items, subtotal, clear, ready } = useCart();
   const { user, profile, saveProfile, enabled, ready: authReady, demo } = useAuth();
-  const { courierFee } = usePricing();
+  const { courierFee, orderingOpen } = usePricing();
+  // Ordering needs this build's switch and a main admin opening it in back-office Settings.
+  const open = orderingEnabled && orderingOpen;
   const router = useRouter();
   const [errors, setErrors] = useState<Errors>({});
   const [processing, setProcessing] = useState(false);
@@ -57,7 +59,7 @@ export function CheckoutView() {
   const [accountContact, setAccountContact] = useState<Contact>({ name: "", email: "", phone: "", company: "", vat: "" });
   const [accountProfile, setAccountProfile] = useState<CustomerProfile>(() => emptyProfile("company"));
   const [demoResult, setDemoResult] = useState<{ number: string; client: string; saved: boolean } | null>(null);
-  const canSubmit = orderingEnabled && !demo && (paymentMethod === "eft" || ozowEnabled);
+  const canSubmit = open && !demo && (paymentMethod === "eft" || ozowEnabled);
   const submitting = useRef(false);
   const pendingOrder = useRef<{ signature: string; order: PlacedOrder } | null>(null);
   const formRef = useRef<HTMLFormElement | null>(null);
@@ -146,7 +148,7 @@ export function CheckoutView() {
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (demo && !submitting.current && validate()) return placeDemoOrder();
-    if (!canSubmit || (paymentMethod === "ozow" && bot.pending) || submitting.current || !validate()) return;
+    if (!canSubmit || bot.pending || submitting.current || !validate()) return;
     submitting.current = true;
     setSubmitError(null);
     setProcessing(true);
@@ -177,7 +179,8 @@ export function CheckoutView() {
       try {
         // Retain the reference before leaving the site, including for guests.
         if (!saveOrder(order)) throw new Error("Your browser couldn't keep your payment reference. Allow site storage and try again.");
-        const payment = await createOzowPayment(order, customer, data.get("accept_terms") === "on", bot.token);
+        const payment = await createOzowPayment(order, customer, data.get("accept_terms") === "on", bot.token,
+          { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration") });
         if (!saveOrder(payment.order)) throw new Error("Your browser couldn't keep your payment reference. Please allow site storage before continuing.");
         if (user && data.get("save_details")) {
           await saveProfile({ full_name: customer.name, phone: customer.phone, company: customer.company || null,
@@ -193,14 +196,17 @@ export function CheckoutView() {
       return;
     }
     const started = Date.now();
-    const result = await persistOrder(order, customer, user?.id ?? null, data.get("accept_terms") === "on");
-    if (result.error) {
-      setSubmitError(result.error);
+    const result = await placeEftOrder(order, customer,
+      { orderAs, saveCustomer: data.get("save_customer") === "on", registration: get("registration"), profile: openAccount ? accountProfile : undefined },
+      data.get("accept_terms") === "on", bot.token || undefined);
+    bot.reset();
+    if (result.error || !result.order) {
+      setSubmitError(result.error ?? "We could not place your order. Your cart has been kept.");
       setProcessing(false);
       submitting.current = false;
       return;
     }
-    saveOrder(order);
+    saveOrder(result.order);
     if (user && data.get("save_details")) {
       await saveProfile({
         full_name: customer.name || null,
@@ -348,7 +354,7 @@ export function CheckoutView() {
               is dispatched once the payment reflects.
             </p>
           </div>
-          {(!orderingEnabled || demo) && (
+          {(!open || demo) && (
             <p role="status" className="mt-4 border-2 border-dashed border-ink p-4 text-sm text-ink-soft">
               Online ordering is being set up. You can browse the bank details below, but please wait until ordering opens before making a payment.
             </p>
@@ -395,13 +401,13 @@ export function CheckoutView() {
           <p className="mt-3 text-xs">The <Link href="/privacy/" target="_blank" rel="noopener noreferrer" className="underline">privacy notice</Link> explains how your details are used to process this order. Review your details and total before continuing.</p>
         </div>
         {submitError && paymentMethod === "ozow" && pendingOrder.current && <Link href="/checkout/ozow/" className="mt-3 block text-sm underline">Check this payment’s status</Link>}
-        {paymentMethod === "ozow" && <BotCheck key={bot.attempt} action="checkout" onToken={bot.setToken} />}
+        {!demo && <BotCheck key={bot.attempt} action="checkout" onToken={bot.setToken} />}
         <button
           type="submit"
-          disabled={processing || (!demo && (!canSubmit || (paymentMethod === "ozow" && bot.pending)))}
+          disabled={processing || (!demo && (!canSubmit || bot.pending))}
           className="mt-6 flex w-full items-center justify-center gap-2 border-2 border-ink bg-flare px-5 py-3.5 font-display uppercase text-paper transition-colors hover:bg-ink disabled:cursor-wait disabled:opacity-50"
         >
-          {demo ? "Place sample order (demo, no payment)" : paymentMethod === "ozow" ? (canSubmit ? "Pay with Ozow" : "Ozow coming soon") : (orderingEnabled ? "Place EFT order" : "Ordering opens soon")}
+          {demo ? "Place sample order (demo, no payment)" : paymentMethod === "ozow" ? (canSubmit ? "Pay with Ozow" : "Ozow coming soon") : (open ? "Place EFT order" : "Ordering opens soon")}
           <Icon name="arrow" size={16} />
         </button>
         <p className="mt-3 text-center text-xs text-muted">{paymentMethod === "ozow" ? "You’ll continue to Ozow to complete payment." : "Use your order reference when making the transfer."}</p>

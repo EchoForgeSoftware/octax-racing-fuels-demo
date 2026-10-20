@@ -2,6 +2,7 @@ import catalogue from "../_shared/catalogue.json" with { type: "json" };
 import { CheckoutError, quoteCart, sha256, trustedRedirect, validateCapability, validateCustomer } from "../_shared/payment.ts";
 import { database, requestOzow, settings } from "../_shared/runtime.ts";
 import { verifyBot } from "../_shared/bot.ts";
+import { liveShop, recordOrder } from "../_shared/live.ts";
 
 Deno.serve(async (request: Request) => {
   let headers: Record<string, string> = { "Content-Type": "application/json", "Cache-Control": "no-store", Vary: "Origin" };
@@ -42,6 +43,7 @@ Deno.serve(async (request: Request) => {
     if (botSecret) await verifyBot(body.captchaToken, botSecret, config.origins);
 
     let userId: string | null = null;
+    let userEmail: string | null = null;
     const bearer = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
     // Supabase's public anon JWT can appear here for guests. A real session
     // token must be verified; its subject is never read without verification.
@@ -49,9 +51,14 @@ Deno.serve(async (request: Request) => {
       const { data, error } = await db.auth.getUser(bearer);
       if (error || !data.user) return reply({ error: "Your session expired. Sign in again, or sign out to order as a guest." }, 401);
       userId = data.user.id;
+      // Only a confirmed email links the customer to their agreed prices.
+      userEmail = data.user.email_confirmed_at ? data.user.email ?? null : null;
     }
     const customer = validateCustomer(body.customer);
-    const quote = quoteCart(body.items, catalogue, customer.city);
+    // Prices, stock and courier fee from the live back office; the built-in list until it is set up.
+    const live = await liveShop(db, userEmail);
+    if (live && !live.open) throw new CheckoutError("Online ordering isn't open yet. Please contact us to order.", 503);
+    const quote = quoteCart(body.items, live?.catalogue ?? catalogue, customer.city);
     if (typeof body.expectedTotal !== "number" || !Number.isFinite(body.expectedTotal) || Math.round(body.expectedTotal * 100) !== Math.round(quote.total * 100)) {
       throw new CheckoutError("The order total has changed. Refresh your cart before starting payment.", 409);
     }
@@ -69,6 +76,11 @@ Deno.serve(async (request: Request) => {
     if (Math.round(Number(payment.order.total) * 100) !== Math.round(body.expectedTotal * 100)) throw new CheckoutError("An existing payment has a different total. Check its status before starting another payment.", 409);
     if (payment.status === "paid") throw new CheckoutError("This order is already paid. Open your payment confirmation.", 409);
     if (Date.parse(payment.request_payload.expireAt) <= Date.now()) throw new CheckoutError("This payment link has expired. Please contact us with your order reference before starting another payment.", 409);
+    // The order shows in the back office straight away, as an unpaid website invoice.
+    await recordOrder(db, { ref: body.ref, method: "ozow", customer, courier: quote.courier,
+      items: quote.items.map(({ sku, name, size, price, qty }) => ({ sku, name, size, price, qty })),
+      orderAs: body.orderAs === "company" ? "company" : "personal", saveCustomer: body.saveCustomer === true,
+      registration: typeof body.registration === "string" ? body.registration.slice(0, 40) : "" });
     let redirectUrl = payment.redirect_url;
     if (!redirectUrl) {
       const result = await requestOzow(config, "/payments", payment.request_payload, payment.ref);

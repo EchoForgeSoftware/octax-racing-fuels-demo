@@ -194,4 +194,42 @@ test("products added in the back office can be deleted only while unused; out of
   assert.equal((await call(null,{op:"public"})).body.catalogue.find(i=>i.sku==="OCTA-M-25").soldOut,false,"booking stock in puts it back on sale");
 });
 
+
+
+test("website EFT orders are priced from the live back office and land as unpaid website invoices",async()=>{
+  const pay=loadTs("supabase/functions/_shared/payment.ts");
+  const orders=[];
+  const shopStore={...store,async insertOrder(row){if(!orders.some(o=>o.ref===row.ref))orders.push(row);return null;}};
+  const tools={quote:pay.quoteCart,validateCustomer:pay.validateCustomer};
+  const customer={name:"Buyer",email:"buyer@example.test",phone:"0821234567",company:"",vat:"",address:"1 Main Rd",city:"Benoni",postcode:"1501"};
+  const place=(who,changes={})=>server.placeOrder({ref:"OCTA-ABCDEF123456",items:[{sku:"OCTA-BOOST-5",qty:2}],customer,expectedTotal:1280,termsAccepted:true,termsVersion:"2026-10-18",...changes},who?user(who):null,shopStore,today,makeId,tools);
+  assert.equal((await place(null)).status,503,"closed until a main admin opens online ordering");
+  const s=(await call("zuan",{op:"load"})).body.data.settings;
+  await act("zuan","saveSettings",[{...s,onlineOrdering:true}]);
+  assert.equal((await call(null,{op:"public"})).body.orderingOpen,true);
+  assert.equal((await place(null,{expectedTotal:1})).status,409,"the browser's total must match the server's");
+  assert.equal((await place(null,{termsAccepted:false})).status,400);
+  assert.equal((await place(null,{items:[{sku:"OCTA-X-25",qty:1}],expectedTotal:960})).status,400,"out-of-stock products can't be ordered");
+  const ok=await place(null);
+  assert.equal(ok.status,200);assert.equal(ok.body.order.total,1280);assert.equal(orders.length,1);assert.equal(orders[0].payment_method,"eft");
+  const again=await place(null);
+  assert.equal(again.status,200);assert.equal(again.body.invoice,ok.body.invoice,"a retry doesn't create a second invoice");
+  const inv=(await call("zuan",{op:"load"})).body.data.documents.find(d=>d.reference==="OCTA-ABCDEF123456");
+  assert.equal(inv.channel,"website");assert.equal(inv.courier,400);assert.deepEqual(inv.payments,[]);assert.match(inv.notes,/EFT · awaiting payment/);
+  assert.equal(inv.delivery.method,"own","Benoni is in the local delivery area");
+  // A signed-in customer gets their agreed price.
+  const own=await place("customer",{ref:"OCTA-ABCDEF654321",items:[{sku:"OCTA-M-25",qty:1}],expectedTotal:1,saveCustomer:true});
+  assert.equal(own.status,409);
+});
+
+test("a confirmed online payment marks the website invoice paid once",async()=>{
+  const ord=loadTs("src/lib/backoffice/orders.ts");
+  const r=await server.updateBackoffice(store,"ozow-payment",(d,env)=>ord.recordWebsitePayment(d,"OCTA-ABCDEF123456",1280,"ozow","TXN-1",env),today,makeId);
+  assert.equal(r.result,true);
+  const r2=await server.updateBackoffice(store,"ozow-payment",(d,env)=>ord.recordWebsitePayment(d,"OCTA-ABCDEF123456",1280,"ozow","TXN-1",env),today,makeId);
+  assert.equal(r2.result,false,"a repeated notification doesn't pay twice");
+  const inv=(await call("zuan",{op:"load"})).body.data.documents.find(d=>d.reference==="OCTA-ABCDEF123456");
+  assert.equal(inv.payments.length,1);assert.equal(inv.payments[0].amount,1280);assert.match(inv.notes,/paid online/);
+});
+
 after(()=>db.close());

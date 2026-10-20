@@ -1,11 +1,15 @@
 // Live back office API. Staff sign in with Supabase Auth on octa-boost.com;
 // this function verifies their token, works out their role and runs the
 // shared back-office rules (src/lib/backoffice/server.ts, copied into
-// _shared/app by scripts/gen-backoffice-function.mjs). Records are read and
-// written with the service role, which never leaves this function.
+// _shared/app by scripts/gen-backoffice-function.mjs). It also places website
+// EFT orders priced from the live back office. Records are read and written
+// with the service role, which never leaves this function.
 import { createClient } from "npm:@supabase/supabase-js@2.118.0";
-import { handle, type Row, type Store } from "../_shared/app/backoffice/server.ts";
+import { handle, placeOrder, type OrderTools } from "../_shared/app/backoffice/server.ts";
 import { todaySA } from "../_shared/app/backoffice/calc.ts";
+import { quoteCart, sha256, validateCustomer } from "../_shared/payment.ts";
+import { verifyBot } from "../_shared/bot.ts";
+import { backofficeStore } from "../_shared/store.ts";
 
 const ORIGINS = ["https://octa-boost.com", "https://www.octa-boost.com"];
 const MAX_BODY = 9_000_000;
@@ -55,37 +59,26 @@ Deno.serve(async (request: Request) => {
       user = { id: data.user.id, email: data.user.email ?? null, emailConfirmed: !!data.user.email_confirmed_at };
     }
 
-    const store: Store = {
-      async load(collections) {
-        const { data, error } = await db.rpc("bo_store_load", { p_collections: collections ?? null });
-        if (error) throw new Error("load failed");
-        return { version: Number(data.version), rows: data.rows ?? {} };
-      },
-      async commit(version, upserts: Row[], deletes, audit) {
-        const { data, error } = await db.rpc("bo_store_commit", {
-          p_version: version, p_upserts: upserts, p_deletes: deletes, p_actor: audit.actor, p_operation: audit.operation, p_details: audit.details,
-        });
-        if (error) throw new Error("commit failed");
-        return data !== null;
-      },
-      async staff(userId) {
-        const { data, error } = await db.from("bo_staff").select("display_name,role,active").eq("user_id", userId).maybeSingle();
-        if (error) throw new Error("staff lookup failed");
-        return data;
-      },
-      async claimInvite(userId, email) {
-        const { data, error } = await db.rpc("bo_claim_staff_invite", { p_user: userId, p_email: email });
-        if (error) throw new Error("invite failed");
-        return data;
-      },
-      async file(id) {
-        const { data, error } = await db.from("bo_store").select("data").eq("collection", "file").eq("id", id).maybeSingle();
-        if (error) throw new Error("file failed");
-        return data?.data ?? null;
-      },
-    };
+    const store = backofficeStore(db);
+    const makeId = (prefix: string) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`;
 
-    const result = await handle(body, user, store, todaySA(), (prefix) => `${prefix}-${crypto.randomUUID().slice(0, 8)}`);
+    if (body?.op === "order") {
+      const ip = request.headers.get("x-forwarded-for")?.split(",")[0].trim() || "unknown";
+      const botSecret = Deno.env.get("TURNSTILE_SECRET_KEY");
+      const tools: OrderTools = {
+        quote: (items, catalogue, city) => quoteCart(items, catalogue, city),
+        validateCustomer: (input) => validateCustomer(input) as ReturnType<OrderTools["validateCustomer"]>,
+        allowed: async () => {
+          const { data, error } = await db.rpc("ozow_take_rate_limit", { p_bucket: await sha256(`${ip}:order`), p_max: 10 });
+          return !error && data === true;
+        },
+        ...(botSecret ? { human: async (token: unknown) => { try { await verifyBot(token, botSecret, ORIGINS); return true; } catch { return false; } } } : {}),
+      };
+      const result = await placeOrder(body, user, store, todaySA(), makeId, tools);
+      return reply(result.body, result.status);
+    }
+
+    const result = await handle(body, user, store, todaySA(), makeId);
     return reply(result.body, result.status);
   } catch {
     return reply({ error: "The back office is unavailable. Try again shortly." }, 503);

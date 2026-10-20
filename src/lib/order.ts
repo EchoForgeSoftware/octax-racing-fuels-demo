@@ -75,6 +75,27 @@ export type CustomerDetails = {
   postcode: string;
 };
 
+/** Account choices made at checkout, used for the back-office customer record. */
+export type OrderAccount = { orderAs: "personal" | "company"; saveCustomer: boolean; registration: string; profile?: unknown };
+
+/**
+ * Place an EFT order. The server prices it from the live back office (the
+ * customer's own prices when signed in), saves it for the order history and
+ * adds it to the back office as an unpaid website invoice. The server's
+ * order (reference, items and totals) is what the confirmation page shows.
+ */
+export async function placeEftOrder(order: PlacedOrder, customer: CustomerDetails, account: OrderAccount, termsAccepted: boolean, captchaToken?: string): Promise<{ order: PlacedOrder | null; error: string | null }> {
+  if (!termsAccepted) return { order: null, error: "Please read and agree to the terms before placing your order." };
+  try {
+    const { callBackoffice } = await import("./backoffice/api");
+    const reply = await callBackoffice<{ order: PlacedOrder }>({ op: "order", ref: order.ref, items: order.items.map(({ sku, qty }) => ({ sku, qty })),
+      customer, expectedTotal: order.total, termsAccepted, termsVersion: LEGAL.version, captchaToken, ...account });
+    return { order: { ...order, ...reply.order, items: order.items.map((i) => ({ ...i, price: reply.order.items.find((x) => x.sku === i.sku)?.price ?? i.price })) }, error: null };
+  } catch (e) {
+    return { order: null, error: e instanceof Error ? e.message : "We could not place your order. Your cart has been kept. Please try again." };
+  }
+}
+
 /**
  * Store the order in Supabase so it is not lost and shows in the customer's
  * order history. Guests are stored with no user id. A retry uses the same

@@ -27,7 +27,7 @@ const signingKey = Buffer.alloc(32, 42);
 const secret = `whsec_${signingKey.toString("base64")}`;
 
 function fixture(enabled = true) {
-  const state = { payment: null, creates: [], outcomes: [], failNext: false, providerPayments: new Map() };
+  const state = { payment: null, creates: [], outcomes: [], failNext: false, providerPayments: new Map(), live: null, recorded: [], paid: [] };
   const config = { environment: "production", siteCode: "TEST-SITE-001", siteUrl: "https://store.example.test/base", origins: ["https://store.example.test"] };
   const db = {
     auth: { getUser: async (value) => value === "valid-session" ? { data: { user: { id: "customer-1" } }, error: null } : { data: { user: null }, error: { message: "invalid" } } },
@@ -65,7 +65,9 @@ function fixture(enabled = true) {
     },
   };
   let checkout, webhook;
-  const dependencies = { "../_shared/payment.ts": core, "../_shared/runtime.ts": runtime, "../_shared/catalogue.json": catalogue,
+  const live = { liveShop: async () => state.live ?? null, recordOrder: async (_db, order) => { state.recorded.push(order); },
+    recordPayment: async (_db, ...args) => { state.paid.push(args); } };
+  const dependencies = { "../_shared/payment.ts": core, "../_shared/runtime.ts": runtime, "../_shared/catalogue.json": catalogue, "../_shared/live.ts": live,
     "../_shared/bot.ts": { verifyBot: async (value) => { if (value !== "test-captcha") throw new core.CheckoutError("Security check required."); } } };
   compile("ozow-checkout/index.ts", dependencies, { Deno: { serve: (handler) => { checkout = handler; }, env: { get: (name) => name === "OZOW_ENABLED" ? String(enabled) : "legacy-anon-key" } } });
   compile("ozow-webhook/index.ts", dependencies, { Deno: { serve: (handler) => { webhook = handler; } } });
@@ -161,4 +163,30 @@ test("Ozow rejects absent/old terms acknowledgement and missing bot proof", asyn
   assert.equal((await f.call({ termsVersion: "old-terms" })).status, 400);
   assert.equal((await f.call({ captchaToken: "" })).status, 400);
   assert.equal(f.state.creates.length, 0);
+});
+
+test("Ozow checkout prices from the live back office, respects closed ordering and records the invoice", async () => {
+  const f = fixture();
+  f.state.live = { open: false, catalogue };
+  assert.equal((await f.call()).status, 503, "closed online ordering blocks new payments");
+  const changed = { ...catalogue, items: catalogue.items.map((p) => p.sku === product.sku ? { ...p, price: product.price + 50 } : p) };
+  f.state.live = { open: true, catalogue: changed };
+  assert.equal((await f.call()).status, 409, "the old cart total no longer matches the back-office price");
+  const ok = await f.call({ expectedTotal: total + 50 });
+  assert.equal(ok.status, 200);
+  assert.equal(f.state.creates.at(-1).body.amount.value, total + 50);
+  assert.equal(f.state.recorded.at(-1).ref, ref);
+  assert.equal(f.state.recorded.at(-1).method, "ozow");
+  assert.equal(f.state.recorded.at(-1).items[0].price, product.price + 50);
+});
+
+test("a verified Ozow payment is recorded on the back-office invoice", async () => {
+  const f = fixture();
+  await f.call();
+  assert.equal((await f.notify(f.event())).status, 200);
+  assert.deepEqual(f.state.paid.at(-1), [ref, total, "12345678-1234-4234-8234-123456789abc"]);
+  const failed = fixture();
+  await failed.call();
+  await failed.notify(failed.event({ Status: "Cancelled" }));
+  assert.equal(failed.state.paid.length, 0, "only successful payments are recorded");
 });

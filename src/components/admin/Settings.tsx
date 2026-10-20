@@ -28,6 +28,20 @@ export function SettingsAdmin() {
     <>
       <PageTitle title="Settings" sub="Business details printed on quotes, invoices and statements." actions={<Button tone="primary" onClick={save}>Save settings</Button>} />
       {notice && <p role="status" className="mb-4 border-2 border-ink bg-lime p-3 text-sm">{notice}</p>}
+      <Panel title="Online ordering" className="mb-6">
+        <label className="flex items-start gap-3 text-sm">
+          <input type="checkbox" checked={s.onlineOrdering === true} onChange={(e) => set({ onlineOrdering: e.target.checked })} className="mt-0.5 h-5 w-5 accent-[var(--color-ink)]" />
+          <span>
+            <strong>Customers can order and pay on the website</strong>
+            <span className="block text-ink-soft">
+              {s.onlineOrdering ? "Open: " : "Closed: "}
+              orders are priced from Products &amp; pricing, checked on the server and appear under Invoices as unpaid website invoices.
+              EFT orders are marked paid when you record the payment (or import the bank statement); Ozow payments are recorded automatically once Ozow is connected.
+              Click Save settings after changing this.
+            </span>
+          </span>
+        </label>
+      </Panel>
       <div className="grid gap-6 xl:grid-cols-2">
         <Panel title="Business">
           <div className="grid gap-3 sm:grid-cols-2">

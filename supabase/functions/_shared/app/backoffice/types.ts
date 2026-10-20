@@ -206,6 +206,8 @@ export type BusinessSettings = {
   invoiceFooter: string;
   /** Courier charge per pack (R); free-delivery thresholds stay as per the policy. */
   courierFee?: number;
+  /** Main admins open and close online ordering on the website (Settings). Closed when missing. */
+  onlineOrdering?: boolean;
   next: { quote: number; invoice: number };
 };
 
