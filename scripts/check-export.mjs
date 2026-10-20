@@ -72,5 +72,7 @@ for (const sheet of sheets) {
   assert.ok(existsSync(join(root, `data-sheets/${sheet.slug}-preview.webp`)));
   const product = readFileSync(join(root, "shop", sheet.slug, "index.html"), "utf8");
   assert.ok(product.includes(pdf) && information.includes(pdf), `Missing product/information PDF link: ${sheet.slug}`);
+  const brochure = `brochures/${sheet.slug}-brochure.pdf`;
+  if (existsSync(join(root, brochure))) assert.ok(product.includes(brochure) && information.includes(brochure), `Missing brochure link: ${sheet.slug}`);
 }
 console.log(`Verified ${pages} exported pages: exact CSP hashes, indexing rules, unique titles/canonicals, social images, product data and public sitemap.`);

@@ -1,0 +1,147 @@
+[
+  {
+    "slug": "octa-x-95-ethanol",
+    "name": "OCTA-X",
+    "kicker": "Ethanol 95%",
+    "headline": "Clean ethanol for builds that want more timing and boost.",
+    "sizes": "25 L can · 210 L drum",
+    "usedFor": [
+      "Ethanol-fuelled performance and motorsport builds",
+      "Flex-fuel setups with a fuel system rated for alcohol",
+      "Tuners and workshops who need a consistent ethanol supply"
+    ],
+    "why": [
+      "At least 95.0% ethanol (dry basis), water 0.4% max: specification on the published data sheet",
+      "Manufacture date and batch number on every pack, so every fill can be traced",
+      "Supplied from the East Rand: collect, or local delivery for bigger orders",
+      "Technical data sheet online: scan the code"
+    ],
+    "pros": [
+      "Alcohol fuel carries its own oxygen",
+      "Cools the intake charge as it evaporates",
+      "Lets ethanol-tuned builds run more timing and boost",
+      "Clear and bright, low colour, tight limits on water and acidity"
+    ],
+    "dosageTitle": "How to use",
+    "dosage": "Use as supplied. Run it only in a fuel system rated for alcohol, on a tune made for ethanol.",
+    "safety": "Highly flammable liquid (UN 1170, Class 3). Keep away from flames and sparks. Read the SDS before use."
+  },
+  {
+    "slug": "octa-m-methanol",
+    "name": "OCTA-M",
+    "kicker": "Methanol 99.9%",
+    "headline": "High-purity methanol for methanol-burning engines.",
+    "sizes": "25 L can · 210 L drum",
+    "usedFor": [
+      "Methanol-burning performance and race engines",
+      "Drag, circuit and off-road builds set up for methanol",
+      "Teams and workshops who need a dependable methanol supply"
+    ],
+    "why": [
+      "99.9% methanol, water 0.10% max: specification on the published data sheet",
+      "Manufacture date and batch number on every pack",
+      "Supplied from the East Rand: collect, or local delivery for bigger orders",
+      "Technical data sheet online: scan the code"
+    ],
+    "pros": [
+      "High, consistent purity from batch to batch",
+      "Clear and bright, low colour",
+      "Low water content",
+      "Packed for the track: 25 L cans or 210 L drums"
+    ],
+    "dosageTitle": "How to use",
+    "dosage": "Use as supplied, only in a fuel system built for methanol.",
+    "safety": "Toxic and highly flammable (UN 1230, Class 3). Use eye protection, gloves and a respirator. Read the SDS before use."
+  },
+  {
+    "slug": "octa-boost",
+    "name": "OCTA-BOOST",
+    "kicker": "Octane booster · 5 L",
+    "headline": "More octane from 95 pump fuel.",
+    "sizes": "5 L can",
+    "usedFor": [
+      "Raising the octane of 95 octane pump petrol",
+      "Performance petrol engines and track days",
+      "Mixing your own blend at the strength you need"
+    ],
+    "why": [
+      "Clear dosage table: pick the mix that suits your build",
+      "Solvent-based octane improver made for 95 octane petrol",
+      "Supplied from the East Rand: collect, or local delivery for bigger orders",
+      "Technical data sheet online: scan the code"
+    ],
+    "pros": [
+      "Increases octane value",
+      "No detrimental effect on the fuel system",
+      "Increases performance substantially",
+      "One 5 L can treats 15 to 30 L of petrol"
+    ],
+    "dosageTitle": "Dilution",
+    "table": {
+      "columns": ["OCTA-BOOST", "95 octane petrol", "Reported increase*"],
+      "rows": [["5 L", "30 L", "8"], ["5 L", "25 L", "9"], ["5 L", "20 L", "11"], ["5 L", "15 L", "25"]]
+    },
+    "dosage": "Mix with 95 octane petrol only. Re-check your tune when you change the mix. *Increase as supplied; the test method is not stated.",
+    "safety": "Flammable liquid (UN 1170, Class 3). Read the SDS before use."
+  },
+  {
+    "slug": "octa-shot",
+    "name": "OCTA-SHOT",
+    "kicker": "Fuel octane booster · 500 mL",
+    "headline": "A shot of octane for everyday petrol cars.",
+    "sizes": "500 mL bottle",
+    "usedFor": [
+      "Unleaded petrol cars, from daily drivers to weekend cars",
+      "Topping up octane on 93 or 95 fuel",
+      "Older vehicles that need wear protection"
+    ],
+    "why": [
+      "One 500 mL bottle treats 50 to 250 L of petrol",
+      "Octane improver and emission reducer in one",
+      "Supplied from the East Rand: collect, or local delivery for bigger orders",
+      "Technical data sheet online: scan the code"
+    ],
+    "pros": [
+      "Increases octane value",
+      "Reduces emissions through cleaner burning",
+      "Wear protection for older vehicles",
+      "Keeps modern emission systems at optimum performance"
+    ],
+    "dosageTitle": "Dilution",
+    "table": {
+      "columns": ["OCTA-SHOT", "Petrol", "93 fuel*", "95 fuel*"],
+      "rows": [["500 mL", "250 L", "2", "1"], ["500 mL", "200 L", "4", "2"], ["500 mL", "100 L", "5", "2.5"], ["500 mL", "50 L", "6.5", "3"]]
+    },
+    "dosage": "Add to the tank at the ratio in the table. *Octane increase as supplied; the test method is not stated.",
+    "safety": "Flammable. Read the SDS before use."
+  },
+  {
+    "slug": "octa-torque",
+    "name": "OCTA-TORQUE",
+    "kicker": "Diesel performance improver · 500 mL",
+    "headline": "Cleaner injectors. Smoother, stronger diesel.",
+    "sizes": "500 mL bottle",
+    "usedFor": [
+      "All diesel fuel injection systems",
+      "Bakkies, trucks, tractors and generators",
+      "Fleets that want fewer unscheduled stops"
+    ],
+    "why": [
+      "Restores injector and combustion performance to their designed output",
+      "Cetane improvement of two numbers (average)",
+      "Supplied from the East Rand: collect, or local delivery for bigger orders",
+      "Technical data sheet online: scan the code"
+    ],
+    "pros": [
+      "More power and acceleration",
+      "Better fuel economy",
+      "Better cold starts, lower noise, smoother running",
+      "Improved lubricity protects the pump and fuel system",
+      "Helps prevent deposits, corrosion and fuel filter blocking"
+    ],
+    "dosageTitle": "Dilution",
+    "highlight": "0.5% · 500 mL treats 100 L of diesel",
+    "dosage": "Recommended dosage 0.50%: 5 L per 1000 L of diesel, so one 500 mL bottle per 100 L.",
+    "safety": "Read the SDS before use. Keep out of reach of children."
+  }
+]
